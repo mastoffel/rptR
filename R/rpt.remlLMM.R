@@ -1,3 +1,62 @@
+#' LMM-based Repeatability Using REML
+#' 
+#' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
+#' 
+#' @param y}{Vector of a response values.
+#' @param groups}{Vector of group identities.
+#' @param CI}{Width of the confidence interval (defaults to 0.95).
+#' @param nboot}{Number of parametric bootstraps for interval estimation. 
+#'        Defaults to 1000. Larger numbers of permutations give a better 
+#'        asymtotic CI, but may be very time-consuming.
+#' @param npermut}{Number of permutations used when calculating 
+#'        asymptotic \emph{P} values (defaults to 1000).
+#' 
+#' 
+#' @return 
+#' Returns an object of class rpt that is a a list with the following elements: 
+#' \item{datatype}{Response distribution (here: "Gaussian").}
+#' \item{method}{Method used to calculate repeatability (here: "REML").}
+#' \item{CI}{Width of the confidence interval.}
+#' \item{R}{Point estimate for repeatability.}
+#' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+#' \item{CI.R}{Confidence interval for  repeatability.}
+#' \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
+#' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
+#' \item{R.permut}{Permutation samples for \emph{R}.}
+#'
+#' @references 
+#' Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized 
+#' concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
+#'
+#' Faraway, J. J. (2006). \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
+#' 
+#' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
+#'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+#' 
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
+#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#'      
+#' @seealso \link{rpt.mcmcLMM}, \link{rpt.aov}, \link{rpt.corr}, \link{print.rpt}, \link{rpt.remlLMM.adj}
+#' 
+#' @examples  
+#' \dontrun{
+#' # repeatability estimation for tarsus length - a very high R
+#' data(BodySize)
+#' attach(BodySize)
+#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=10, npermut=10))   
+#' # reduced number of nboot and npermut iterations
+#' detach(BodySize)
+#'
+#' # repeatability estimation for weight (body mass) - a lower R than the previous one
+#' data(BodySize)
+#' attach(BodySize)
+#' (rpt.Weight <- rpt.remlLMM(Weight, BirdID, nboot=10, npermut=10)) 
+#' # reduced number of nboot and npermut iterations
+#' detach(BodySize)
+#'       }
+#'       
+#' @keywords models
+#' 
 rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks
 	if(length(y)!= length(groups)) stop("y and group are of unequal length")
