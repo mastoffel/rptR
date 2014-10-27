@@ -6,17 +6,17 @@
 rpt.remlLMM(y, groups, CI = 0.95, nboot = 1000, npermut = 1000)
 }
 \arguments{
-\item{y}{Vector}{of a response values.}
+\item{y}{Vector of a response values.}
 
-\item{groups}{Vector}{of group identities.}
+\item{groups}{Vector of group identities.}
 
-\item{CI}{Width}{of the confidence interval (defaults to 0.95).}
+\item{CI}{Width of the confidence interval (defaults to 0.95).}
 
-\item{nboot}{Number}{of parametric bootstraps for interval estimation.
+\item{nboot}{Number of parametric bootstraps for interval estimation.
 Defaults to 1000. Larger numbers of permutations give a better
 asymtotic CI, but may be very time-consuming.}
 
-\item{npermut}{Number}{of permutations used when calculating
+\item{npermut}{Number of permutations used when calculating
        asymptotic \emph{P} values (defaults to 1000).}
 }
 \value{

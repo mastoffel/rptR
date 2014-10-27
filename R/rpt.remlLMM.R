@@ -2,13 +2,13 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
 #' 
-#' @param y}{Vector of a response values.
-#' @param groups}{Vector of group identities.
-#' @param CI}{Width of the confidence interval (defaults to 0.95).
-#' @param nboot}{Number of parametric bootstraps for interval estimation. 
+#' @param y Vector of a response values.
+#' @param groups Vector of group identities.
+#' @param CI Width of the confidence interval (defaults to 0.95).
+#' @param nboot Number of parametric bootstraps for interval estimation. 
 #'        Defaults to 1000. Larger numbers of permutations give a better 
 #'        asymtotic CI, but may be very time-consuming.
-#' @param npermut}{Number of permutations used when calculating 
+#' @param npermut Number of permutations used when calculating 
 #'        asymptotic \emph{P} values (defaults to 1000).
 #' 
 #' 
