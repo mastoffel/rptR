@@ -91,6 +91,8 @@
 #' 
 #' @keywords models
 #' 
+#' @export
+#' 
 rpt.adj <- function(formula, grname, data,
 			   datatype=c("Gaussian", "binomial", "proportion", "count"),  
 			   method=c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"),  

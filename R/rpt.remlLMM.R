@@ -57,6 +57,12 @@
 #'       
 #' @keywords models
 #' 
+#' @export
+#' 
+#' @importFrom nlme VarCorr
+#' @importFrom nlme lme
+#' 
+#' 
 rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks
 	if(length(y)!= length(groups)) stop("y and group are of unequal length")

@@ -58,6 +58,12 @@
 #'       
 #' @keywords models
 #' 
+#' @export
+#' 
+#' @importFrom lme4 lmer
+#' @importFrom lme4 VarCorr
+#' @importFrom arm sim
+#' 
 rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1000) {
 	mod         <- lmer(formula, data=data)
 	if(nboot < 0) 	nboot <- 0

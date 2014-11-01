@@ -78,6 +78,11 @@
 #'       
 #' @keywords models
 #' 
+#' @export
+#' 
+#' @importFrom MCMCglmm MCMCglmm
+#' @importFrom MCMCglmm posterior.mode
+#' @importFrom coda HPDinterval 
 
 rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...) {
 	# initial checks

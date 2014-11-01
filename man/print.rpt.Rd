@@ -3,7 +3,7 @@
 \alias{print.rpt}
 \title{Print a rpt object}
 \usage{
-print.rpt(x, ...)
+\method{print}{rpt}(x, ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions}

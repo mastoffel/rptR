@@ -25,6 +25,9 @@
 #'       
 #' @keywords models
 #' 
+#' @export
+#' 
+#' 
 
 print.rpt <- function(x, ...) {
 	if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {

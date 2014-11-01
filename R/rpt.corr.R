@@ -41,6 +41,7 @@
 #'   detach(Fledglings)
 #' @keywords models
 #' 
+#' @export
 
 rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks

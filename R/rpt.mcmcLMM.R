@@ -55,6 +55,12 @@
 #'       
 #' @keywords models
 #' 
+#' @export
+#' 
+#' @importFrom MCMCglmm MCMCglmm
+#' @importFrom MCMCglmm posterior.mode
+#' @importFrom coda HPDinterval
+#' 
 rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
 	# initial checks
 	if(length(y)!= length(groups)) stop("y and group are of unequal length")
