@@ -79,6 +79,7 @@
 #' @seealso \link{rpt}
 #' 
 #' @examples  
+#' \dontrun{
 #' # for Gaussian data - correlation-based repeatability for male breeding success on a transformed scale
 #'      data(Fledglings)
 #'      Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
@@ -88,7 +89,7 @@
 #'      data(BodySize)
 #'      (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize, datatype="Gaussian", 
 #'                     method="MCMC"))
-#' 
+#' }
 #' @keywords models
 #' 
 #' @export

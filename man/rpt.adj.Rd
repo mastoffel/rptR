@@ -88,6 +88,7 @@ For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
   rpt.mcmcLMM.adj is not yet implemented).
 }
 \examples{
+\dontrun{
 # for Gaussian data - correlation-based repeatability for male breeding success on a transformed scale
      data(Fledglings)
      Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
@@ -97,6 +98,7 @@ For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
      data(BodySize)
      (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize, datatype="Gaussian",
                     method="MCMC"))
+}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

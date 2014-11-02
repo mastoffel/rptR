@@ -36,7 +36,7 @@ For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
 # repeatability estimation for tarsus length - a very high R
      data(BodySize)
      attach(BodySize)
-     rpt.BS <- rpt.aov(Tarsus, BirdID, npermut=10))    # reduced number of npermut iterations
+     (rpt.BS <- rpt.aov(Tarsus, BirdID, npermut=10))    # reduced number of npermut iterations
      detach(BodySize)
 
 # repeatability estimation for weight (body mass) - a lower R than the previous one
