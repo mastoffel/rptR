@@ -80,9 +80,9 @@
 #' 
 #' @export
 #' 
-#' @importFrom MCMCglmm MCMCglmm
-#' @importFrom MCMCglmm posterior.mode
-#' @importFrom coda HPDinterval 
+# @importFrom MCMCglmm MCMCglmm
+# @importFrom MCMCglmm posterior.mode
+# @importFrom coda HPDinterval 
 
 rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...) {
 	# initial checks
@@ -91,7 +91,7 @@ rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...)
 	groups     <- factor(groups)
 	# model fitting
 	if(is.null(prior)) prior=list(R=list(V=1e-10,nu=-1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
-	mod        <- MCMCglmm(y ~ 1, random=~groups, family="poisson", data=data.frame(y=y,groups=groups), prior=prior, verbose=verbose, ...)
+	mod        <- MCMCglmm::MCMCglmm(y ~ 1, random=~groups, family="poisson", data=data.frame(y=y,groups=groups), prior=prior, verbose=verbose, ...)
 	# ezxtraction of posterior distributions
 	var.a      <- mod$VCV[,"groups"]
 	var.e      <- mod$VCV[,"units"]
@@ -100,8 +100,8 @@ rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...)
 	EY 		   <- exp(beta0+(var.e+var.a)/2)
 	postR.org  <- EY*(exp(var.a)-1)/(EY*(exp(var.e+var.a)-1)+1)
 	# point estimate on link and original scale
-	R.link     <- posterior.mode( postR.link )
-	R.org      <- posterior.mode( postR.org )
+	R.link     <- MCMCglmm::posterior.mode( postR.link )
+	R.org      <- MCMCglmm::posterior.mode( postR.org )
 	# credibility interval estimation from paterior distribution
 	CI.link    <- coda::HPDinterval(postR.link, CI)[1,]
 	CI.org     <- coda::HPDinterval(postR.org, CI)[1,]

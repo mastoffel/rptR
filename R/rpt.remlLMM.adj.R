@@ -60,18 +60,18 @@
 #' 
 #' @export
 #' 
-#' @importFrom lme4 lmer
-#' @importFrom lme4 VarCorr
-#' @importFrom arm sim
-#' 
+# @importFrom lme4 lmer
+# @importFrom lme4 VarCorr
+# @importFrom arm sim
+ 
 rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1000) {
-	mod         <- lmer(formula, data=data)
+	mod         <- lme4::lmer(formula, data=data)
 	if(nboot < 0) 	nboot <- 0
 	if(npermut < 1) npermut <- 1
 	e1 = environment()
 	# point estimates of R
 	R.pe <- function(formula, data, grname, peYN=FALSE) {
-		mod.fnc = lmer(formula, data)
+		mod.fnc = lme4::lmer(formula, data)
 		varComps <- lme4::VarCorr(mod.fnc)
 		if(peYN & any(varComps==0) & nboot > 0) {
 			assign("nboot", 0, envir=e1)

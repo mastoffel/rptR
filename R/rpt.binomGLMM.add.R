@@ -72,9 +72,9 @@
 #' 
 #' @export
 #' 
-#' @importFrom MCMCglmm MCMCglmm
-#' @importFrom MCMCglmm posterior.mode
-#' @importFrom coda HPDinterval
+# @importFrom MCMCglmm MCMCglmm
+# @importFrom MCMCglmm posterior.mode
+# @importFrom coda HPDinterval
 
 
 
@@ -89,11 +89,11 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 	# model fitting
 	if(all(n==1)) {
 		if(is.null(prior)) prior=list(R=list(V=1,fix=1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
-		mod    <- MCMCglmm(m ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="categorical", verbose=verbose, ...) 
+		mod    <- MCMCglmm::MCMCglmm(m ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="categorical", verbose=verbose, ...) 
 	}
 	else {
 		if(is.null(prior)) prior=list(R=list(V=1e-10,nu=-1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
-		mod    <- MCMCglmm(cbind(m, nm) ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="multinomial2", verbose=verbose, ...)
+		mod    <- MCMCglmm::MCMCglmm(cbind(m, nm) ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="multinomial2", verbose=verbose, ...)
 	}
 	# ezxtraction of posterior distributions
 	var.a      <- mod$VCV[,"groups"]
@@ -103,8 +103,8 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 	P          <- exp(beta0) / (1+ exp(beta0))
 	postR.org  <- (var.a * P*P / (1+exp(beta0))^2 ) / ((var.a + var.e)* P*P / (1+exp(beta0))^2 +  P*(1-P))
 	# point estimate on link and original scale
-	R.link     <- posterior.mode( postR.link )
-	R.org      <- posterior.mode( postR.org )
+	R.link     <- MCMCglmm::posterior.mode( postR.link )
+	R.org      <- MCMCglmm::posterior.mode( postR.org )
 	# credibility interval estimation from paterior distribution
 	CI.link    <- coda::HPDinterval(postR.link, CI)[1,]
 	CI.org     <- coda::HPDinterval(postR.org, CI)[1,]

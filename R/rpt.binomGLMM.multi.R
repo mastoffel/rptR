@@ -97,9 +97,9 @@
 #' 
 #' @export
 #' 
-#' @importFrom MASS glmmPQL
-#' @importFrom nlme VarCorr
-#' @importFrom VGAM probit
+# @importFrom MASS glmmPQL
+# @importFrom nlme VarCorr
+# @importFrom VGAM probit
 
 rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks
@@ -125,8 +125,8 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 	k <- length(levels(groups))
 	# functions
 	pqlglmm.binom.model <- function(y, groups, n, link, returnR=TRUE) {
-		if(all(n==1)) mod <- glmmPQL(y ~ 1, random=~1|groups,  family=binomial(link=eval(link)), verbose=FALSE)
-		else          mod <- glmmPQL(y ~ 1, random=~1|groups,  family=quasibinomial(link=eval(link)), verbose=FALSE)	
+		if(all(n==1)) mod <- MASS::glmmPQL(y ~ 1, random=~1|groups,  family=binomial(link=eval(link)), verbose=FALSE)
+		else          mod <- MASS::glmmPQL(y ~ 1, random=~1|groups,  family=quasibinomial(link=eval(link)), verbose=FALSE)	
 		VarComp  <- nlme::VarCorr(mod)
 		beta0    <- as.numeric(mod$coefficients$fixed)
 		if(all(n==1)) omega <- 1
@@ -151,7 +151,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 		groupMeans <- rnorm(k, 0, sqrt(var.a))
 		p.link     <- beta0 + groupMeans[groups]
 		if(link=="logit") p <- exp(p.link)/(1+exp(p.link))
-		if(link=="probit") p <- probit(p.link, inverse=TRUE)
+		if(link=="probit") p <- VGAM::probit(p.link, inverse=TRUE)
 		if(all(n==1))
 			m <- rbinom(N, 1, p)   # binomial model
 		else {

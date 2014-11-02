@@ -59,10 +59,10 @@
 #' 
 #' @export
 #' 
-#' @importFrom nlme VarCorr
-#' @importFrom nlme lme
-#' 
-#' 
+# @importFrom nlme VarCorr
+# @importFrom nlme lme
+ 
+ 
 rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks
 	if(length(y)!= length(groups)) stop("y and group are of unequal length")
@@ -80,7 +80,7 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	N <- length(y)
 	# functions: point estimates of R
 	R.pe <- function(y, groups) {
-        varComps <- try(nlme::VarCorr(lme(y ~ 1, random = ~1 | groups)), silent=TRUE)
+        varComps <- try(nlme::VarCorr(nlme::lme(y ~ 1, random = ~1 | groups)), silent=TRUE)
 		if(class(varComps)=="try-error") {
 			warning("Convergence problems in lme (most likely during bootstrap or permutation). R is set to NA for this iteration")
 			R = NA
@@ -100,10 +100,10 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 		R.pe(y.boot, groups) 
 	}
 	if(nboot > 0) {
-		mod <- try(lme(y ~ 1, random = ~1 | groups), silent=TRUE)
+		mod <- try(nlme::lme(y ~ 1, random = ~1 | groups), silent=TRUE)
 		if(class(mod)=="try-error") {
 			warning("Convergence problems in lme. Model is refitted.")
-			mod <- lme(y ~ 1, random = ~1 | groups)                
+			mod <- nlme::lme(y ~ 1, random = ~1 | groups)                
 		}
 		beta0    <- as.numeric(summary(mod)$tTable[,1])
 		varComps <- nlme::VarCorr(mod)

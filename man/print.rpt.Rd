@@ -17,8 +17,7 @@ Displays the results a rpt object (i.e. the result of a rpt function call) an a 
 # repeatability estimation for weight (body mass)
 data(BodySize)
 attach(BodySize)
-print.rpt(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-print(rpt.Weight)  # alternative call to print.rpt() through pring()
+print(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
 detach(BodySize)
 }
 \author{
