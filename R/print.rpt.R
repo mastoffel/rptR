@@ -27,13 +27,14 @@
 #' @export
 #' 
 #' 
-# @examples  
-# # repeatability estimation for weight (body mass)
-# data(BodySize)
-# attach(BodySize)
-# print.rpt(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-# print(rpt.Weight)  # alternative call to print.rpt() through pring()
-# detach(BodySize)
+#' @examples  
+#' repeatability estimation for weight (body mass)
+#' data(BodySize)
+#' attach(BodySize)
+#' print.rpt(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
+#' print(rpt.Weight)  # alternative call to print.rpt() through pring()
+#' detach(BodySize)
+#' 
 print.rpt <- function(x, ...) {
 	if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {
 		cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
