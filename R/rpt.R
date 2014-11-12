@@ -79,7 +79,7 @@
 #'          \link{rpt.poisGLMM.multi} 
 #' 
 #' @examples  
-#' \dontrun{
+#' 
 #'        # all examples use a reduced number of npermut and nboot iterations!
 #'        
 #'        # for Gaussian data - correlation-based repeatability
@@ -129,7 +129,7 @@
 #'        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.multi", nboot=10, npermut=10))
 #'        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.add"))
 #'        detach(Fledglings)
-#'}
+#'
 #'
 #' @keywords models
 #' 

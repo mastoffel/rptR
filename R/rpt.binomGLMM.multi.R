@@ -71,7 +71,7 @@
 #' @seealso \link{rpt.binomGLMM.add}, \link{rpt}, \link{print.rpt}
 #' 
 #' @examples  
-#' \dontrun{
+#' 
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
 #'      attach(BroodParasitism)
@@ -92,7 +92,7 @@
 #'      (rpt.BroodPar <- rpt.binomGLMM.multi(ParasitismOR[-zz,], FemaleID[-zz], nboot=10, npermut=10))   
         # reduced number of npermut iterations
 #'      detach(BroodParasitism)
-#' }
+#' 
 #' @keywords models
 #' 
 #' @export
@@ -161,7 +161,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 #			if(rho==0)
 #				m <- rbinom(N,n,p)
 #			else {
-				m <- rbetabinom(N,n,p,rho)    # or p * rho
+				m <- VGAM::rbetabinom(N,n,p,rho)    # or p * rho
 #			}
 		}
 		pqlglmm.binom.model(cbind(m, n-m), groups, n, link) 

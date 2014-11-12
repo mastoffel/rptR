@@ -67,8 +67,7 @@ are inappropriate at high repeatabilities (\emph{omega} < 1), because
 parametric bootstrapping allows only \emph{omega} greater than or equal to  1.
 }
 \examples{
-\dontrun{
-       # repeatability for female clutch size over two years.
+# repeatability for female clutch size over two years.
        data(BroodParasitism)
        attach(BroodParasitism)
        (rpt.Host <- rpt.poisGLMM.multi(OwnClutches, FemaleID, nboot=10, npermut=10))
@@ -80,7 +79,7 @@ parametric bootstrapping allows only \emph{omega} greater than or equal to  1.
        attach(Fledglings)
        (rpt.Fledge <- rpt.poisGLMM.multi(Fledge, MaleID, nboot=10, npermut=10))
        # reduced number of nboot and npermut iterations
-       detach(Fledglings)}
+       detach(Fledglings)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

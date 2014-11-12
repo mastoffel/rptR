@@ -71,7 +71,6 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
           \emph{omega} greater than or equal to 1.
 }
 \examples{
-\dontrun{
 # repeatability estimations for egg dumping (binary data)
      data(BroodParasitism)
      attach(BroodParasitism)
@@ -91,7 +90,6 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) # some rows have entries 0,0 and need to be removed
      (rpt.BroodPar <- rpt.binomGLMM.multi(ParasitismOR[-zz,], FemaleID[-zz], nboot=10, npermut=10))
      detach(BroodParasitism)
-}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

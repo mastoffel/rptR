@@ -44,17 +44,20 @@
 #' @seealso \link{rpt.mcmcLMM}, \link{print.rpt}, \link{rpt}, \link{rpt.adj}
 #' 
 #' @examples  
-#' \dontrun{
+#' 
+#' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ Sex + (1|BirdID), "BirdID", data=BodySize, nboot=10, npermut=10))
+#' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ Sex + (1|BirdID), "BirdID", 
+#'  data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 
 #' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize, nboot=10, npermut=10))
+#' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize,
+#'  nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
-#' }
+#' 
 #'       
 #' @keywords models
 #' 
@@ -87,19 +90,20 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	names(R) = grname
 	# confidence interval estimation by parametric bootstrapping
 	bootstr <- function(mod, formula, data, grname) {
-		mod.sim <- arm::sim(mod, n.sim=2)   # for some reason it is not possible to set n.sim=1
-		y <- mod@X %*% matrix(mod.sim@fixef[1,]) + t(as.matrix(mod@Zt)) %*% matrix(unlist(mod.sim@ranef)[seq(1, length(unlist(mod.sim@ranef)), by=2)])
-		y <- y + rnorm(length(y), 0, attr(lme4::VarCorr(mod), "sc"))
-		data[,names(mod@frame)[1]] = as.vector(y)
+                y <- as.matrix(simulate(mod, nsim = 1))
+		data[,names(model.frame(mod))[1]] = as.vector(y)
 		R.pe(formula, data, grname)
 	}
-	if(nboot > 0) R.boot   <- replicate(nboot, bootstr(mod, formula, data, grname), simplify=TRUE)
-		else R.boot <- matrix(rep(NA, length(grname)), nrow=length(grname))
+	if(nboot > 0){ 
+                R.boot   <- replicate(nboot, bootstr(mod, formula, data, grname), simplify=TRUE)
+		} else {
+                  R.boot <- matrix(rep(NA, length(grname)), nrow=length(grname))
+		}
 	if(length(grname) == 1) {
 		CI.R     <- quantile(R.boot, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
 		se <- sd(R.boot)
-		names(se) = grname }
-	else {
+		names(se) = grname 
+	} else {
 		CI.R     <- t(apply(R.boot, 1, function(x) { quantile(x, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)}))	
 		se       <- apply(R.boot, 1, sd)
 		rownames(R.boot) = grname

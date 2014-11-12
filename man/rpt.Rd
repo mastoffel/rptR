@@ -87,8 +87,7 @@ For \code{datatype="Gaussian"} calls function \link{rpt.corr}, \link{rpt.aov},
          or \link{rpt.poisGLMM.add} (methods "GLMM.multi" and "GLMM.add", respectively).
 }
 \examples{
-\dontrun{
-       # all examples use a reduced number of npermut and nboot iterations!
+# all examples use a reduced number of npermut and nboot iterations!
 
        # for Gaussian data - correlation-based repeatability
        # repeatability for male breeding success on a transformed scale
@@ -137,7 +136,6 @@ For \code{datatype="Gaussian"} calls function \link{rpt.corr}, \link{rpt.aov},
        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.multi", nboot=10, npermut=10))
        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.add"))
        detach(Fledglings)
-}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

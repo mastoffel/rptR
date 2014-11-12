@@ -35,7 +35,6 @@ Returns an object of class rpt that is a a list with the following elements:
 Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
 \examples{
-\dontrun{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
 attach(BodySize)
@@ -49,7 +48,6 @@ attach(BodySize)
 (rpt.Weight <- rpt.remlLMM(Weight, BirdID, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 detach(BodySize)
-      }
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

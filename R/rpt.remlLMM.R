@@ -39,7 +39,7 @@
 #' @seealso \link{rpt.mcmcLMM}, \link{rpt.aov}, \link{rpt.corr}, \link{print.rpt}, \link{rpt.remlLMM.adj}
 #' 
 #' @examples  
-#' \dontrun{
+#' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
 #' attach(BodySize)
@@ -53,7 +53,7 @@
 #' (rpt.Weight <- rpt.remlLMM(Weight, BirdID, nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #' detach(BodySize)
-#'       }
+#'       
 #'       
 #' @keywords models
 #' 

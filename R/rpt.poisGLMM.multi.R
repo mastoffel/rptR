@@ -70,7 +70,7 @@
 #' @seealso \link{rpt.poisGLMM.add}, \link{rpt}, \link{print.rpt}
 #' 
 #' @examples  
-#' \dontrun{
+#' 
 #'        # repeatability for female clutch size over two years.
 #'        data(BroodParasitism)
 #'        attach(BroodParasitism)
@@ -83,7 +83,7 @@
 #'        attach(Fledglings)
 #'        (rpt.Fledge <- rpt.poisGLMM.multi(Fledge, MaleID, nboot=10, npermut=10))  
 #'        # reduced number of nboot and npermut iterations
-#'        detach(Fledglings)}
+#'        detach(Fledglings)
 #'       
 #' @keywords models
 #' 
