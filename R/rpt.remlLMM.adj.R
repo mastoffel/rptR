@@ -89,13 +89,14 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	R <- R.pe(formula, data, grname, peYN=TRUE)
 	names(R) = grname
 	# confidence interval estimation by parametric bootstrapping
-	bootstr <- function(mod, formula, data, grname) {
-                y <- as.matrix(simulate(mod, nsim = 1))
+        
+	Ysim <- as.matrix(simulate(mod, nsim = nboot))
+	bootstr <- function(y, mod, formula, data, grname) {
 		data[,names(model.frame(mod))[1]] = as.vector(y)
 		R.pe(formula, data, grname)
 	}
 	if(nboot > 0){ 
-                R.boot   <- replicate(nboot, bootstr(mod, formula, data, grname), simplify=TRUE)
+                R.boot   <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, grname = grname))
 		} else {
                   R.boot <- matrix(rep(NA, length(grname)), nrow=length(grname))
 		}

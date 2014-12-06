@@ -74,7 +74,7 @@ rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
 	postR <- var.a / (var.a + var.e)
 	# point estimate
 	R     <- MCMCglmm::posterior.mode( postR )
-	# credibility interval estimation from paterior distribution
+	# credibility interval estimation from posterior distribution
 	CI.R    <- coda::HPDinterval(postR,CI)[1,]
 	se 	    <- sd(postR)
 	# 'significance test'

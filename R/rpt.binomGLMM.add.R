@@ -86,7 +86,7 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 	# preparation	
 	n          <- rowSums(y)
 	groups     <- factor(groups)
-	# model fitting
+	# model fitting # change MCMCglmm with lme4 function plus factor(rownames(data) and family argument --> binomial)
 	if(all(n==1)) {
 		if(is.null(prior)) prior=list(R=list(V=1,fix=1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
 		mod    <- MCMCglmm::MCMCglmm(m ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="categorical", verbose=verbose, ...) 
@@ -95,7 +95,7 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 		if(is.null(prior)) prior=list(R=list(V=1e-10,nu=-1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
 		mod    <- MCMCglmm::MCMCglmm(cbind(m, nm) ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="multinomial2", verbose=verbose, ...)
 	}
-	# ezxtraction of posterior distributions
+	# extraction of posterior distributions
 	var.a      <- mod$VCV[,"groups"]
 	var.e      <- mod$VCV[,"units"]
 	postR.link <- var.a / (var.a + var.e + pi^2 /3)

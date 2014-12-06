@@ -34,7 +34,7 @@ Returns an object of class rpt that is a a list with the following elements:
      link scale, i.e. the standard deviation of the posterior distribution.
      Note that the distribution might not be symmetrical, in which case the
      se is less informative.}
-\item{CI.link}{Vonfidence interval for repeatability (ICC) on the link scale
+\item{CI.link}{Confidence interval for repeatability (ICC) on the link scale
      based on the posterior distribution of  \emph{R}}
 \item{P.link}{Approximate \emph{P} value from a significance test for the
      link scale repeatability}
