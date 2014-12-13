@@ -127,7 +127,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 	pqlglmm.binom.model <- function(y, groups, n, link, returnR=TRUE) {
 		if(all(n==1)) mod <- MASS::glmmPQL(y ~ 1, random=~1|groups,  family=binomial(link=eval(link)), verbose=FALSE)
 		else          mod <- MASS::glmmPQL(y ~ 1, random=~1|groups,  family=quasibinomial(link=eval(link)), verbose=FALSE)	
-		VarComp  <- nlme::VarCorr(mod)
+		VarComp  <- lme4::VarCorr(mod)
 		beta0    <- as.numeric(mod$coefficients$fixed)
 		if(all(n==1)) omega <- 1
 			else      omega <- (as.numeric(VarComp[2,1]))
