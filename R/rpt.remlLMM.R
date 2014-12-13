@@ -59,73 +59,54 @@
 #' 
 #' @export
 #' 
-# @importFrom nlme VarCorr
-# @importFrom nlme lme
- 
- 
+# @importFrom lme4 VarCorr
+# @importFrom lme4 lmer
+
 rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
-        # initial checks
-        if(length(y)!= length(groups)) stop("y and group are of unequal length")
-        if(nboot < 0) 	nboot <- 0
+        # model
+        formula  <- y ~ 1 + (1|groups)
+        mod         <- lme4::lmer(formula) 
+        # checks 
+        if(nboot < 0)         nboot <- 0
         if(npermut < 1) npermut <- 1
-        if(any(is.na(y))) {
-                warning("missing values in y are removed")
-                groups <- groups[!is.na(y)]
-                groups <- factor(groups)
-                y      <- y[!is.na(y)] 
-        }
-        # preparation
-        groups <- factor(groups)
-        # define formula, use VarCorr from lme4
-        k <- length(unique(groups))
-        N <- length(y)
-        # functions: point estimates of R
-        R.pe <- function(y, groups) {
-                varComps <- try(nlme::VarCorr(nlme::lme(y ~ 1, random = ~1 | groups)), silent=TRUE)
-                if(class(varComps)=="try-error") {
-                        warning("Convergence problems in lme (most likely during bootstrap or permutation). R is set to NA for this iteration")
-                        R = NA
+        # prep
+        e1  <-  environment() 
+        # point estimates of R
+        R.pe <- function(y, groups, peYN=FALSE) { 
+                formula <- y ~ 1 + (1|groups)
+                mod.fnc  <- lme4::lmer(formula)
+                varComps <- lme4::VarCorr(mod.fnc)
+                if(peYN & any(varComps==0) & nboot > 0) {
+                        assign("nboot", 0, envir=e1)
+                        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
                 }
-                else {
-                        var.a <- as.numeric(varComps[1, 1])
-                        var.e <- as.numeric(varComps[2, 1])
-                        R <- var.a/(var.a + var.e)
-                }
+                var.a    <- as.numeric(varComps)
+                var.p    <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
+                R        <- var.a / var.p
                 return(R) 
         }
-        # point estimation according to model 8 and equation 9
-        R <- R.pe(y, groups)
+        R <- R.pe(y, groups, peYN=TRUE)
+     
         # confidence interval estimation by parametric bootstrapping
-        bootstr <- function(y, groups, k, N, beta0, var.a, var.e) {
-                y.boot <- beta0 + rnorm(k, 0, sqrt(var.a))[groups] + rnorm(N, 0, sqrt(var.e))
-                R.pe(y.boot, groups) 
+        Ysim <- as.matrix(simulate(mod, nsim = nboot))
+        if(nboot > 0){ 
+                R.boot   <- unname(apply(Ysim, 2, R.pe, groups = groups))
+        } else {
+                R.boot <- matrix(rep(NA, length(groups)), nrow=length(groups))
         }
-        if(nboot > 0) {
-                mod <- try(nlme::lme(y ~ 1, random = ~1 | groups), silent=TRUE)
-                if(class(mod)=="try-error") {
-                        warning("Convergence problems in lme. Model is refitted.")
-                        mod <- nlme::lme(y ~ 1, random = ~1 | groups)                
-                }
-                beta0    <- as.numeric(summary(mod)$tTable[,1])
-                varComps <- nlme::VarCorr(mod)
-                var.a    <- as.numeric(varComps[1,1])
-                var.e    <- as.numeric(varComps[2,1])	
-                R.boot   <- replicate(nboot, bootstr(y, groups, k, N, beta0, var.a, var.e), simplify=TRUE)
-        }
-        else
-                R.boot   <- NA
         CI.R     <- quantile(R.boot, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-        se       <- sd(R.boot, na.rm=TRUE)
+        se <- sd(R.boot)
+        
         # significance test by likelihood-ratio-test
         LR       <- as.numeric(-2*(logLik(lm(y~1))-logLik(mod)))
         P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
         # significance test by permutation
-        permut <- function(y, groups, N) {
-                samp <- sample(1:N, N)
-                R.pe(y, groups[samp]) 
+        permut <- function(formula, groups) {
+                groups <- sample(as.character(groups))
+                R.pe(y, groups) 
         }
         if(npermut > 1) {
-                R.permut <- c(R, replicate(npermut-1, permut(y, groups, N), simplify=TRUE))
+                R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
                 P.permut <- sum(R.permut >= R)/npermut
         }
         else {
@@ -138,5 +119,5 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
                      P = c(P.LRT=P.LRT, P.permut=P.permut), 
                      R.boot=R.boot, R.permut=R.permut )
         class(res) <- "rpt"
-        return(res) 
+        return(res)
 }
