@@ -90,7 +90,7 @@
 #' @export
 #' 
 # @importFrom MASS glmmPQL
-# @importFrom nlme VarCorr
+# @importFrom lme4 VarCorr
 #' 
 rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1000, npermut=1000) {
 	# initial checks
@@ -114,7 +114,7 @@ rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1
 	# functions
 	pqlglmm.pois.model <- function(y, groups, link, returnR=TRUE) {
 		mod     <-  MASS::glmmPQL(y ~ 1,random=~1|groups,  family=quasipoisson(link=eval(link)), verbose=FALSE) 
-		VarComp <- nlme::VarCorr(mod)
+		VarComp <- lme4::VarCorr(mod)
 		beta0   <- as.numeric(mod$coefficients$fixed)
 		omega   <- (as.numeric(VarComp[2,1]))
 		var.a   <- (as.numeric(VarComp[1,1]))
