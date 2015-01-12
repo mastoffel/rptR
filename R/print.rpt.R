@@ -32,7 +32,7 @@
 #' data(BodySize)
 #' attach(BodySize)
 #' rpt.Weight <- rpt.mcmcLMM(Weight, BirdID)
-#' print(rpt.Weight)  # alternative call to print.rpt() through pring()
+#' print(rpt.Weight)  # alternative call to print.rpt() through print()
 #' detach(BodySize)
 #' 
 print.rpt <- function(x, ...) {
@@ -86,7 +86,7 @@ print.rpt <- function(x, ...) {
 			"SE = ", round(x$se.link,3), "\n",
 			"CI = [", round(x$CI.link[1],3), ", ", round(x$CI.link[2],3), "]", "\n",
 			"P  = ", signif(x$P.link, 3), "\n\n", 
-			"Origial scale repeatabilities:","\n",
+			"Original scale repeatabilities:","\n",
 			"R  = ", round(x$R.org,3), "\n",
 			"SE = ", round(x$se.org,3), "\n",
 			"CI = [", round(x$CI.org[1],3), ", ", round(x$CI.org[2],3), "]", "\n",
@@ -100,7 +100,7 @@ print.rpt <- function(x, ...) {
 			"SE = ", round(x$se.link,3), "\n",
 			"CI = [", round(x$CI.link[1],3), ", ", round(x$CI.link[2],3), "]", "\n",
 			"P  = ", signif(x$P.link, 3), "\n\n", 
-			"Origial scale repeatabilities:","\n",
+			"Original scale repeatabilities:","\n",
 			"R  = ", round(x$R.org,3), "\n",
 			"SE = ", round(x$se.org,3), "\n",
 			"CI = [", round(x$CI.org[1],3), ", ", round(x$CI.org[2],3), "]", "\n",
