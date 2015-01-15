@@ -38,6 +38,8 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{LRT}{Vector of Likelihood-ratios for the model and the reduced model, and \emph{P} value and degrees of freedom for the Likelihood-ratio test}
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
 }
 \description{

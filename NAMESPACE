@@ -2,6 +2,7 @@
 
 S3method(plot,rpt)
 S3method(print,rpt)
+S3method(summary,rpt)
 export(rpt)
 export(rpt.adj)
 export(rpt.aov)

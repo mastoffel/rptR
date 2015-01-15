@@ -28,6 +28,8 @@
 #' \item{LRT}{Vector of Likelihood-ratios for the model and the reduced model, and \emph{P} value and degrees of freedom for the Likelihood-ratio test}  
 #' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
 #' 
 #' @references 
@@ -136,7 +138,7 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel =
                      P = c(P.LRT=LRT.P, P.permut=P.permut),
                      LRT = c(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df,LRT.P=LRT.P),
                      R.boot=R.boot, R.permut=R.permut,
-                     mod=mod)
+                     ngroups = length(unique(groups)), nobs = length(y), mod=mod)
         class(res) <- "rpt"
         return(res)
 }
