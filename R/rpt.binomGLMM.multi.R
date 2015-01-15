@@ -16,7 +16,9 @@
 #' @param npermut Number of permutations for significance testing 
 #'        (defaults to 1000). Larger numbers of permutations give better
 #'        asymtotic \emph{P} values, but may be very time-consuming.      
-#' 
+#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used.  
 #'       
 #' @details Models are fitted using the \link{glmmPQL} function in \pkg{MASS} 
 #'          with the \code{quasibinomial} family (proportion data) or the

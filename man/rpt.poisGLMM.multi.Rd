@@ -4,7 +4,7 @@
 \title{GLMM-based Repeatability Using PQL Estimation for Count Data}
 \usage{
 rpt.poisGLMM.multi(y, groups, link = c("log", "sqrt"), CI = 0.95,
-  nboot = 1000, npermut = 1000)
+  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
 \item{y}{Vector of a response values.}
@@ -18,9 +18,14 @@ rpt.poisGLMM.multi(y, groups, link = c("log", "sqrt"), CI = 0.95,
 \item{nboot}{Number of parametric bootstraps for interval estimation. Defaults to 1000.
 Larger numbers of permutations give better asymtotic CI, but may be very time-consuming.}
 
+\item{parallel}{If TRUE, bootstraps will be distributed.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+       all cores are used.}
+
 \item{npermut}{Number}{of permutations for a significance testing. Defaults to 1000.
-       Larger numbers of permutations give better asymptotic \emph{P} values,
-       but may be very time-consuming.}
+Larger numbers of permutations give better asymptotic \emph{P} values,
+but may be very time-consuming.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:

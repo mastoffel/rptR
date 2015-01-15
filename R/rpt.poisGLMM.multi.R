@@ -12,7 +12,10 @@
 #' @param npermut}{Number of permutations for a significance testing. Defaults to 1000.
 #'        Larger numbers of permutations give better asymptotic \emph{P} values,
 #'        but may be very time-consuming.
-#' 
+#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used. 
+#'        
 #' @details Models are fitted using the \link{glmmPQL} function in \pkg{MASS} 
 #' with quasipoisson family. }\note{ Confidence intervals and standard errors 
 #' are inappropriate at high repeatabilities (\emph{omega} < 1), because 
@@ -92,7 +95,7 @@
 # @importFrom MASS glmmPQL
 # @importFrom lme4 VarCorr
 #' 
-rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1000, npermut=1000) {
+rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
 	# initial checks
 	if(length(y) != length(groups)) 
 		stop("y and group hav to be of equal length")
@@ -133,7 +136,8 @@ rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1
 	# point estimation according to model 17 equations 18-20
 	R   <- pqlglmm.pois.model(y, groups, link)
 	# confidence interval estimation by parametric bootstrapping
-	bootstr <- function(y, groups, k, N, beta0, var.a, omega, link) {
+	# nboot is not used in function, but necessary to run parSapply over vector in parallelization
+	bootstr <- function(nboot, y, groups, k, N, beta0, var.a, omega, link) {
 		groupMeans <- rnorm(k, 0, sqrt(var.a))
 		if(link=="log")  mu <- exp(beta0 + groupMeans[groups])
 		if(link=="sqrt") mu <- (beta0 + groupMeans[groups])^2
@@ -141,9 +145,26 @@ rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1
 			else         y.boot <- rnbinom(N, size=(mu/(omega-1)), mu=mu)
 		pqlglmm.pois.model(y.boot, groups, link) 
 	}
-	if(nboot > 0) {
+	if(nboot > 0 & parallel == TRUE){ 
+	        mod.ests <- pqlglmm.pois.model(y, groups, link, returnR=FALSE)
+	        if (ncores == 0) {
+	                ncores <- parallel::detectCores()
+	                warning("No core number specified: detectCores() is used to detect the number of 
+                        cores on the local machine")
+	        } 
+	        # start cluster
+	        cl <- parallel::makeCluster(ncores)
+	        parallel::clusterExport(cl, "pqlglmm.pois.model", envir=environment())
+	        # parallel computing
+	        R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y = y, groups = groups, k = k, N = N,
+	                                       beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
+	                                       omega = mod.ests$omega, link = link))
+	        parallel::stopCluster(cl)
+	} else if(nboot > 0 & parallel == FALSE) {
 		mod.ests <- pqlglmm.pois.model(y, groups, link, returnR=FALSE)
-		R.boot   <- replicate(nboot, bootstr(y, groups, k, N, mod.ests$beta0, mod.ests$var.a, mod.ests$omega, link), simplify=TRUE)
+		R.boot   <- replicate(nboot, bootstr( y = y, groups = groups, k = k, N = N,
+		                                      beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
+		                                      omega = mod.ests$omega, link = link), simplify=TRUE)
 		R.boot   <- list(R.link = as.numeric(unlist(R.boot["R.link",])), R.org = as.numeric(unlist(R.boot["R.org",]))) 	
 	}
 	else {

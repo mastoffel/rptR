@@ -4,7 +4,7 @@
 \title{GLMM-based Repeatability Using PQL Estimation for Binomial Data}
 \usage{
 rpt.binomGLMM.multi(y, groups, link = c("logit", "probit"), CI = 0.95,
-  nboot = 1000, npermut = 1000)
+  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
 \item{y}{Vector of a response values (for binary data) or a two-column matrix,
@@ -23,8 +23,13 @@ to \code{log}.}
 asymtotic CI, but may be very time-consuming.}
 
 \item{npermut}{Number of permutations for significance testing
-       (defaults to 1000). Larger numbers of permutations give better
-       asymtotic \emph{P} values, but may be very time-consuming.}
+(defaults to 1000). Larger numbers of permutations give better
+asymtotic \emph{P} values, but may be very time-consuming.}
+
+\item{parallel}{If TRUE, bootstraps will be distributed.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+       all cores are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
