@@ -26,35 +26,36 @@
 #'       
 #' @keywords models
 #' 
+#' @export
 #' 
 #' 
 #' 
-#' 
-plot.rpt <- function(x, ...) {
+plot.rpt <- function(x, y, ...) {
+        # more default arguments !
         
+        # par(lwd = 2)
         CI.l <- unname(x$CI.R[1])
         CI.u <- unname(x$CI.R[2])
         
-        boot.plot <- hist(x$R.boot, breaks = "FD", xlab = "Repeatability estimate",
-                     main="Distribution of repeatability estimates from bootstrap",
+        boot.plot <- hist(x$R.boot, breaks = "FD",
                      plot = FALSE)
         
         v.pos <- max(boot.plot$counts) # 1/10 * max(boot.plot$counts)
         
-        distr <- hist(x$R.boot, breaks = "FD", 
+        hist(x$R.boot, breaks = "FD", 
              ylim = c(0, v.pos*1.5),
-             xlab = "Repeatability estimate",
-             main="Distribution of repeatability estimates from bootstrap")
-        
-        points(x$R, v.pos*1.15, cex = 1.2, pch = 19, col = "blue")
+             xlab = "ICC estimates",
+             main="Distribution of ICC estimates from bootstrap")
+       
         arrows(CI.l, v.pos*1.15, CI.u, v.pos*1.15, length=0.3, angle=90, code=3,
-               lwd = 2.5, col = "blue")
+               lwd = 2.5, col = "black")
         lines(x = c(x$R, x$R), y = c(0, v.pos * 1.15),
-              lwd = 2.5, col = "blue", lty = 5)
+              lwd = 2.5, col = "grey", lty = 5)
+        points(x$R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
         legend("topleft", pch = 19, cex = 1, bty = "n",
-               col = c("blue"), c("Repeatability with CI"),
+               col = c("red"), c("ICC with CI"),
                box.lty = 0)
-        
+}
         
 #         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {
 #                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
@@ -127,4 +128,4 @@ plot.rpt <- function(x, ...) {
 #                     "P  = ", signif(x$P.org, 3), "\n\n", 
 #                     sep="")  
 #         }	
-}	
+	

@@ -80,7 +80,7 @@ rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
 	# 'significance test'
 	P 	  <- NA
 	res = list(call=match.call(), datatype="Gaussian", method="LMM.MCMC", CI=CI, 
-				R=R, CI.R=CI.R, se=se, P=P, R.post=postR ) 
+				R=R, CI.R=CI.R, se=se, P=P, R.post=postR, mod=mod ) 
 	class(res) <- "rpt"
 	return(res) 
 }

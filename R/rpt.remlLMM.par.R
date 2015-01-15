@@ -62,6 +62,7 @@
 # @importFrom lme4 VarCorr
 # @importFrom lme4 lmer
 
+# much to do here
 rpt.remlLMM.par <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
         # model
         formula  <- y ~ 1 + (1|groups)
@@ -69,24 +70,23 @@ rpt.remlLMM.par <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parall
         # checks 
         if(nboot < 0)         nboot <- 0
         if(npermut < 1) npermut <- 1
-        # prep
-        e1  <-  environment() 
+        
         # point estimates of R
-        R.pe <- function(y, groups, peYN=FALSE) { 
+        R.pe <- function(y, groups) { 
                 formula <- y ~ 1 + (1|groups)
                 mod.fnc  <- lme4::lmer(formula)
                 varComps <- lme4::VarCorr(mod.fnc)
-                if(peYN & any(varComps==0) & nboot > 0) {
-                        assign("nboot", 0, envir=e1)
-                        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-                }
                 var.a    <- as.numeric(varComps)
                 var.p    <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
                 R        <- var.a / var.p
                 return(R) 
         }
-        R <- R.pe(y, groups, peYN=TRUE)
-     
+        R <- R.pe(y, groups)
+        if(R==0 & nboot > 0) {
+                nboot <- 0
+                warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+        }
+        
         # confidence interval estimation by parametric bootstrapping
         Ysim <- as.matrix(simulate(mod, nsim = nboot))
         if(nboot > 0 & parallel == TRUE){ 
@@ -97,7 +97,6 @@ rpt.remlLMM.par <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parall
                 } 
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "nboot") 
                 R.boot <- unname(parallel::parApply(cl, Ysim, 2, R.pe, groups = groups))
                 parallel::stopCluster(cl)
         } else if (nboot > 0 & parallel == FALSE) {
@@ -109,8 +108,11 @@ rpt.remlLMM.par <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parall
         se <- sd(R.boot)
         
         # significance test by likelihood-ratio-test
-        LR       <- as.numeric(-2*(logLik(lm(y~1))-logLik(mod)))
-        P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+        LRT.mod  <- logLik(mod)
+        LRT.red  <- logLik(lm(y~1))
+        LRT.D    <- as.numeric(-2*(LRT.red-LRT.mod))
+        LRT.df   <- 1
+        LRT.P    <- ifelse(LRT.D<=0, LRT.df, pchisq(LRT.D,1,lower.tail=FALSE)/2)
         # significance test by permutation
         permut <- function(formula, groups) {
                 groups <- sample(as.character(groups))
@@ -127,8 +129,10 @@ rpt.remlLMM.par <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parall
         # return of results
         res  <- list(call=match.call(), datatype="Gaussian", method="LMM.REML", CI=CI, 
                      R=R, se=se, CI.R=CI.R, 
-                     P = c(P.LRT=P.LRT, P.permut=P.permut), 
-                     R.boot=R.boot, R.permut=R.permut )
+                     P = c(P.LRT=LRT.P, P.permut=P.permut),
+                     LRT = c(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df,LRT.P=LRT.P),
+                     R.boot=R.boot, R.permut=R.permut,
+                     mod=mod)
         class(res) <- "rpt"
         return(res)
 }

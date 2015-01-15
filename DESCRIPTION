@@ -17,5 +17,6 @@ Imports:
     MCMCglmm (>= 2.21),
     MASS (>= 7.3-33),
     lme4 (>= 1.1-7),
-    coda (>= 0.16-1)
- 
+    coda (>= 0.16-1),
+    parallel (>= 3.1.2)
+    
