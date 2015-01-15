@@ -100,7 +100,7 @@
 # @importFrom MASS glmmPQL
 # @importFrom VGAM probit
 
-rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000) {
+rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
 	# initial checks
 	if (is.null(dim(y))) 
 		y <- cbind(y, 1-y)
@@ -146,7 +146,8 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 	# point estimate
 	R <- pqlglmm.binom.model(y, groups, n, link)
 	# confidence interval by parametric bootstrapping
-	bootstr <- function(y, groups, k, N, n, beta0, var.a, omega, link) {
+        # nboot is not used in function, but necessary to run parSapply over vector in parallelization
+	bootstr <- function(nboot, y, groups, k, N, n, beta0, var.a, omega, link) {
 		groupMeans <- rnorm(k, 0, sqrt(var.a))
 		p.link     <- beta0 + groupMeans[groups]
 		if(link=="logit") p <- exp(p.link)/(1+exp(p.link))
@@ -165,13 +166,30 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 		}
 		pqlglmm.binom.model(cbind(m, n-m), groups, n, link) 
 	}
-	if(nboot > 0) {
+        if(nboot > 0 & parallel == TRUE){ 
+                mod.ests <- pqlglmm.binom.model(y, groups, n, link, returnR=FALSE)
+                if (ncores == 0) {
+                ncores <- parallel::detectCores()
+                warning("No core number specified: detectCores() is used to detect the number of 
+                        cores on the local machine")
+                } 
+                # start cluster
+                cl <- parallel::makeCluster(ncores)
+                parallel::clusterExport(cl, "pqlglmm.binom.model", envir=environment())
+                parallel::clusterEvalQ(cl,library(VGAM))
+                # parallel computing
+                R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y = y, groups = groups, k = k, N = N,
+                                               n = n, beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
+                                               omega = mod.ests$omega, link = link))
+                parallel::stopCluster(cl)
+	} else if (nboot > 0 & parallel == FALSE) {
 		mod.ests <- pqlglmm.binom.model(y, groups, n, link, returnR=FALSE)
-		R.boot   <- replicate(nboot, bootstr(y, groups, k, N, n, mod.ests$beta0, mod.ests$var.a, mod.ests$omega, link), simplify=TRUE)
+		R.boot   <- replicate(nboot, bootstr(y = y, groups = groups, k = k, N = N,
+		                                     n = n, beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
+		                                     omega = mod.ests$omega, link = link), simplify=TRUE)
 		R.boot   <- list(R.link = as.numeric(unlist(R.boot["R.link",])), R.org = as.numeric(unlist(R.boot["R.org",])))  
-	}
-	else {
-			R.boot   <- list(R.link = NA, R.org = NA)
+	} else {
+		R.boot   <- list(R.link = NA, R.org = NA)
 	}
 	CI.link  <- quantile(R.boot$R.link, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
 	CI.org   <- quantile(R.boot$R.org, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
