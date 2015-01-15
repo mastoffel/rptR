@@ -35,7 +35,7 @@
 #' \item{CI.org}{Bayesian credibility interval for repeatability on the original scale based on the posterior distribution of \emph{R}.}
 #' \item{P.org}{Significance test for the original scale repeatability, returned as \emph{NA}, since the Bayesian approach conflicts with the null hypothesis testing.}
 #' \item{R.post}{Named list of MCMC samples form the posterior distributions. \code{R.link} gives the samples for the link scale repeatability, \code{R.org} gives the samples for the original scale repeatability.} 
-#'
+#' \item{mod}{Fitted model.}
 #'
 #' @references 
 #' Browne, W. J., Subramanian, S. V., et al. (2005). \emph{Variance partitioning in multilevel logistic models that exhibit overdispersion}. Journal of the Royal Statistical Society A 168: 599-613. \cr
@@ -117,7 +117,8 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 	res        <- list(call=match.call(), datatype="binomial", method="MCMC", CI=CI,
 			      R.link=R.link, se.link=se.link, CI.link=CI.link, P.link=P.link, 
 				  R.org = R.org, se.org=se.org, CI.org=CI.org, P.org=P.org,
-				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)) )
+				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)),
+                                  mod = mod)
 	class(res) <- "rpt"
 	return(res) 
 }

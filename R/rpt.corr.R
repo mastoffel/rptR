@@ -10,7 +10,9 @@
 #'        confidence interval (defaults to 1000).
 #' @param npermut Number of permutations used when calculating asymptotic 
 #'        \emph{P} values (defaults to 1000).
-#'   
+#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used.  
 #' 
 #' @return Returns an object of class rpt that is a a list with the following elements: 
 #' \item{datatype}{Response distribution (here: "Gaussian").}
@@ -43,7 +45,7 @@
 #' 
 #' @export
 
-rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
+rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
 	# initial checks
 	if(length(y)!= length(groups)) 
 		stop("y and group have to be of equal length")
@@ -69,14 +71,28 @@ rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
 	# point estimation according to equations 4 and 5
 	R      <- R.pe(y1, y2, k)
 	# confidence interval estimation according to equation 6 and 7
-	bootstr <- function(y1, y2, k) {
+	bootstr <- function(nboot, y1, y2, k) {
 		samp<- sample(1:k, k, replace=TRUE)
 		R.pe(y1[samp], y2[samp], k)
 	}
-	if(nboot > 0)
+	if(nboot > 0 & parallel == TRUE){ 
+	        if (ncores == 0) {
+	                ncores <- parallel::detectCores()
+	                warning("No core number specified: detectCores() is used to detect the number of 
+                                cores on the local machine")
+	        } 
+	        # start cluster
+	        cl <- parallel::makeCluster(ncores)
+	        parallel::clusterExport(cl, "R.pe")
+                # parallel computing
+	        R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y1, y2, k))
+	        parallel::stopCluster(cl)
+                
+	} else if (nboot > 0 & parallel == FALSE) {
 		R.boot <- replicate(nboot, bootstr(y1, y2, k), simplify=TRUE) 
-	else
+	} else {
 		R.boot <- NA
+	}
 	CI.R   <- quantile(R.boot, c((1-CI)/2, 1-(1-CI)/2), na.rm=TRUE)
 	se     <- sd(R.boot, na.rm=TRUE)
 	# significance test by permutation

@@ -39,6 +39,7 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{CI.org}{Bayesian credibility interval for repeatability on the original scale based on the posterior distribution of \emph{R}.}
 \item{P.org}{Significance test for the original scale repeatability, returned as \emph{NA}, since the Bayesian approach conflicts with the null hypothesis testing.}
 \item{R.post}{Named list of MCMC samples form the posterior distributions. \code{R.link} gives the samples for the link scale repeatability, \code{R.org} gives the samples for the original scale repeatability.}
+\item{mod}{Fitted model.}
 }
 \description{
 Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for binary and proportion data.

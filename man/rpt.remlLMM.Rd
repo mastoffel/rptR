@@ -3,7 +3,8 @@
 \alias{rpt.remlLMM}
 \title{LMM-based Repeatability Using REML}
 \usage{
-rpt.remlLMM(y, groups, CI = 0.95, nboot = 1000, npermut = 1000)
+rpt.remlLMM(y, groups, CI = 0.95, nboot = 1000, npermut = 1000,
+  parallel = FALSE, ncores = 0)
 }
 \arguments{
 \item{y}{Vector of a response values.}
@@ -17,19 +18,27 @@ Defaults to 1000. Larger numbers of permutations give a better
 asymtotic CI, but may be very time-consuming.}
 
 \item{npermut}{Number of permutations used when calculating
-       asymptotic \emph{P} values (defaults to 1000).}
+asymptotic \emph{P} values (defaults to 1000).}
+
+\item{parallel}{If TRUE, bootstraps will be distributed.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+       all cores are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
+\item{call}{Model call.}
 \item{datatype}{Response distribution (here: "Gaussian").}
 \item{method}{Method used to calculate repeatability (here: "REML").}
 \item{CI}{Width of the confidence interval.}
 \item{R}{Point estimate for repeatability.}
 \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
 \item{CI.R}{Confidence interval for  repeatability.}
-\item{P}{Approximate \emph{P} value from a significance test based on permutation.}
+\item{P}{Vector of Approximate \emph{P} value from Likelihood-ratio test and Approximate \emph{P} value from a significance test based on permutation.}
+\item{LRT}{Vector of Likelihood-ratios for the model and the reduced model, and \emph{P} value and degrees of freedom for the Likelihood-ratio test}
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
+\item{mod}{Fitted model.}
 }
 \description{
 Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).

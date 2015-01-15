@@ -98,7 +98,6 @@
 #' @export
 #' 
 # @importFrom MASS glmmPQL
-# @importFrom nlme VarCorr
 # @importFrom VGAM probit
 
 rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000) {

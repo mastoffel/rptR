@@ -3,7 +3,8 @@
 \alias{rpt.corr}
 \title{Correlation-based Repeatability}
 \usage{
-rpt.corr(y, groups, CI = 0.95, nboot = 1000, npermut = 1000)
+rpt.corr(y, groups, CI = 0.95, nboot = 1000, npermut = 1000,
+  parallel = FALSE, ncores = 0)
 }
 \arguments{
 \item{y}{Vector of measurements. Missing values are not allowed.}
@@ -17,7 +18,12 @@ Note that each group identity has to appear exactly twice.}
 confidence interval (defaults to 1000).}
 
 \item{npermut}{Number of permutations used when calculating asymptotic
-       \emph{P} values (defaults to 1000).}
+\emph{P} values (defaults to 1000).}
+
+\item{parallel}{If TRUE, bootstraps will be distributed.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+       all cores are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:

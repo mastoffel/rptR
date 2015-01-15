@@ -23,6 +23,7 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{CI}{Asymptotic confidence interval for repeatability based on non-parametric bootstrapping.}
 \item{P}{Named vector of two \emph{P} values (significance tests): \code{P.aov} is the \emph{P} value for the ANOVA F test, \code{P.permut} is the permutation based \emph{P} value.}
 \item{R.permut}{Repeatability \emph{R} estimates for each permutation run.}
+\item{mod}{Fitted model.}
 }
 \description{
 Repeatability calculations based on Analysis of Variance (ANOVA).

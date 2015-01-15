@@ -10,20 +10,26 @@
 #'        asymtotic CI, but may be very time-consuming.
 #' @param npermut Number of permutations used when calculating 
 #'        asymptotic \emph{P} values (defaults to 1000).
-#' 
+#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used.
 #' 
 #' @return 
+#' 
 #' Returns an object of class rpt that is a a list with the following elements: 
+#' \item{call}{Model call.}
 #' \item{datatype}{Response distribution (here: "Gaussian").}
 #' \item{method}{Method used to calculate repeatability (here: "REML").}
 #' \item{CI}{Width of the confidence interval.}
 #' \item{R}{Point estimate for repeatability.}
 #' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
 #' \item{CI.R}{Confidence interval for  repeatability.}
-#' \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
+#' \item{P}{Vector of Approximate \emph{P} value from Likelihood-ratio test and Approximate \emph{P} value from a significance test based on permutation.}
+#' \item{LRT}{Vector of Likelihood-ratios for the model and the reduced model, and \emph{P} value and degrees of freedom for the Likelihood-ratio test}  
 #' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
-#'
+#' \item{mod}{Fitted model.}
+#' 
 #' @references 
 #' Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized 
 #' concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
@@ -59,37 +65,45 @@
 #' 
 #' @export
 #' 
-# @importFrom lme4 VarCorr
-# @importFrom lme4 lmer
 
-rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
+# much to do here
+rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
         # model
         formula  <- y ~ 1 + (1|groups)
         mod         <- lme4::lmer(formula) 
         # checks 
         if(nboot < 0)         nboot <- 0
         if(npermut < 1) npermut <- 1
-        # prep
-        e1  <-  environment() 
+        
         # point estimates of R
-        R.pe <- function(y, groups, peYN=FALSE) { 
+        R.pe <- function(y, groups) { 
                 formula <- y ~ 1 + (1|groups)
                 mod.fnc  <- lme4::lmer(formula)
                 varComps <- lme4::VarCorr(mod.fnc)
-                if(peYN & any(varComps==0) & nboot > 0) {
-                        assign("nboot", 0, envir=e1)
-                        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-                }
                 var.a    <- as.numeric(varComps)
                 var.p    <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
                 R        <- var.a / var.p
                 return(R) 
         }
-        R <- R.pe(y, groups, peYN=TRUE)
-     
+        R <- R.pe(y, groups)
+        if(R==0 & nboot > 0) {
+                nboot <- 0
+                warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+        }
+        
         # confidence interval estimation by parametric bootstrapping
         Ysim <- as.matrix(simulate(mod, nsim = nboot))
-        if(nboot > 0){ 
+        if(nboot > 0 & parallel == TRUE){ 
+                if (ncores == 0) {
+                        ncores <- parallel::detectCores()
+                        warning("No core number specified: detectCores() is used to detect the number of 
+                                cores on the local machine")
+                } 
+                # start cluster
+                cl <- parallel::makeCluster(ncores)
+                R.boot <- unname(parallel::parApply(cl, Ysim, 2, R.pe, groups = groups))
+                parallel::stopCluster(cl)
+        } else if (nboot > 0 & parallel == FALSE) {
                 R.boot   <- unname(apply(Ysim, 2, R.pe, groups = groups))
         } else {
                 R.boot <- matrix(rep(NA, length(groups)), nrow=length(groups))
@@ -98,8 +112,11 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
         se <- sd(R.boot)
         
         # significance test by likelihood-ratio-test
-        LR       <- as.numeric(-2*(logLik(lm(y~1))-logLik(mod)))
-        P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+        LRT.mod  <- logLik(mod)
+        LRT.red  <- logLik(lm(y~1))
+        LRT.D    <- as.numeric(-2*(LRT.red-LRT.mod))
+        LRT.df   <- 1
+        LRT.P    <- ifelse(LRT.D<=0, LRT.df, pchisq(LRT.D,1,lower.tail=FALSE)/2)
         # significance test by permutation
         permut <- function(formula, groups) {
                 groups <- sample(as.character(groups))
@@ -116,8 +133,10 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000) {
         # return of results
         res  <- list(call=match.call(), datatype="Gaussian", method="LMM.REML", CI=CI, 
                      R=R, se=se, CI.R=CI.R, 
-                     P = c(P.LRT=P.LRT, P.permut=P.permut), 
-                     R.boot=R.boot, R.permut=R.permut )
+                     P = c(P.LRT=LRT.P, P.permut=P.permut),
+                     LRT = c(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df,LRT.P=LRT.P),
+                     R.boot=R.boot, R.permut=R.permut,
+                     mod=mod)
         class(res) <- "rpt"
         return(res)
 }
