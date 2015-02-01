@@ -94,7 +94,9 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel =
         }
         
         # confidence interval estimation by parametric bootstrapping
+        if(nboot > 0) {
         Ysim <- as.matrix(simulate(mod, nsim = nboot))
+        }
         if(nboot > 0 & parallel == TRUE){ 
                 if (ncores == 0) {
                         ncores <- parallel::detectCores()
@@ -127,8 +129,7 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel =
         if(npermut > 1) {
                 R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
                 P.permut <- sum(R.permut >= R)/npermut
-        }
-        else {
+        } else {
                 R.permut = R
                 P.permut <- NA
         }

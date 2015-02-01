@@ -13,7 +13,7 @@ Covariates and additional random effects can be included to estimate adjusted re
 
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
-be estimated. Spelling needs to match the random effect names as given in \code{fromula}.}
+be estimated. Spelling needs to match the random effect names as given in \code{formula}.}
 
 \item{data}{A dataframe that contains the variables included in the formula argument.}
 

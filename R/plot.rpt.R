@@ -32,8 +32,9 @@
 #' 
 plot.rpt <- function(x, y, ...) {
         # more default arguments !
-        
-        # par(lwd = 2)
+        # rpt.corr, rpt.rmlLMM
+        if(x$datatype=="Gaussian" & length(x$R)==1) {
+                
         CI.l <- unname(x$CI.R[1])
         CI.u <- unname(x$CI.R[2])
         
@@ -55,6 +56,8 @@ plot.rpt <- function(x, y, ...) {
         legend("topleft", pch = 19, cex = 1, bty = "n",
                col = c("red"), c("ICC with CI"),
                box.lty = 0)
+        }
+        
 }
         
 #         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {

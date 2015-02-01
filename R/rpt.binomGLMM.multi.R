@@ -207,8 +207,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 		R.permut <- list(R.link = c(R$R.link, unlist(R.permut["R.link",])), R.org = c(R$R.org, unlist(R.permut["R.org",])))
 		P.link   <- sum(R.permut$R.link >= R$R.link) / npermut
 		P.org    <- sum(R.permut$R.org >= R$R.org) / npermut
-	}
-	else {
+	} else {
 		R.permut <- R
 		P.link   <- NA
 		P.org    <- NA

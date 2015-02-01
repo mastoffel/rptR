@@ -91,8 +91,7 @@ rpt.aov <- function(y, groups, CI=0.95, npermut=1000) {
 	# return of results
 	res <- list(call=match.call(), datatype="Gaussian",
                     method="ANOVA", CI=CI, R=R, se=se, CI.R=CI.R, 
-                    P=c(P.aov=P.aov, P.permut=P.permut), R.permut=R.permut,
-                    mod = mod) 
+                    P=c(P.aov=P.aov, P.permut=P.permut), R.permut=R.permut) 
 	class(res) <- "rpt"
 	return(res) 
 }

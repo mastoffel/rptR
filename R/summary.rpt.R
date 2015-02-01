@@ -29,7 +29,62 @@
 #' 
 #' 
 #' 
+#' 
+
+
 summary.rpt <- function(x) {
-        class(x) <- "summary.rpt"
-        x
-}	
+        #rpt.corr & and  rpt.remlLMM
+        if(x$datatype=="Gaussian" & length(x$R)==1) {
+                # bootstrap and permutation table 
+                CI.R     <- x$CI.R
+                CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+                CI.df    <- round(t(data.frame(CI.R, CI.perm)), 4)
+                RandBoot.df <- data.frame(N = c(length(x$R.boot), length(x$R.permut)),
+                                          mean = c(mean(x$R.boot), mean(x$R.permut)), 
+                                          median = c(median(x$R.boot), median(x$R.permut)))
+                RandBoot.df <- cbind(RandBoot.df, CI.df)
+                row.names(RandBoot.df) <- c("nboot", "npermut")
+                x$boot   <- RandBoot.df[1, ]
+                x$permut <- RandBoot.df[2, ]
+                class(x) <- "summary.rpt"
+                x 		
+        } 
+        
+#         if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)==1) { # 
+#                 # create bootstrap and randomisation data frame
+#                 CI.R     <- x$CI.R
+#                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+#                 CI.df    <- round(t(data.frame(CI.R, CI.perm)), 4)
+#                 RandBoot.df <- data.frame(N = c(length(x$R.boot), length(x$R.permut)),
+#                                                 mean = c(mean(x$R.boot), mean(x$R.permut)), 
+#                                                 median = c(median(x$R.boot), median(x$R.permut)))
+#                 RandBoot.df <- cbind(RandBoot.df, CI.df)
+#                 row.names(RandBoot.df) <- c("nboot", "npermut")
+#                 x$boot   <- RandBoot.df[1, ]
+#                 x$permut <- RandBoot.df[2, ]
+#                 class(x) <- "summary.rpt"
+#                 x		
+#         } 
+        
+#         if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)==1) {
+#                 # create bootstrap and randomisation data frame
+#                 CI.R     <- x$CI.R
+#                 CI.perm  <- quantile(R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+#                 CI.df    <- round(t(data.frame(CI.R, CI.perm)), 4)
+#                 RandBoot.df <- data.frame(N = c(length(x$R.boot), length(x$R.permut)),
+#                                       mean = c(mean(x$R.boot), mean(x$R.permut)), 
+#                                       median = c(median(x$R.boot), median(x$R.permut)))
+#                 RandBoot.df <- cbind(RandBoot.df, CI.df)
+#                 row.names(RandBoot.df) <- c("nboot", "npermut")
+#         x$boot   <- RandBoot.df[1, ]
+#         x$permut <- RandBoot.df[2, ]
+#         class(x) <- "summary.rpt"
+#         x
+#         }	
+}
+
+
+
+
+
+

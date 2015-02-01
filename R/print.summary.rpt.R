@@ -36,43 +36,44 @@
 #' detach(BodySize)
 #' 
 print.summary.rpt <- function(x) {
-        #         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {
-        #                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
-        #                     "R  = ", round(x$R,3), "\n",
-        #                     "SE = ", round(x$se,3), "\n",
-        #                     "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
-        #                     "P  = ", signif(x$P, 3), "\n\n", 
-        #                     sep="")          	
-        #         } 
         
-        # remlLMM.R
-        if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)==1) {
+        if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {
+                cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
+                    "Call = ", deparse(x$call), 
+                    "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n",
+                    sep = "")   
+                cat("Repeatability: ", "\n", 
+                    "R  = ", round(x$R,3), "\n",
+                    "SE = ", round(x$se,3), "\n",
+                    "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
+                    "P  = ", signif(x$P, 3), "\n\n", 
+                    sep="")
+                cat("Bootstrapping and Permutation test:", "\n")
+                print(format(rbind(x$boot, x$permut), digits = 3))  
+        } 
+        
+        if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)==1) { 
                 
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n",
-                    sep = "")
-                
-#                 print(format(data.frame(PE = x$R, SE = x$se, lowerCI = unname(x$CI.R[1]), upperCI = unname(x$CI.R[2]),
-#                                   row.names = "Repeatability"), 
-#                                   digits = 3))
-#                 print(format(data.frame(N = c(x$nboot, x$npermut, mean = c(mean(x$R.boot), mean(x$R.permut)),
-#                                         median = c(median(x$R.boot), median(x$R.permut)))
-                        
-                cat("Repeatability: ",
-                    "\n", "R  = ", round(x$R,3), "\n",
+                    sep = "")   
+                cat("Repeatability: ", "\n", 
+                    "R  = ", round(x$R,3), "\n",
                     "SE = ", round(x$se,3), "\n",
                     "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
                     "P  = ", signif(x$P[1], 3), " [", attr(x$P, "names")[1], "]", "\n", 
                     "     ", signif(x$P[2], 3), " [", attr(x$P, "names")[2], "]", "\n\n", 
                     sep="")
                 
-                cat("Likelihood ratio test: ", "\n",
-                    "logLik model      = ", x$LRT["LRT.mod"], "\n",
+                cat("Bootstrapping and Permutation test:", "\n")
+                print(format(rbind(x$boot, x$permut), digits = 3))  
+                
+                cat("\n", "Likelihood ratio test: ", "\n",
+                    "logLik full model = ", x$LRT["LRT.mod"], "\n",
                     "logLik red. model = ", x$LRT["LRT.red"], "\n",
-                    "D  = ", signif(x$LRT["LRT.D"], 3), "\n",
-                    "df = ", x$LRT["LRT.df"], "\n",
-                    "P  = ", signif(x$LRT["LRT.P"], 3), "\n",
+                    "D  = ", signif(x$LRT["LRT.D"], 3), ", " , "df = ", x$LRT["LRT.df"], ", ",
+                    "P  = ", signif(x$LRT["LRT.P"], 3), 
                     sep = "")
         } 
         #         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)>1) {

@@ -7,7 +7,7 @@
 #'        Covariates and additional random effects can be included to estimate adjusted repeatabilities.
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
-#'        be estimated. Spelling needs to match the random effect names as given in \code{fromula}.
+#'        be estimated. Spelling needs to match the random effect names as given in \code{formula}.
 #' @param data A dataframe that contains the variables included in the formula argument.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation.
@@ -131,13 +131,10 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	P = matrix(c(P.LRT, P.permut),ncol=2,byrow=FALSE)
 	colnames(P) = c("P.LRT", "P.permut")
 	rownames(P) = grname
-	res  = list(datatype="Gaussian", 
-				method="LMM.REML", 
-				CI=CI,
-				R=R, se=se, CI.R=CI.R, 
-				P = P,
-				R.boot=R.boot, R.permut=NA,
-				mod = mod	)
+	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
+		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
+		    R.boot=R.boot, R.permut=NA,
+		    mod = mod	)
 	class(res) <- "rpt"
 	return(res)
 }

@@ -22,6 +22,8 @@
 #' \item{CI}{Asymptotic confidence interval for repeatability based on non-parametric bootstrapping.}
 #' \item{P}{Asymptotic \emph{P} value from a significance test for the intraclass correlation based on permutation.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
 #'
 #'
 #' @references 
@@ -89,7 +91,7 @@ rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FA
 	        parallel::stopCluster(cl)
                 
 	} else if (nboot > 0 & parallel == FALSE) {
-		R.boot <- replicate(nboot, bootstr(y1, y2, k), simplify=TRUE) 
+	        R.boot <- replicate(nboot, bootstr(y1 = y1, y2 = y2, k = k), simplify=TRUE) 
 	} else {
 		R.boot <- NA
 	}
@@ -110,7 +112,9 @@ rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FA
 	}
 	# return of results
 	res <- list(call=match.call(), datatype="Gaussian", method="corr", CI=CI, 
-				R=R, se=se, CI.R=CI.R, P=P.permut, R.permut=R.permut) 
+				R=R, se=se, CI.R=CI.R, P=P.permut,  
+                                R.boot=R.boot, R.permut=R.permut,
+				ngroups = length(unique(groups)), nobs = length(y)) 
 	class(res) <- "rpt"
 	return(res) 
 }
