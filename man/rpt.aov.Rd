@@ -20,10 +20,11 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{method}{Method used to calculate repeatability (here: "ANOVA").}
 \item{R}{Point estimate for the repeatability (denoted as \emph{R}).}
 \item{se}{Asymptotic standard error for repeatability (ICC) based Becker (1982).}
-\item{CI}{Asymptotic confidence interval for repeatability based on non-parametric bootstrapping.}
+\item{CI.R}{Asymptotic confidence interval for repeatability.}
 \item{P}{Named vector of two \emph{P} values (significance tests): \code{P.aov} is the \emph{P} value for the ANOVA F test, \code{P.permut} is the permutation based \emph{P} value.}
 \item{R.permut}{Repeatability \emph{R} estimates for each permutation run.}
-\item{mod}{Fitted model.}
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
 }
 \description{
 Repeatability calculations based on Analysis of Variance (ANOVA).

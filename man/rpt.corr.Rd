@@ -34,6 +34,8 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{CI}{Asymptotic confidence interval for repeatability based on non-parametric bootstrapping.}
 \item{P}{Asymptotic \emph{P} value from a significance test for the intraclass correlation based on permutation.}
 \item{R.permut}{Permutation samples for \emph{R}.}
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
 }
 \description{
 Calculates repeatability based on inter-class correlations
