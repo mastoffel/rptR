@@ -90,5 +90,27 @@ print.summary.rpt <- function(x) {
                     "P  = ", signif(x$LRT["LRT.P"], 3), 
                     sep = "")
         } 
+        
+        if(x$datatype!="Gaussian" & x$method=="PQL") {
+                cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, "link", "\n\n",
+                    "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n", 
+                    "Estimated overdispersion (omega) = ", x$omega, "\n\n",
+                    sep = "") 
+                cat("Link scale repeatabilities:","\n",
+                    "R  = ", round(x$R.link,3), "\n",
+                    "SE = ", round(x$se.link,3), "\n",
+                    "CI = [", round(x$CI.link[1],3), ", ", round(x$CI.link[2],3), "]", "\n",
+                    "P  = ", signif(x$P.link, 3), "\n\n", 
+                    "Original scale repeatabilities:","\n",
+                    "R  = ", round(x$R.org,3), "\n",
+                    "SE = ", round(x$se.org,3), "\n",
+                    "CI = [", round(x$CI.org[1],3), ", ", round(x$CI.org[2],3), "]", "\n",
+                    "P  = ", signif(x$P.org, 3), "\n\n", 
+                    sep="")  
+                cat("Bootstrapping:", "\n")
+                print(format(x$boot, digits = 3))
+                cat("\n", "Permutation:", "\n")
+                print(format(x$perm, digits = 3))
+        }
 	
 }	

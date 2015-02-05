@@ -58,7 +58,8 @@
 #' \item{R.permut}{Named list of permutation samples for \emph{R}. \code{R.link}
 #'       gives the samples for the link scale repeatability, \code{R.org} gives
 #'       the samples for the original scale repeatability.} 
-#'
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
 #'
 #' @references 
 #' Browne, W. J., Subramanian, S. V., et al. (2005). \emph{Variance partitioning in multilevel logistic models that exhibit overdispersion}. Journal of the Royal Statistical Society A 168: 599-613. \cr
@@ -220,7 +221,8 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 				R.org=R$R.org, se.org=se.org, CI.org=CI.org, P.org=P.org, 
 				omega=mod.ests$omega,
 				R.boot = list(R.link=R.boot$R.link, R.org=R.boot$R.org),
-				R.permut = list(R.link=R.permut$R.link, R.org=R.permut$R.org) ) 
+				R.permut = list(R.link=R.permut$R.link, R.org=R.permut$R.org),
+				ngroups = length(unique(groups)), nobs = length(y)) 
 	class(res) <- "rpt"
 	return(res) 
 }			
