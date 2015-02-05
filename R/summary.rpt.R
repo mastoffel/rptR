@@ -34,7 +34,7 @@
 
 summary.rpt <- function(x) {
         #rpt.corr and  rpt.remlLMM and rpt.aov
-        if(x$datatype =="Gaussian" & ((x$method == "corr") | (x$method == "LMM.reml"))) {
+        if(x$datatype =="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
                 # bootstrap and permutation table 
                 CI.R     <- x$CI.R
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)

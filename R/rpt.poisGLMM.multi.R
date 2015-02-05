@@ -54,7 +54,9 @@
 #' \item{R.permut}{Named list of permutation samples for \emph{R}. \code{R.link}
 #'      gives the samples for the link scale repeatability, \code{R.org} gives 
 #'      the samples for the original scale repeatability.}
-#'
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
+#' 
 #' @references 
 #' Carrasco, J. L. (2010). \emph{A generalized concordance correlation 
 #'              coefficient based on the variance components generalized 
@@ -198,7 +200,8 @@ rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1
 				R.org  = R$R.org, se.org=se.org, CI.org=CI.org, P.org=P.org, 
 				omega=mod.ests$omega,
 				R.boot = list(R.link=R.boot$R.link, R.org=R.boot$R.org),
-				R.permut = list(R.link=R.permut$R.link, R.org=R.permut$R.org) ) 
+				R.permut = list(R.link=R.permut$R.link, R.org=R.permut$R.org),
+				ngroups = length(unique(groups)), nobs = length(y)) 
 	class(res) <- "rpt"
 	return(res)		
 }			

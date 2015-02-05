@@ -68,7 +68,7 @@ print.summary.rpt <- function(x) {
                 print(format(rbind(x$boot, x$permut), digits = 3))  
         } 
         
-        if(x$datatype=="Gaussian" & x$method == "LMM.reml") { 
+        if(x$datatype=="Gaussian" & x$method == "LMM.REML") { 
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n",
@@ -93,6 +93,7 @@ print.summary.rpt <- function(x) {
         
         if(x$datatype!="Gaussian" & x$method=="PQL") {
                 cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, "link", "\n\n",
+                    "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n", 
                     "Estimated overdispersion (omega) = ", x$omega, "\n\n",
                     sep = "") 
