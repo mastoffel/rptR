@@ -42,12 +42,10 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")  
-                cat("Repeatability: ", "\n", 
-                    "R  = ", round(x$R,3), "\n",
-                    "SE = ", round(x$se,3), "\n",
-                    "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
-                    "P  = ", signif(x$P, 3), "\n\n", 
-                    sep="")
+                cat("\n")
+                cat("Repeatability:", "\n")
+                print(format(x$rpt, digits = 3), row.names = FALSE)
+                cat("\n")
                 cat("Bootstrapping and Permutation test:", "\n")
                 print(format(rbind(x$boot, x$permut), digits = 3))  
         } 

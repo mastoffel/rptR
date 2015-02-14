@@ -37,9 +37,10 @@ summary.rpt <- function(x) {
         if(x$datatype =="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
                 # bootstrap and permutation table 
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
+                x$rpt    <- structure(data.frame(x$R, x$se ,unname(x$P[1]), x$CI.R[1], x$CI.R[2]), 
                                       names = c("R", "SE", attr(x$P, "names")[1], 
-                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))
+                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
+                                      row.names = "rpt")
                 bootperm <- structure(data.frame(c(length(x$R.boot), length(x$R.permut)),
                                                c(mean(x$R.boot), mean(x$R.permut)),
                                                c(median(x$R.boot), median(x$R.permut)),
@@ -57,7 +58,7 @@ summary.rpt <- function(x) {
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {
                 # anova repeatability and permutation table 
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
+                x$rpt    <- structure(data.frame(x$R, x$se, unname(x$P[1]), x$CI.R[1], x$CI.R[2]), 
                                       names = c("R", "SE", attr(x$P, "names")[1], 
                                                 attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))
                 x$permut <- structure(data.frame(length(x$R.permut), mean(x$R.permut),

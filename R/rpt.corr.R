@@ -112,7 +112,7 @@ rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FA
 	}
 	# return of results
 	res <- list(call=match.call(), datatype="Gaussian", method="corr", CI=CI, 
-				R=R, se=se, CI.R=CI.R, P=P.permut,  
+				R=R, se=se, CI.R=CI.R, P=structure(P.permut, names = "P.corr"),  
                                 R.boot=R.boot, R.permut=R.permut,
 				ngroups = length(unique(groups)), nobs = length(y)) 
 	class(res) <- "rpt"
