@@ -36,23 +36,30 @@ summary.rpt <- function(x) {
         #rpt.corr and  rpt.remlLMM and rpt.aov
         if(x$datatype =="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
                 # bootstrap and permutation table 
-                CI.R     <- x$CI.R
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-                CI.df    <- t(data.frame(CI.R, CI.perm)) #round(t(data.frame(CI.R, CI.perm)), 4)
-                RandBoot.df <- data.frame(N = c(length(x$R.boot), length(x$R.permut)),
-                                          mean = c(mean(x$R.boot), mean(x$R.permut)), 
-                                          median = c(median(x$R.boot), median(x$R.permut)))
-                RandBoot.df <- cbind(RandBoot.df, CI.df)
-                row.names(RandBoot.df) <- c("boot", "permut")
-                x$boot   <- RandBoot.df[1, ]
-                x$permut <- RandBoot.df[2, ]
+                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
+                                      names = c("R", "SE", attr(x$P, "names")[1], 
+                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))
+                bootperm <- structure(data.frame(c(length(x$R.boot), length(x$R.permut)),
+                                               c(mean(x$R.boot), mean(x$R.permut)),
+                                               c(median(x$R.boot), median(x$R.permut)),
+                                               c(unname(x$CI.R[1]), unname(CI.perm[1])),
+                                               c(unname(x$CI.R[2]), unname(CI.perm[2]))),
+                                    names = c("N", "Mean", "Median", 
+                                              attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
+                                    row.names = c("boot", "permut"))
+                x$boot   <-  bootperm[1, ]
+                x$permut <-  bootperm[2, ]
                 class(x) <- "summary.rpt"
                 return(x) 		
         } 
         
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {
-                # bootstrap and permutation table 
+                # anova repeatability and permutation table 
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
+                                      names = c("R", "SE", attr(x$P, "names")[1], 
+                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))
                 x$permut <- structure(data.frame(length(x$R.permut), mean(x$R.permut),
                                                  median(x$R.permut), unname(x$P[2]),
                                                  unname(CI.perm[1]), unname(CI.perm[2])),
@@ -60,8 +67,6 @@ summary.rpt <- function(x) {
                                                 attr(x$P, "names")[2], 
                                                 attr(CI.perm, "names")[1],
                                                 attr(CI.perm, "names")[2]))
-                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
-                                      names = c("R", "SE", attr(x$P, "names")[1], names(CI.perm)[1], names(CI.perm)[2]))
                 class(x) <- "summary.rpt"
                 return(x)         	
         } 
