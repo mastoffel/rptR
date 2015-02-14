@@ -76,6 +76,7 @@ rpt.aov <- function(y, groups, CI=0.95, npermut=1000) {
 	CI.R     <- R + c(1,-1)* qt((1-CI)/2,k-1)*se
 	# significance test from ANOVA
 	P.aov    <- anova(lm(y ~ groups))[5][1,1]
+        # model output
 	# significance test by permutation
 	permut <- function(y, groups, N, n0) {
 		sampy <- sample(y, N)

@@ -118,6 +118,7 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 			      R.link=R.link, se.link=se.link, CI.link=CI.link, P.link=P.link, 
 				  R.org = R.org, se.org=se.org, CI.org=CI.org, P.org=P.org,
 				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)),
+                                  MCMCpars = attr(mod$VCV),
                                   mod = mod)
 	class(res) <- "rpt"
 	return(res) 

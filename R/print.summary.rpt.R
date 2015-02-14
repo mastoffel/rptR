@@ -55,17 +55,14 @@ print.summary.rpt <- function(x) {
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
                     "Call = ", deparse(x$call), 
-                    "\n", "Data: ", x$nobs, " observations and ", x$ngroups, " groups", "\n\n",
+                    "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")   
-                cat("Repeatability: ", "\n", 
-                    "R  = ", round(x$R,3), "\n",
-                    "SE = ", round(x$se,3), "\n",
-                    "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
-                    "P  = ", signif(x$P[1], 3), " [", attr(x$P, "names")[1], "]", "\n", 
-                    "     ", signif(x$P[2], 3), " [", attr(x$P, "names")[2], "]", "\n\n", 
-                    sep="")
+                cat("\n")
+                cat("Repeatability:", "\n")
+                print(format(x$rpt, digits = 3), row.names = FALSE)
+                cat("\n")
                 cat("Permutation test:", "\n")
-                print(format(rbind(x$boot, x$permut), digits = 3))  
+                print(format(x$permut, digits = 3), row.names = FALSE)  
         } 
         
         if(x$datatype=="Gaussian" & x$method == "LMM.REML") { 

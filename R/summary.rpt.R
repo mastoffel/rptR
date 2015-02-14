@@ -53,11 +53,15 @@ summary.rpt <- function(x) {
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {
                 # bootstrap and permutation table 
                 CI.perm  <- quantile(x$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-                x$permut <- cbind(data.frame(N = length(x$R.permut),
-                                       mean = mean(x$R.permut), 
-                                       median = median(x$R.permut),
-                                       row.names = "permut"),
-                                       t(CI.perm))
+                x$permut <- structure(data.frame(length(x$R.permut), mean(x$R.permut),
+                                                 median(x$R.permut), unname(x$P[2]),
+                                                 unname(CI.perm[1]), unname(CI.perm[2])),
+                                      names = c("N", "Mean", "Median",
+                                                attr(x$P, "names")[2], 
+                                                attr(CI.perm, "names")[1],
+                                                attr(CI.perm, "names")[2]))
+                x$rpt    <- structure(data.frame(x$R, x$se, x$CI.R[1], unname(x$P[1]), x$CI.R[2]), 
+                                      names = c("R", "SE", attr(x$P, "names")[1], names(CI.perm)[1], names(CI.perm)[2]))
                 class(x) <- "summary.rpt"
                 return(x)         	
         } 
