@@ -87,25 +87,38 @@ summary.rpt <- function(x) {
         }
         
         if(x$datatype!="Gaussian" & x$method=="PQL") {
+                # CI for permutation and bootstrap
+                CI.perm       <- as.data.frame(rbind(quantile(x$R.permut$R.link, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE),
+                                         quantile(x$R.permut$R.org, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)))
+                CI.boot       <- as.data.frame(rbind(x$CI.link, x$CI.org))
+                # Rpt table with link and original scale
+                x$rpt    <- structure(data.frame(c(x$R.link,  x$R.org), 
+                                                 c(x$se.link, x$se.org),
+                                                 c(x$P.link, x$P.org),
+                                                 c(x$CI.link[1], x$CI.org[1]),
+                                                 c(x$CI.link[2], x$CI.org[2])),
+                                      names = c("R", "SE", "P", 
+                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
+                                      row.names = c("link", "original"))
                 # CI for bootstrap and permutation
-                CI.boot       <- t(cbind(x$CI.link, x$CI.org))
-                CI.perm       <- t(cbind(quantile(x$R.permut$R.link, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE),
-                                         quantile(x$R.permut$R.org, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)))         
+                   
                 # bootstrap table
-                Boot.df.temp  <- data.frame(N = c(length(x$R.boot$R.link), length(x$R.boot$R.org)),
-                                          mean = c(mean(x$R.boot$R.link), mean(x$R.boot$R.org)), 
-                                          median = c(median(x$R.boot$R.link), median(x$R.boot$R.org)),
-                                          row.names = c("link", "org"))
-                Boot.df       <- cbind(Boot.df.temp, CI.boot)
+                boot <- structure(data.frame(c(length(x$R.boot$R.link), length(x$R.boot$R.org)),
+                                             c(mean(x$R.boot$R.link), mean(x$R.boot$R.org)), 
+                                             c(median(x$R.boot$R.link), median(x$R.boot$R.org)),
+                                             CI.boot[1], CI.boot[2]),
+                                             row.names = c("link", "original"),
+                                             names = c("N", "Mean", "Median", names(CI.boot)[1], names(CI.boot)[2]))
                 # permutation table
-                Perm.df.temp  <- data.frame(N = c(length(x$R.permut$R.link), length(x$R.permut$R.org)),
-                                            mean = c(mean(x$R.permut$R.link), mean(x$R.permut$R.org)), 
-                                            median = c(median(x$R.permut$R.link), median(x$R.permut$R.org)),
-                                            row.names = c("link", "org"))
-                Perm.df       <- cbind(Perm.df.temp, CI.perm)
+                perm  <- structure(data.frame(c(length(x$R.permut$R.link), length(x$R.permut$R.org)),
+                                                      c(mean(x$R.permut$R.link), mean(x$R.permut$R.org)), 
+                                                      c(median(x$R.permut$R.link), median(x$R.permut$R.org)),
+                                                      CI.perm[1], CI.perm[2]),
+                                           row.names = c("link", "original"),
+                                           names = c("N", "Mean", "Median", names(CI.perm)[1], names(CI.perm)[2]))
                 
-                x$boot   <- Boot.df
-                x$permut <- Perm.df
+                x$boot   <- boot
+                x$permut <- perm
                 class(x) <- "summary.rpt"
                 return(x) 
         }
