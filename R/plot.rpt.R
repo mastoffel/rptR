@@ -30,30 +30,23 @@
 #' 
 #' 
 #' 
-plot.rpt <- function(x, y, ...) {
+plot.rpt <- function(x, y, type = "boot", xlab = "Repeatability estimates", breaks = "FD", 
+                     main="Distribution of repeatability estimates from bootstrap", ...) {
         # more default arguments !
         # rpt.corr, rpt.rmlLMM
+        
         if(x$datatype=="Gaussian" & x$method == "LMM.REML") {
-        # get CI        
-        CI.l <- unname(x$CI.R[1])
-        CI.u <- unname(x$CI.R[2])
+        # y axis position of CI-line
+        v.pos <- max((hist(x$R.boot, breaks = "FD", plot = FALSE))$counts)
         
-        boot.plot <- hist(x$R.boot, breaks = "FD", plot = FALSE)
-        v.pos <- max(boot.plot$counts) # 1/10 * max(boot.plot$counts)
-        
-        hist(x$R.boot, breaks = "FD", ylim = c(0, v.pos*1.5), xlab = "ICC estimates",
-             main="Distribution of ICC estimates from bootstrap")
-       
-        
-        arrows(CI.l, v.pos*1.15, CI.u, v.pos*1.15, length=0.3, angle=90, code=3,
-               lwd = 2.5, col = "black")
-        lines(x = c(x$R, x$R), y = c(0, v.pos * 1.15),
-              lwd = 2.5, col = "grey", lty = 5)
+        hist(x$R.boot, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
+             main=main)
+        arrows(unname(x$CI.R[1]), v.pos*1.15, unname(x$CI.R[2]), v.pos*1.15, 
+               length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
+        lines(x = c(x$R, x$R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
         points(x$R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
-        
-        legend("topleft", pch = 19, cex = 1, bty = "n",
-               col = c("red"), c("ICC with CI"),
-               box.lty = 0)
+        legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), 
+               c("Repeatability with CI"), box.lty = 0)
         }
         
 }

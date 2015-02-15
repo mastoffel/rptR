@@ -22,6 +22,7 @@
 #' \item{R.permut}{Repeatability \emph{R} estimates for each permutation run.}
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
+#' \item{mod}{.}
 #'
 #' @references 
 #' Becker, W. A. (1992) \emph{A manual of quantitative genetics}. 5th edn. Academic Enterprises, Pullman, WA. \cr
@@ -76,7 +77,6 @@ rpt.aov <- function(y, groups, CI=0.95, npermut=1000) {
 	CI.R     <- R + c(1,-1)* qt((1-CI)/2,k-1)*se
 	# significance test from ANOVA
 	P.aov    <- anova(lm(y ~ groups))[5][1,1]
-        # model output
 	# significance test by permutation
 	permut <- function(y, groups, N, n0) {
 		sampy <- sample(y, N)
@@ -95,7 +95,8 @@ rpt.aov <- function(y, groups, CI=0.95, npermut=1000) {
                     method="ANOVA", R=R, se=se, CI=CI, CI.R=CI.R, 
                     P=c(P.aov=P.aov, P.permut=P.permut),
 	            R.permut=R.permut,
-	            ngroups = length(unique(groups)), nobs = length(y)) 
+	            ngroups = length(unique(groups)), nobs = length(y),
+	            mod = anova(lm(y ~ groups))) 
 	class(res) <- "rpt"
 	return(res) 
 }

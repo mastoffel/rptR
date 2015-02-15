@@ -35,6 +35,9 @@
 #' \item{CI.org}{Bayesian credibility interval for repeatability on the original scale based on the posterior distribution of \emph{R}.}
 #' \item{P.org}{Significance test for the original scale repeatability, returned as \emph{NA}, since the Bayesian approach conflicts with the null hypothesis testing.}
 #' \item{R.post}{Named list of MCMC samples form the posterior distributions. \code{R.link} gives the samples for the link scale repeatability, \code{R.org} gives the samples for the original scale repeatability.} 
+#' \item{MCMCpars}{Burnin, length of chain, thinning interval of MCMC chain.}
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
 #'
 #' @references 
@@ -90,8 +93,7 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 	if(all(n==1)) {
 		if(is.null(prior)) prior=list(R=list(V=1,fix=1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
 		mod    <- MCMCglmm::MCMCglmm(m ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="categorical", verbose=verbose, ...) 
-	}
-	else {
+	} else {
 		if(is.null(prior)) prior=list(R=list(V=1e-10,nu=-1),G=list(G1=list(V=1,nu=1,alpha.mu=0,alpha.V=25^2)))
 		mod    <- MCMCglmm::MCMCglmm(cbind(m, nm) ~ 1, random= ~ groups, data=data.frame(m=y[,1],nm=y[,2],groups=groups), prior=prior, family="multinomial2", verbose=verbose, ...)
 	}
@@ -118,7 +120,8 @@ rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...
 			      R.link=R.link, se.link=se.link, CI.link=CI.link, P.link=P.link, 
 				  R.org = R.org, se.org=se.org, CI.org=CI.org, P.org=P.org,
 				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)),
-                                  MCMCpars = attr(mod$VCV),
+                                  MCMCpars = attr(beta0, "mcpar"),
+				  ngroups = length(unique(groups)), nobs = length(y),
                                   mod = mod)
 	class(res) <- "rpt"
 	return(res) 

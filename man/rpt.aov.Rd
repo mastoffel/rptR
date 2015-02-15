@@ -25,6 +25,7 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{R.permut}{Repeatability \emph{R} estimates for each permutation run.}
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
+\item{mod}{.}
 }
 \description{
 Repeatability calculations based on Analysis of Variance (ANOVA).

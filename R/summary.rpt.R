@@ -72,6 +72,15 @@ summary.rpt <- function(x) {
                 return(x)         	
         } 
         
+        if(x$datatype=="Gaussian" & x$method == "LMM.MCMC") { 
+                # Rpt table
+                x$rpt    <- structure(data.frame(x$R, x$se, unname(x$P[1]), x$CI.R[1], x$CI.R[2]), 
+                                      names = c("R", "SE", "P", 
+                                                attr(x$CI.R, "names")[1], attr(x$CI.R, "names")[2]))
+                class(x) <- "summary.rpt"
+                return(x)  
+        } 
+        
         if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)>1) {
                 warning("Not yet implemented")
 #                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n")
@@ -103,22 +112,32 @@ summary.rpt <- function(x) {
                 # CI for bootstrap and permutation
                    
                 # bootstrap table
-                boot <- structure(data.frame(c(length(x$R.boot$R.link), length(x$R.boot$R.org)),
+                x$boot <- structure(data.frame(c(length(x$R.boot$R.link), length(x$R.boot$R.org)),
                                              c(mean(x$R.boot$R.link), mean(x$R.boot$R.org)), 
                                              c(median(x$R.boot$R.link), median(x$R.boot$R.org)),
                                              CI.boot[1], CI.boot[2]),
                                              row.names = c("link", "original"),
                                              names = c("N", "Mean", "Median", names(CI.boot)[1], names(CI.boot)[2]))
                 # permutation table
-                perm  <- structure(data.frame(c(length(x$R.permut$R.link), length(x$R.permut$R.org)),
+                x$permut  <- structure(data.frame(c(length(x$R.permut$R.link), length(x$R.permut$R.org)),
                                                       c(mean(x$R.permut$R.link), mean(x$R.permut$R.org)), 
                                                       c(median(x$R.permut$R.link), median(x$R.permut$R.org)),
                                                       CI.perm[1], CI.perm[2]),
                                            row.names = c("link", "original"),
                                            names = c("N", "Mean", "Median", names(CI.perm)[1], names(CI.perm)[2]))
-                
-                x$boot   <- boot
-                x$permut <- perm
+                class(x) <- "summary.rpt"
+                return(x) 
+        }
+        
+        if(x$datatype!="Gaussian" & x$method=="MCMC") { #x$datatype!="Gaussian" & 
+                x$rpt    <- structure(data.frame(c(x$R.link,  x$R.org), 
+                                                 c(x$se.link, x$se.org),
+                                                 c(x$P.link, x$P.org),
+                                                 c(x$CI.link[1], x$CI.org[1]),
+                                                 c(x$CI.link[2], x$CI.org[2])),
+                                      names = c("R", "SE", "P", 
+                                                attr(CI.link, "names")[1], attr(CI.link, "names")[2]),
+                                      row.names = c("link", "original"))
                 class(x) <- "summary.rpt"
                 return(x) 
         }

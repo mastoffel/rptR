@@ -82,6 +82,21 @@ print.summary.rpt <- function(x) {
                     sep = "")
         } 
         
+        if(x$datatype=="Gaussian" & x$method == "LMM.MCMC") { 
+                cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
+                    "Call = ", deparse(x$call), 
+                    "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
+                    sep = "")   
+                cat("\n")
+                cat("Repeatability:", "\n")
+                print(format(x$rpt, digits = 3), row.names = FALSE)
+                cat("\n")
+                cat("MCMC parameters:")
+                cat("\n")
+                cat("Length = ", length(x$R.post), ", ", "Burnin = ", x$MCMCpars[1], ", ",
+                    "End = ", x$MCMCpars[2], ", ", "Thinning = ", x$MCMCpars[3], sep = "")
+        } 
+        
         if(x$datatype!="Gaussian" & x$method=="PQL") {
                 cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, "link", "\n\n",
                     "Call = ", deparse(x$call), 
@@ -97,6 +112,24 @@ print.summary.rpt <- function(x) {
                 cat("\n")
                 cat("Permutation:", "\n")
                 print(format(x$perm, digits = 3))
+        }
+        
+        if(x$datatype!="Gaussian" & x$method=="MCMC") { #x$datatype!="Gaussian" & 
+                cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
+                    "Call = ", deparse(x$call), 
+                    "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
+                    sep = "") 
+                cat("\n")
+                cat("Repeatability:", "\n")
+                print(format(x$rpt, digits = 3)) 
+                cat("\n")
+                cat("MCMC parameters:")
+                cat("\n")
+                cat("Length = ", length(x$R.post$R.link), ", ", "Burnin = ", x$MCMCpars[1], ", ",
+                    "End = ", x$MCMCpars[2], ", ", "Thinning = ", x$MCMCpars[3], sep = "")
+#                 print(format(data.frame("Length" = length(x$R.post$R.link), "Burnin" = x$MCMCpars[1], 
+#                                         "End" = x$MCMCpars[2],"Thin" = x$MCMCpars[3]), 
+#                              digits = 3, width = 6), row.names = "")
         }
 	
 }	

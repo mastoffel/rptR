@@ -28,6 +28,10 @@
 #'  \item{CI.R}{Bayesian credibility interval for the repeatability (ICC) based on the posterior distribution of \emph{R}.}
 #'  \item{P}{Significace test, returned as  \code{NA}, since the Bayesian approach conflicts with the null hypothesis testing.}
 #'  \item{R.post}{MCMC samples form the posterior distributions of \emph{R}.}
+#'  \item{MCMCpars}{Burnin, length of chain, thinning interval of MCMC chain.}
+#'  \item{ngroups}{Number of groups.}
+#'  \item{nobs}{Number of observations.}
+#'  \item{mod}{Fitted model.}
 #'
 #'
 #' @references 
@@ -80,7 +84,10 @@ rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
 	# 'significance test'
 	P 	  <- NA
 	res = list(call=match.call(), datatype="Gaussian", method="LMM.MCMC", CI=CI, 
-				R=R, CI.R=CI.R, se=se, P=P, R.post=postR, mod=mod ) 
+				R=R, CI.R=CI.R, se=se, P=P, R.post=postR, 
+				MCMCpars = attr(beta0, "mcpar"),
+				ngroups = length(unique(groups)), nobs = length(y),
+				mod=mod ) 
 	class(res) <- "rpt"
 	return(res) 
 }

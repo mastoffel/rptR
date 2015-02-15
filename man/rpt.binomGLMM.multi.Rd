@@ -62,6 +62,8 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{R.permut}{Named list of permutation samples for \emph{R}. \code{R.link}
       gives the samples for the link scale repeatability, \code{R.org} gives
       the samples for the original scale repeatability.}
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
 }
 \description{
 Calculates repeatability from a generalised linear mixed-effects models fitted

@@ -49,6 +49,10 @@
 #' \item{R.post}{Named list of MCMC samples form the posterior distributions.
 #'       \code{R.link} gives the samples for the link scale repeatability,
 #'       \code{R.org} gives the samples for the original scale repeatability.}
+#' \item{MCMCpars}{Burnin, length of chain, thinning interval of MCMC chain.}
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
+#' \item{mod}{Fitted model.}
 #'
 #'
 #' @references 
@@ -114,7 +118,10 @@ rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...)
 	res 	   <- list(call=match.call(), datatype="count", method="MCMC", CI=CI,
 			      R.link=R.link, se.link=se.link, CI.link=CI.link, P.link=P.link, 
 				  R.org = R.org, se.org=se.org, CI.org=CI.org, P.org=P.org,
-				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)) )
+				  R.post=list(R.link=as.vector(postR.link), R.org=as.vector(postR.org)),
+				  MCMCpars = attr(beta0, "mcpar"),
+				  ngroups = length(unique(groups)), nobs = length(y),
+				  mod = mod)
 	class(res) <- "rpt"
 	return(res) 
 }
