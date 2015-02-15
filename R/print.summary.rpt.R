@@ -42,7 +42,6 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")  
-                cat("\n")
                 cat("Repeatability:", "\n")
                 print(format(x$rpt, digits = 3), row.names = FALSE)
                 cat("\n")
@@ -55,12 +54,15 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")   
-                cat("\n")
                 cat("Repeatability:", "\n")
-                print(format(x$rpt, digits = 3), row.names = FALSE)
+                print(format(x$rpt, digits = 3, width = 6), row.names = FALSE)
                 cat("\n")
                 cat("Permutation test:", "\n")
-                print(format(x$permut, digits = 3), row.names = FALSE)  
+                print(format(x$permut, digits = 3, width = 6), row.names = FALSE)  
+                cat("\n\n")
+                cat("Analysis of Variance Table", "\n")
+                cat("Response:", as.character(x$call)[2], "\n")
+                print(format(x$anovatab, digits = 3, width = 6))
         } 
         
         if(x$datatype=="Gaussian" & x$method == "LMM.REML") { 
@@ -68,12 +70,11 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")   
-                cat("\n")
                 cat("Repeatability:", "\n")
-                print(format(x$rpt, digits = 3), row.names = FALSE)
+                print(format(x$rpt, digits = 3, width = 6), row.names = FALSE)
                 cat("\n")
                 cat("Bootstrapping and Permutation test:", "\n")
-                print(format(rbind(x$boot, x$permut), digits = 3))  
+                print(format(rbind(x$boot, x$permut), digits = 3, width = 6))  
                 cat("\n", "Likelihood ratio test: ", "\n",
                     "logLik full model = ", x$LRT["LRT.mod"], "\n",
                     "logLik red. model = ", x$LRT["LRT.red"], "\n",
@@ -87,7 +88,6 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "")   
-                cat("\n")
                 cat("Repeatability:", "\n")
                 print(format(x$rpt, digits = 3), row.names = FALSE)
                 cat("\n")
@@ -103,7 +103,6 @@ print.summary.rpt <- function(x) {
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n", 
                     "Estimated overdispersion (omega) = ", x$omega, "\n\n",
                     sep = "") 
-                cat("\n")
                 cat("Repeatability:", "\n")
                 print(format(x$rpt, digits = 3)) 
                 cat("\n")
@@ -119,7 +118,6 @@ print.summary.rpt <- function(x) {
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
                     sep = "") 
-                cat("\n")
                 cat("Repeatability:", "\n")
                 print(format(x$rpt, digits = 3)) 
                 cat("\n")

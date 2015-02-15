@@ -68,6 +68,7 @@ summary.rpt <- function(x) {
                                                 attr(x$P, "names")[2], 
                                                 attr(CI.perm, "names")[1],
                                                 attr(CI.perm, "names")[2]))
+                x$anovatab <- structure(model.frame(x$mod), row.names = c(as.character(x$call)[3], "Residuals"))
                 class(x) <- "summary.rpt"
                 return(x)         	
         } 
