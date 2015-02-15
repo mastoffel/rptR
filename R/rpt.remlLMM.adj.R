@@ -28,6 +28,9 @@
 #' \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
 #' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
+#' \item{ngroups}{Number of groups.}
+#' \item{nobs}{Number of observations.}
+#' \item{mod}{Fitted model.}
 #'
 #' @references 
 #' Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized 
@@ -123,7 +126,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	if(length(randterms)>1) {
 		P.LRT = rep(NA, length(grname))
 		for(i in 1:length(grname)) {
-			LR       <- as.numeric(-2*(logLik(lmer(update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") ))), data=data))-logLik(mod)))
+			LR       <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") ))), data=data))-logLik(mod)))
 			P.LRT[i] <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
 		}
 	}
@@ -134,7 +137,9 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
 		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
 		    R.boot=R.boot, R.permut=NA,
-		    mod = mod	)
+		    ngroups = unlist(lapply(data[grname], function(X) length(unique(x)))),
+		    nobs = nrow(data),
+		    mod = mod)
 	class(res) <- "rpt"
 	return(res)
 }
