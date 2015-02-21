@@ -137,7 +137,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
 		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
 		    R.boot=R.boot, R.permut=NA,
-		    ngroups = unlist(lapply(data[grname], function(X) length(unique(x)))),
+		    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))),
 		    nobs = nrow(data),
 		    mod = mod)
 	class(res) <- "rpt"
