@@ -31,17 +31,24 @@
 #' 
 #' 
 plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL, 
-                     main = NULL, breaks = "FD", ...) {
+                     main = NULL, breaks = "FD", scale = c("link", "original"), ...) {
         
         # initialising
         if (length(type) != 1)  type <- type[1]
+        if (length(scale) != 1) scale <- scale[1]
         
-        if (type == "boot") {
+        if (x$datatype!="Gaussian" & x$method=="PQL") {
                 if (is.null(xlab)) xlab <- "Repeatability estimates"
-                if (is.null(main)) main <- "Distribution of repeatability estimates from bootstrap"
-        } else if (type == "permut") {
-                if (is.null(xlab)) xlab <- "Repeatability estimates"
-                if (is.null(main)) main <- "Distribution of repeatability estimates from randomisation"
+                if (is.null(main)){
+                        if (type == "boot") {
+                                if (scale == "link") main <- "Link scale distribution of repeatability estimates from bootstrap"
+                                if (scale == "original") main <- "Original scale distribution of repeatability estimates from bootstrap"
+                        } else if (type == "permut") {
+                                if (scale == "link") main <- "Link scale distribution of repeatability estimates from permutation"
+                                if (scale == "original") main <- "Original scale distribution of repeatability estimates from permutation"
+                        
+                        }
+                }
         }
         
         # make bootstrap histogram
@@ -51,10 +58,10 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                 # plot
                 hist(R.boot, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
                      main=main)
+                lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
                 arrows(CI.l, v.pos*1.15, CI.u, v.pos*1.15, 
                        length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
-                lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
-                points(x$R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
+                points(R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
                 legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), 
                        c("Repeatability with CI"), box.lty = 0)
         }
@@ -68,15 +75,14 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                 # plot
                 hist(R.permut, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
                      main=main)
+                lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+                lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
                 arrows(unname(CI.perm[1]), v.pos*1.15, unname(CI.perm[2]), v.pos*1.15, 
                        length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
-                lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
                 points(Median.R, v.pos*1.15, cex = 1.2, pch = 19, col = "black")
-                lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
-                points(R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
-                
-                legend("topleft", pch = 19, cex = 1, bty = "n", col = c("blue", "red"), 
-                       c("Mean simulated repeatability with CI", "Observed repeatability"), box.lty = 0)
+                points(R, v.pos*1.3, cex = 1.2, pch = 19, col = "red")
+                legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), 
+                       c("Median of simulated repeatabilities with CI", "Observed repeatability"), box.lty = 0)
         }
         
         if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
@@ -105,79 +111,33 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
               }
         } 
         
+        if(x$datatype!="Gaussian" & x$method=="PQL") {
+                # if (is.null(scale)) warning("Set scale to 'link' or 'original' to show the respective plot")
+                if (scale == "link") {
+                        if(type == "boot") {
+                                boot_hist(R = x$R.link, R.boot = x$R.boot$R.link, 
+                                          CI.l = unname(x$CI.link[1]),
+                                          CI.u = unname(x$CI.link[2]), ...)
+                        } else if (type == "permut") {
+                                        permut_hist(R = x$R.link, R.permut = x$R.permut$R.link, ...)  
+                                }
+                } 
+                if (scale == "original") {
+                        if(type == "boot") {
+                                boot_hist(R = x$R.org, R.boot = x$R.boot$R.org, 
+                                          CI.l = unname(x$CI.link[1]),
+                                          CI.u = unname(x$CI.link[2]), ...)
+                        } else if (type == "permut") {
+                                permut_hist(R = x$R.org, R.permut = x$R.permut$R.org, ...)  
+                        }
+                }
+                
+        }
         
+        if(x$method=="LMM.MCMC" | x$method=="MCMC") { 
+                plot(x$mod)
+        }
         
 }
         
-#         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)==1) {
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
-#                     "R  = ", round(x$R,3), "\n",
-#                     "SE = ", round(x$se,3), "\n",
-#                     "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
-#                     "P  = ", signif(x$P, 3), "\n\n", 
-#                     sep="")  		
-#         } 
-#         if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)==1) {
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
-#                     "R  = ", round(x$R,3), "\n",
-#                     "SE = ", round(x$se,3), "\n",
-#                     "CI = [", round(x$CI.R[1],3), ", ", round(x$CI.R[2],3), "]", "\n",
-#                     "P  = ", signif(x$P[1], 3), " [", attr(x$P, "names")[1], "]", "\n", 
-#                     "     ", signif(x$P[2], 3), " [", attr(x$P, "names")[2], "]", "\n\n", 
-#                     sep="")
-#         } 
-#         if(x$datatype=="Gaussian" & length(x$P)==1 & length(x$R)>1) {
-#                 print("h3")
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n")
-#                 for(i in 1: length(x$R)) {
-#                         cat("Repeatability for ", names(x$R)[i], "\n",
-#                             "R  = ", round(x$R[i],3), "\n",
-#                             "SE = ", round(x$se[i],3), "\n",
-#                             "CI = [", round(x$CI.R[i,1],3), ", ", round(x$CI.R[i,2],3), "]", "\n",
-#                             "P  = ", signif(x$P[i], 3), "\n\n", 
-#                             sep="")
-#                 }
-#         }
-#         if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)>1) {
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n")
-#                 for(i in 1: length(x$R)) {
-#                         cat("Repeatability for ", names(x$R)[i], "\n",
-#                             "R  = ", round(x$R[i],3), "\n",
-#                             "SE = ", round(x$se[i],3), "\n",
-#                             "CI = [", round(x$CI.R[i,1],3), ", ", round(x$CI.R[i,2],3), "]", "\n",
-#                             "P  = ", signif(x$P[i,1], 3), " [", attr(x$P, "names")[1], "]", "\n", 
-#                             "     ", signif(x$P[i,2], 3), " [", attr(x$P, "names")[2], "]", "\n\n", 
-#                             sep="")
-#                 }
-#         }
-#         
-#         if(x$datatype!="Gaussian" & x$method=="PQL") {
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, "link", "\n\n",
-#                     "Esimated overdistpersion (omega) = ", x$omega, "\n\n",
-#                     "Link scale repeatabilities:","\n",
-#                     "R  = ", round(x$R.link,3), "\n",
-#                     "SE = ", round(x$se.link,3), "\n",
-#                     "CI = [", round(x$CI.link[1],3), ", ", round(x$CI.link[2],3), "]", "\n",
-#                     "P  = ", signif(x$P.link, 3), "\n\n", 
-#                     "Original scale repeatabilities:","\n",
-#                     "R  = ", round(x$R.org,3), "\n",
-#                     "SE = ", round(x$se.org,3), "\n",
-#                     "CI = [", round(x$CI.org[1],3), ", ", round(x$CI.org[2],3), "]", "\n",
-#                     "P  = ", signif(x$P.org, 3), "\n\n", 
-#                     sep="")  
-#         }
-#         if(x$datatype!="Gaussian" & x$method=="MCMC") {
-#                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
-#                     "Link scale repeatabilities:","\n",
-#                     "R  = ", round(x$R.link,3), "\n",
-#                     "SE = ", round(x$se.link,3), "\n",
-#                     "CI = [", round(x$CI.link[1],3), ", ", round(x$CI.link[2],3), "]", "\n",
-#                     "P  = ", signif(x$P.link, 3), "\n\n", 
-#                     "Original scale repeatabilities:","\n",
-#                     "R  = ", round(x$R.org,3), "\n",
-#                     "SE = ", round(x$se.org,3), "\n",
-#                     "CI = [", round(x$CI.org[1],3), ", ", round(x$CI.org[2],3), "]", "\n",
-#                     "P  = ", signif(x$P.org, 3), "\n\n", 
-#                     sep="")  
-#         }	
-	
+
