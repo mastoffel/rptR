@@ -37,6 +37,9 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
+\item{mod}{Fitted model.}
 }
 \description{
 Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).

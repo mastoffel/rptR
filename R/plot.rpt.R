@@ -19,7 +19,7 @@
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
 #' attach(BodySize)
-#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=100, npermut=100, parallel = TRUE))   
+#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=100, npermut=100))   
 #' # reduced number of nboot and npermut iterations
 #' plot(rpt.BS)
 #' detach(BodySize)
@@ -34,36 +34,26 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                      main = NULL, breaks = "FD", ...) {
         
         # initialising
-        if (length(type) != 1) {
-                type <- type[1]
-        }
+        if (length(type) != 1)  type <- type[1]
         
         if (type == "boot") {
-                if (is.null(xlab)) {
-                        xlab <- "Repeatability estimates"
-                }
-                if (is.null(main)) {
-                        main <- "Distribution of repeatability estimates from bootstrap"
-                }
+                if (is.null(xlab)) xlab <- "Repeatability estimates"
+                if (is.null(main)) main <- "Distribution of repeatability estimates from bootstrap"
         } else if (type == "permut") {
-                if (is.null(xlab)) {
-                        xlab <- "P values"
-                }
-                if (is.null(main)) {
-                        main <- "Distribution of P values from permutation test"
-                }
+                if (is.null(xlab)) xlab <- "P values"
+                if (is.null(main)) main <- "Distribution of P values from permutation test"
         }
         
         # make bootstrap histogram
-        boot_hist <- function(R, R.boot, xlab. = xlab, breaks. = breaks, main. = main, ...) {
+        boot_hist <- function(R, R.boot, CI.l, CI.u, xlab. = xlab, breaks. = breaks, main. = main, ...) {
                 # y position of confidence band
                 v.pos <- max((hist(R.boot, breaks = breaks, plot = FALSE))$counts)  
                 # plot
                 hist(R.boot, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
                      main=main)
-                arrows(unname(x$CI.R[1]), v.pos*1.15, unname(x$CI.R[2]), v.pos*1.15, 
+                arrows(CI.l, v.pos*1.15, CI.u, v.pos*1.15, 
                        length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
-                lines(x = c(x$R, x$R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+                lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
                 points(x$R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
                 legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), 
                        c("Repeatability with CI"), box.lty = 0)
@@ -89,13 +79,29 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
         
         if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
                 if(type == "boot") {
-                        boot_hist(R = x$R, R.boot = x$R.boot, ...)
+                        boot_hist(R = x$R, R.boot = x$R.boot, 
+                                  CI.l = unname(x$CI.R[1]),
+                                  CI.u = unname(x$CI.R[2]), ...)
                 } else if(type == "permut") {
-                        permut_hist(P = x$P[2], R.permut = x$R.permut, ...)
+                        if (x$method == "corr") {
+                                permut_hist(P = x$P, R.permut = x$R.permut, ...)
+                        } else if (x$method == "LMM.REML") {
+                                # no red point. unclear which p to plot
+                                permut_hist(P = x$P[2], R.permut = x$R.permut, ...)      
+                        }
                 } else {
                         stop("Plotting type invalid")
                 }
         }
+        
+        if(x$datatype=="Gaussian" & x$method == "ANOVA") {
+              if (type == "boot") {
+                      warning("type = 'boot' not available. Use type = 'permut'.")
+              }
+              if (type == "permut") {
+              permut_hist(P = x$P[2], R.permut = x$R.permut, ...)  
+              }
+        } 
         
 }
         

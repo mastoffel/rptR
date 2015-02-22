@@ -128,7 +128,7 @@ rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel =
         }
         if(npermut > 1) {
                 # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-                R.permut <- replicate(npermut-1, permut(formula, groups), simplify=TRUE)
+                R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
                 P.permut <- sum(R.permut >= R)/npermut
         } else {
                 R.permut = R

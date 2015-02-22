@@ -85,7 +85,7 @@ rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
 	P 	  <- NA
 	res = list(call=match.call(), datatype="Gaussian", method="LMM.MCMC", CI=CI, 
 				R=R, CI.R=CI.R, se=se, P=P, R.post=postR, 
-				MCMCpars = attr(beta0, "mcpar"),
+				MCMCpars = attr(mod$Sol, "mcpar"),
 				ngroups = length(unique(groups)), nobs = length(y),
 				mod=mod ) 
 	class(res) <- "rpt"

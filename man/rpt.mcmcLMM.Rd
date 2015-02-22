@@ -33,6 +33,10 @@ Returns an object of class rpt that is a a list with the following elements:
  \item{CI.R}{Bayesian credibility interval for the repeatability (ICC) based on the posterior distribution of \emph{R}.}
  \item{P}{Significace test, returned as  \code{NA}, since the Bayesian approach conflicts with the null hypothesis testing.}
  \item{R.post}{MCMC samples form the posterior distributions of \emph{R}.}
+ \item{MCMCpars}{Burnin, length of chain, thinning interval of MCMC chain.}
+ \item{ngroups}{Number of groups.}
+ \item{nobs}{Number of observations.}
+ \item{mod}{Fitted model.}
 }
 \description{
 Calculates repeatability from a linear mixed-effects models fitted by MCMC
