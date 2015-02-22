@@ -21,7 +21,7 @@
 #' attach(BodySize)
 #' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=100, npermut=100))   
 #' # reduced number of nboot and npermut iterations
-#' plot(rpt.BS)
+#' plot(rpt.BS)#
 #' detach(BodySize)
 #'       
 #' @keywords models
@@ -40,8 +40,8 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                 if (is.null(xlab)) xlab <- "Repeatability estimates"
                 if (is.null(main)) main <- "Distribution of repeatability estimates from bootstrap"
         } else if (type == "permut") {
-                if (is.null(xlab)) xlab <- "P values"
-                if (is.null(main)) main <- "Distribution of P values from permutation test"
+                if (is.null(xlab)) xlab <- "Repeatability estimates"
+                if (is.null(main)) main <- "Distribution of repeatability estimates from randomisation"
         }
         
         # make bootstrap histogram
@@ -59,9 +59,10 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                        c("Repeatability with CI"), box.lty = 0)
         }
         
-        permut_hist <- function(P, R.permut, xlab. = xlab, breaks. = breaks, main. = main, ...) {
+        permut_hist <- function(R, R.permut, xlab. = xlab, breaks. = breaks, main. = main, ...) {
                 # get CI for permutation
                 CI.perm  <- quantile(R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+                Median.R <- median(R.permut)
                 # y position of confidence band
                 v.pos <- max((hist(R.permut, breaks = breaks, plot = FALSE))$counts)  
                 # plot
@@ -69,13 +70,14 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                      main=main)
                 arrows(unname(CI.perm[1]), v.pos*1.15, unname(CI.perm[2]), v.pos*1.15, 
                        length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
-                lines(x = c(P, P), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
-                points(P, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
-                legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), 
-                       c("P value with CI"), box.lty = 0)
+                lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+                points(Median.R, v.pos*1.15, cex = 1.2, pch = 19, col = "black")
+                lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+                points(R, v.pos*1.15, cex = 1.2, pch = 19, col = "red")
+                
+                legend("topleft", pch = 19, cex = 1, bty = "n", col = c("blue", "red"), 
+                       c("Mean simulated repeatability with CI", "Observed repeatability"), box.lty = 0)
         }
-        
-        
         
         if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
                 if(type == "boot") {
@@ -87,7 +89,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                                 permut_hist(P = x$P, R.permut = x$R.permut, ...)
                         } else if (x$method == "LMM.REML") {
                                 # no red point. unclear which p to plot
-                                permut_hist(P = x$P[2], R.permut = x$R.permut, ...)      
+                                permut_hist(R = x$R, R.permut = x$R.permut, ...)      
                         }
                 } else {
                         stop("Plotting type invalid")
@@ -99,9 +101,11 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                       warning("type = 'boot' not available. Use type = 'permut'.")
               }
               if (type == "permut") {
-              permut_hist(P = x$P[2], R.permut = x$R.permut, ...)  
+              permut_hist(R = x$R, R.permut = x$R.permut, ...)  
               }
         } 
+        
+        
         
 }
         
