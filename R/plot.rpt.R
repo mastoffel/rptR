@@ -1,9 +1,14 @@
 #' Plot a rpt object
 #' 
-#' Plots the distribution of repeatability estimates with a confidence interval
+#' Plots the distribution of repeatability estimates from bootstrapping and permutation tests.
+#' For MCMC methods
 #' 
-#' @param x An rpt object returned from one of the rpt functions
-#' @param \dots Additional arguments; none are used in this method.
+#' @param x An rpt object returned from one of the rpt functions.
+#' @param type Showing either the bootstap or permutation test results.
+#' @param scale Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.
+#' @param main Plot title
+#' @param breaks hist() argument
+#' @param \dots Additional arguments to the hist() function.
 #'
 #' @references 
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
@@ -30,15 +35,17 @@
 #' 
 #' 
 #' 
-plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL, 
-                     main = NULL, breaks = "FD", scale = c("link", "original"), ...) {
-        
+plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"), 
+                     main = NULL, breaks = "FD",  ...) {
+        xlab <- "Repeatability estimates"
         # initialising
-        if (length(type) != 1)  type <- type[1]
+        if (length(type) != 1)  type  <- type[1]
         if (length(scale) != 1) scale <- scale[1]
         
+        
+        
+        
         if (x$datatype!="Gaussian" & x$method=="PQL") {
-                if (is.null(xlab)) xlab <- "Repeatability estimates"
                 if (is.null(main)){
                         if (type == "boot") {
                                 if (scale == "link") main <- "Link scale distribution of repeatability estimates from bootstrap"
@@ -48,6 +55,12 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                                 if (scale == "original") main <- "Original scale distribution of repeatability estimates from permutation"
                         
                         }
+                }
+        }
+        if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML") | (x$method == "ANOVA"))) {
+                if (is.null(main)){
+                        if (type == "boot") main <- "Distribution of repeatability estimates from bootstrap"
+                        if (type == "permut") main <- "Distribution of repeatability estimates from permutation"
                 }
         }
         
@@ -97,9 +110,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), xlab = NULL,
                                 # no red point. unclear which p to plot
                                 permut_hist(R = x$R, R.permut = x$R.permut, ...)      
                         }
-                } else {
-                        stop("Plotting type invalid")
-                }
+                } 
         }
         
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {

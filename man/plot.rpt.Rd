@@ -3,11 +3,19 @@
 \alias{plot.rpt}
 \title{Plot a rpt object}
 \usage{
-\method{plot}{rpt}(x, type = c("boot", "permut"), xlab = NULL,
-  main = NULL, breaks = "FD", ...)
+\method{plot}{rpt}(x, type = c("boot", "permut"), scale = c("link",
+  "original"), main = NULL, breaks = "FD", ...)
 }
 \arguments{
-\item{x}{An rpt object returned from one of the rpt functions}
+\item{x}{An rpt object returned from one of the rpt functions.}
+
+\item{type}{Showing either the bootstap or permutation test results.}
+
+\item{scale}{Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.}
+
+\item{main}{Plot title}
+
+\item{breaks}{hist() argument}
 
 \item{\dots}{Additional arguments; none are used in this method.}
 }
@@ -20,7 +28,7 @@ data(BodySize)
 attach(BodySize)
 (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=100, npermut=100))
 # reduced number of nboot and npermut iterations
-plot(rpt.BS)
+plot(rpt.BS)#
 detach(BodySize)
 }
 \author{
