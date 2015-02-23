@@ -3,10 +3,10 @@
 \alias{summary.rpt}
 \title{Summary of a rpt object}
 \usage{
-\method{summary}{rpt}(x)
+\method{summary}{rpt}(object, ...)
 }
 \arguments{
-\item{x}{An rpt object returned from one of the rpt functions}
+\item{object}{An rpt object returned from one of the rpt functions}
 
 \item{\dots}{Additional arguments; none are used in this method.}
 }

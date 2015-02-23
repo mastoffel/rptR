@@ -35,7 +35,7 @@
 #' print(rpt.Weight)  # alternative call to print.rpt() through print()
 #' detach(BodySize)
 #' 
-print.summary.rpt <- function(x) {
+print.summary.rpt <- function(x, ...) {
         
         if(x$datatype=="Gaussian" & x$method == "corr") {
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",

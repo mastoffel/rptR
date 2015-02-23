@@ -3,7 +3,7 @@
 \alias{print.summary.rpt}
 \title{Prints the summary of a rpt object}
 \usage{
-\method{print}{summary.rpt}(x)
+\method{print}{summary.rpt}(x, ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions}
