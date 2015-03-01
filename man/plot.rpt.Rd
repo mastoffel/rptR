@@ -3,8 +3,8 @@
 \alias{plot.rpt}
 \title{Plot a rpt object}
 \usage{
-plot.rpt(x, type = c("boot", "permut"), scale = c("link", "original"),
-  main = NULL, breaks = "FD", ...)
+\method{plot}{rpt}(x, type = c("boot", "permut"), scale = c("link",
+  "original"), main = NULL, breaks = "FD", ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions.}

@@ -101,7 +101,7 @@
 #' @export
 #' 
 # @importFrom MASS glmmPQL
-# @importFrom VGAM probit
+#' @importFrom VGAM probit rbetabinom
 
 rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
 	# initial checks
@@ -154,7 +154,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 		groupMeans <- rnorm(k, 0, sqrt(var.a))
 		p.link     <- beta0 + groupMeans[groups]
 		if(link=="logit") p <- exp(p.link)/(1+exp(p.link))
-		if(link=="probit") p <- VGAM::probit(p.link, inverse=TRUE)
+		if(link=="probit") p <- probit(p.link, inverse=TRUE) # VGAM::probit(p.link, inverse=TRUE)
 		if(all(n==1))
 			m <- rbinom(N, 1, p)   # binomial model
 		else {
@@ -164,7 +164,7 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
 #			if(rho==0)
 #				m <- rbinom(N,n,p)
 #			else {
-				m <- VGAM::rbetabinom(N,n,p,rho)    # or p * rho
+				m <- rbetabinom(N,n,p,rho)    # or p * rho, VGAM::rbetabinom(N,n,p,rho)
 #			}
 		}
 		pqlglmm.binom.model(cbind(m, n-m), groups, n, link) 
@@ -178,8 +178,8 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
                 } 
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "pqlglmm.binom.model", envir=environment())
-                parallel::clusterEvalQ(cl,library(VGAM))
+                parallel::clusterExport(cl, c("pqlglmm.binom.model", "probit", "rbetabinom"), envir=environment())
+                # parallel::clusterEvalQ(cl,library(VGAM)) ## problematic!
                 # parallel computing
                 R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y = y, groups = groups, k = k, N = N,
                                                n = n, beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
