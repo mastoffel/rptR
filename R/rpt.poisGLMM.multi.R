@@ -161,6 +161,8 @@ rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1
 	        R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y = y, groups = groups, k = k, N = N,
 	                                       beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
 	                                       omega = mod.ests$omega, link = link))
+	        # transform to list
+	        R.boot <- lapply(data.frame(t(R.boot)), unlist)
 	        parallel::stopCluster(cl)
 	} else if(nboot > 0 & parallel == FALSE) {
 		mod.ests <- pqlglmm.pois.model(y, groups, link, returnR=FALSE)

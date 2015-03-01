@@ -184,6 +184,8 @@ rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, n
                 R.boot <- (parallel::parSapply(cl, 1:nboot, bootstr, y = y, groups = groups, k = k, N = N,
                                                n = n, beta0 = mod.ests$beta0, var.a = mod.ests$var.a, 
                                                omega = mod.ests$omega, link = link))
+                # transform to list
+                R.boot <- lapply(data.frame(t(R.boot)), unlist)
                 parallel::stopCluster(cl)
 	} else if (nboot > 0 & parallel == FALSE) {
 		mod.ests <- pqlglmm.binom.model(y, groups, n, link, returnR=FALSE)
