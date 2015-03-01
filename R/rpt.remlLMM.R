@@ -2,8 +2,9 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
 #' 
-#' @param y Vector of a response values.
-#' @param groups Vector of group identities.
+#' @param y String specifying response variable or vector of a response values.
+#' @param groups String specifying group variable or vector of group identities.
+#' @param Data frame containing respnse and groups variable.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation. 
 #'        Defaults to 1000. Larger numbers of permutations give a better 
@@ -69,7 +70,15 @@
 #' 
 
 # much to do here
-rpt.remlLMM <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+rpt.remlLMM <- function(y, groups, data = NULL, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+        # checking for vectors
+        if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                y <- data[[y]]
+                groups <- data[[groups]]
+        } else if (!(length(y) == length(groups)){
+                stop("y and groups must have the same length")
+        }
+        
         # model
         formula  <- y ~ 1 + (1|groups)
         mod         <- lme4::lmer(formula) 
