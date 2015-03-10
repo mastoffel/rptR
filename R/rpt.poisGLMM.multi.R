@@ -5,6 +5,7 @@
 #' 
 #' @param y Vector of a response values.
 #' @param groups Vector of group identities.
+#' @param data Data frame containing respnse and groups variable.
 #' @param link Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation. Defaults to 1000. 
@@ -78,17 +79,13 @@
 #' 
 #'        # repeatability for female clutch size over two years.
 #'        data(BroodParasitism)
-#'        attach(BroodParasitism)
-#'        (rpt.Host <- rpt.poisGLMM.multi(OwnClutches, FemaleID, nboot=10, npermut=10))  
+#'        (rpt.Host <- rpt.poisGLMM.multi("OwnClutches", "FemaleID", data = BroodParasitism, nboot=10, npermut=10))  
 #'        # reduced number of nboot and npermut iterations
-#'        detach(BroodParasitism)
 #'        
 #'        # repeatability for male fledgling success
 #'        data(Fledglings)
-#'        attach(Fledglings)
-#'        (rpt.Fledge <- rpt.poisGLMM.multi(Fledge, MaleID, nboot=10, npermut=10))  
+#'        (rpt.Fledge <- rpt.poisGLMM.multi("Fledge", "MaleID", data = Fledglings, nboot=10, npermut=10))  
 #'        # reduced number of nboot and npermut iterations
-#'        detach(Fledglings)
 #'       
 #' @keywords models
 #' 
@@ -97,7 +94,15 @@
 # @importFrom MASS glmmPQL
 # @importFrom lme4 VarCorr
 #' 
-rpt.poisGLMM.multi = function(y, groups, link=c("log", "sqrt"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+rpt.poisGLMM.multi = function(y, groups, data, link=c("log", "sqrt"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+        
+        if  (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & (length(groups) == 1)) {
+                # y gets vector is one column, stays df if two columns
+                ifelse(is.data.frame(data[, y]),  y <- as.matrix(data[, y]), y <- data[, y])
+                # y <- as.matrix(data[, y])
+                groups <- data[, groups]
+        }
+        
 	# initial checks
 	if(length(y) != length(groups)) 
 		stop("y and group hav to be of equal length")
