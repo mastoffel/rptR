@@ -3,13 +3,15 @@
 \alias{rpt.poisGLMM.multi}
 \title{GLMM-based Repeatability Using PQL Estimation for Count Data}
 \usage{
-rpt.poisGLMM.multi(y, groups, link = c("log", "sqrt"), CI = 0.95,
+rpt.poisGLMM.multi(y, groups, data, link = c("log", "sqrt"), CI = 0.95,
   nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
 \item{y}{Vector of a response values.}
 
 \item{groups}{Vector of group identities.}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{link}{Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.}
 
@@ -76,17 +78,13 @@ parametric bootstrapping allows only \emph{omega} greater than or equal to  1.
 \examples{
 # repeatability for female clutch size over two years.
        data(BroodParasitism)
-       attach(BroodParasitism)
-       (rpt.Host <- rpt.poisGLMM.multi(OwnClutches, FemaleID, nboot=10, npermut=10))
+       (rpt.Host <- rpt.poisGLMM.multi("OwnClutches", "FemaleID", data = BroodParasitism, nboot=10, npermut=10))
        # reduced number of nboot and npermut iterations
-       detach(BroodParasitism)
 
        # repeatability for male fledgling success
        data(Fledglings)
-       attach(Fledglings)
-       (rpt.Fledge <- rpt.poisGLMM.multi(Fledge, MaleID, nboot=10, npermut=10))
+       (rpt.Fledge <- rpt.poisGLMM.multi("Fledge", "MaleID", data = Fledglings, nboot=10, npermut=10))
        # reduced number of nboot and npermut iterations
-       detach(Fledglings)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

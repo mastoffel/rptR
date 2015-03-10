@@ -59,15 +59,15 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 # repeatability estimations for egg dumping (binary data)
      data(BroodParasitism)
      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
-     rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump)
-     rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism)
+     (rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump))
+     (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism))
 
 # repeatability estimations for egg dumping (proportion data)
 ## data argument has to work for matrix, to be implemented
      data(BroodParasitism)
      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches
-     rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR)
+     (rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

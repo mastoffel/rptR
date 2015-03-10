@@ -57,15 +57,15 @@
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
 #'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
-#'      rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump)
-#'      rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism)
+#'      (rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump))
+#'      (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism))
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #' ## data argument has to work for matrix, to be implemented
 #'      data(BroodParasitism)
 #'      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
 #'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches 
-#'      rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR)
+#'      (rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR))
 #'  
 #' @keywords models
 #' 
@@ -78,11 +78,13 @@
 
 
 rpt.binomGLMM.add <- function(y, groups, data, CI=0.95, prior=NULL, verbose=FALSE, ...) {
-        # 
+        
+        # data argument check
         if  (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & (length(groups) == 1)) {
                 # y gets vector is one column, stays df if two columns
-                y <- data[, y]
-                groups <- data[[groups]]
+                ifelse(is.data.frame(data[, y]),  y <- as.matrix(data[, y]), y <- data[, y])
+                # y <- as.matrix(data[, y])
+                groups <- data[, groups]
         }
         # check for equal length y and groups here?
         

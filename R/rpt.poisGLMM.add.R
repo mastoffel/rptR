@@ -4,6 +4,7 @@
 #' 
 #' @param y Vector of a response values
 #' @param groups Vector of group identities.
+#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95).
 #' @param prior List of prior values passed to \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). 
@@ -70,15 +71,11 @@
 #' @examples  
 #' # repeatability for female clutch size over two years.
 #'    data(BroodParasitism)
-#'    attach(BroodParasitism)
-#'    (rpt.Host <- rpt.poisGLMM.add(OwnClutches, FemaleID))
-#'    detach(BroodParasitism)
+#'    (rpt.Host <- rpt.poisGLMM.add("OwnClutches", "FemaleID", data = BroodParasitism))
 #'     
 #' # repeatability for male fledgling success
 #'    data(Fledglings)
-#'    attach(Fledglings)
-#'    (rpt.Fledge <- rpt.poisGLMM.add(Fledge, MaleID))
-#'    detach(Fledglings) 
+#'    (rpt.Fledge <- rpt.poisGLMM.add("Fledge", "MaleID", data = Fledglings))
 #'       
 #' @keywords models
 #' 
@@ -88,7 +85,16 @@
 # @importFrom MCMCglmm posterior.mode
 # @importFrom coda HPDinterval 
 
-rpt.poisGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...) {
+rpt.poisGLMM.add <- function(y, groups, data, CI=0.95, prior=NULL, verbose=FALSE, ...) {
+        
+        # data argument check
+        if  (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & (length(groups) == 1)) {
+                # y gets vector is one column, stays df if two columns
+                ifelse(is.data.frame(data[, y]),  y <- as.matrix(data[, y]), y <- data[, y])
+                # y <- as.matrix(data[, y])
+                groups <- data[, groups]
+        }
+        
 	# initial checks
 	if(any(is.na(y))) warning("missing values in y")
 	# preparation

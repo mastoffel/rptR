@@ -2,9 +2,10 @@
 #' 
 #' Calculates repeatability based on inter-class correlations
 #' 
-#' @param y Vector of measurements. Missing values are not allowed.
-#' @param groups Vector of group identitities (will be converted to a factor).
+#' @param y String specifying response variable or vector of response values. Missing values are not allowed.
+#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
 #'        Note that each group identity has to appear exactly twice.
+#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param nboot Number of bootstrapping runs used when calculating an asymptotic
 #'        confidence interval (defaults to 1000).
@@ -40,14 +41,20 @@
 #' # repeatability for male breeding success on a transformed scale
 #'   data(Fledglings)
 #'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'   attach(Fledglings)
-#'   (rpt.Fledge <- rpt.corr(sqrtFledge, MaleID, nboot=10, npermut=10))  # reduced number of iterations
-#'   detach(Fledglings)
+#'   (rpt.Fledge <- rpt.corr("sqrtFledge", "MaleID", data = Fledglings, nboot=10, npermut=10))  # reduced number of iterations
+#'   
 #' @keywords models
 #' 
 #' @export
 
-rpt.corr <- function(y, groups, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+rpt.corr <- function(y, groups, data, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+        
+        # check inputs
+        if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                y <- data[[y]]
+                groups <- data[[groups]]
+        } 
+        
 	# initial checks
 	if(length(y)!= length(groups)) 
 		stop("y and group have to be of equal length")
