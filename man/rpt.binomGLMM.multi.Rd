@@ -3,7 +3,7 @@
 \alias{rpt.binomGLMM.multi}
 \title{GLMM-based Repeatability Using PQL Estimation for Binomial Data}
 \usage{
-rpt.binomGLMM.multi(y, groups, link = c("logit", "probit"), CI = 0.95,
+rpt.binomGLMM.multi(y, groups, data, link = c("logit", "probit"), CI = 0.95,
   nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
@@ -12,6 +12,8 @@ array or data.frame with colums m, n-m, where m is the number of
 successes and n the number of trials.}
 
 \item{groups}{Vector of group identitites.}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{link}{Link function, \code{log} and \code{sqrt} are allowed, defaults
 to \code{log}.}
@@ -80,23 +82,26 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
 \examples{
 # repeatability estimations for egg dumping (binary data)
      data(BroodParasitism)
-     attach(BroodParasitism)
-     (rpt.Host <- rpt.binomGLMM.multi(HostYN[OwnClutchesBothSeasons==1], FemaleID[OwnClutchesBothSeasons==1],
-                                nboot=10, npermut=10)) # low number of nboot and npermut to speed up error checking
-     (rpt.BroodPar <- rpt.binomGLMM.multi(cbpYN, FemaleID, nboot=10, npermut=10))
+     EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+     (rpt.Host <- rpt.binomGLMM.multi("HostYN", "FemaleID", data = EggDump,  nboot=10, npermut=10))
      # low number of nboot and npermut to speed up error checking
-     detach(BroodParasitism)
+     (rpt.BroodPar <- rpt.binomGLMM.multi("cbpYN", "FemaleID", data = BroodParasitism, nboot=10, npermut=10))
+     # low number of nboot and npermut to speed up error checking
 
 # repeatability estimations for egg dumping (proportion data)
      data(BroodParasitism)
-     attach(BroodParasitism)
-     ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
-     (rpt.Host <- rpt.binomGLMM.multi(ParasitisedOR[OwnClutchesBothSeasons==1,],
-                                FemaleID[OwnClutchesBothSeasons==1], nboot=10, npermut=10))  # reduced number of npermut iterations
-     ParasitismOR <- cbind(cbpEggs, nEggs-cbpEggs)
+     ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, FemaleID))
+     ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches
+     (rpt.Host <- rpt.binomGLMM.multi(c("HostClutches", "parasitised"), "FemaleID",
+                                     data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
+                                     nboot=10, npermut=10))
+                                      # reduced number of npermut iterations
+
+     ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
+     ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) # some rows have entries 0,0 and need to be removed
-     (rpt.BroodPar <- rpt.binomGLMM.multi(ParasitismOR[-zz,], FemaleID[-zz], nboot=10, npermut=10))
-     detach(BroodParasitism)
+     (rpt.BroodPar <- rpt.binomGLMM.multi(c("cbpEggs", "parasitised"), "FemaleID",
+                                             data = ParasitismOR[-zz, ], nboot=10, npermut=10))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

@@ -80,7 +80,7 @@ print.rpt <- function(x, ...) {
 
 	if(x$datatype!="Gaussian" & x$method=="PQL") {
 		cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, "link", "\n\n",
-			"Esimated overdistpersion (omega) = ", x$omega, "\n\n",
+			"Estimated overdispersion (omega) = ", x$omega, "\n\n",
 			"Link scale repeatabilities:","\n",
 			"R  = ", round(x$R.link,3), "\n",
 			"SE = ", round(x$se.link,3), "\n",

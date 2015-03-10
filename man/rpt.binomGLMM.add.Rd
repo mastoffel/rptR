@@ -3,8 +3,8 @@
 \alias{rpt.binomGLMM.add}
 \title{GLMM-based Repeatability Using MCMC for Binomial Data}
 \usage{
-rpt.binomGLMM.add(y, groups, CI = 0.95, prior = NULL, verbose = FALSE,
-  ...)
+rpt.binomGLMM.add(y, groups, data, CI = 0.95, prior = NULL,
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{Vector of a response values (for binary data) or a two-column
@@ -12,6 +12,8 @@ matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the numb
 number of trials.}
 
 \item{groups}{Vector of group identities.}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95)}
 
@@ -56,21 +58,16 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 \examples{
 # repeatability estimations for egg dumping (binary data)
      data(BroodParasitism)
-     attach(BroodParasitism)
-     (rpt.Host <- rpt.binomGLMM.add(HostYN[OwnClutchesBothSeasons==1],
-                  FemaleID[OwnClutchesBothSeasons==1]))
-     (rpt.BroodPar <- rpt.binomGLMM.add(cbpYN, FemaleID))
-     detach(BroodParasitism)
+     EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+     rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump)
+     rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism)
 
 # repeatability estimations for egg dumping (proportion data)
+## data argument has to work for matrix, to be implemented
      data(BroodParasitism)
-     attach(BroodParasitism)
-     ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
-     (rpt.Host <- rpt.binomGLMM.add(ParasitisedOR[OwnClutchesBothSeasons==1,],
-                  FemaleID[OwnClutchesBothSeasons==1]))
-     ParasitismOR <- cbind(cbpEggs, nEggs-cbpEggs)
-     (rpt.BroodPar <- rpt.binomGLMM.add(ParasitismOR, FemaleID))
-     detach(BroodParasitism)
+     ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
+     ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches
+     rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

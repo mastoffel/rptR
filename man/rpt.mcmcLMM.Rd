@@ -3,13 +3,15 @@
 \alias{rpt.mcmcLMM}
 \title{LMM-based repeatability estimated using MCMC sampling}
 \usage{
-rpt.mcmcLMM(y, groups, CI = 0.95, prior = NULL, verbose = FALSE, ...)
+rpt.mcmcLMM(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE,
+  ...)
 }
 \arguments{
-\item{y}{Vector of a response values}
+\item{y}{String specifying response variable or vector of measurements.}
 
-\item{groups}{Vector of group identities
-Note that each group identity has to appear exactly twice.}
+\item{groups}{String specifying groups variable or vector of group identities (will be converted to a factor).}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95)}
 
@@ -49,15 +51,11 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 \examples{
 # repeatability estimation for tarsus length - a very high R
     data(BodySize)
-    attach(BodySize)
-    (rpt.BS <- rpt.mcmcLMM(Tarsus, BirdID))
-    detach(BodySize)
+    (rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))
 
 # repeatability estimation for weight (body mass) - a lower R than the previous one
     data(BodySize)
-    attach(BodySize)
-    (rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-    detach(BodySize)
+    (rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

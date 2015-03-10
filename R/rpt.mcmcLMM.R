@@ -2,9 +2,9 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by MCMC
 #' 
-#' @param y Vector of a response values
-#' @param groups Vector of group identities
-#'        Note that each group identity has to appear exactly twice.
+#' @param y String specifying response variable or vector of measurements.
+#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
+#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). Default priors will 
@@ -47,15 +47,11 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #'     data(BodySize)
-#'     attach(BodySize)
-#'     (rpt.BS <- rpt.mcmcLMM(Tarsus, BirdID))  
-#'     detach(BodySize)
+#'     (rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))  
 #'     
 #' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #'     data(BodySize)
-#'     attach(BodySize)
-#'     (rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-#'     detach(BodySize)  
+#'     (rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
 #'       
 #' @keywords models
 #' 
@@ -65,7 +61,13 @@
 # @importFrom MCMCglmm posterior.mode
 # @importFrom coda HPDinterval
  
-rpt.mcmcLMM <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...){
+rpt.mcmcLMM <- function(y, groups, data, CI=0.95, prior=NULL, verbose=FALSE, ...){
+        
+        # check inputs
+        if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                y <- data[[y]]
+                groups <- data[[groups]]
+        } 
 	# initial checks
 	if(length(y)!= length(groups)) stop("y and group are of unequal length")
 	# preparation

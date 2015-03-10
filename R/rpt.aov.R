@@ -2,8 +2,9 @@
 #' 
 #' Repeatability calculations based on Analysis of Variance (ANOVA).
 #' 
-#' @param y Vector of measurements.
-#' @param groups Vector of group identities (will be converted to a factor).
+#' @param y String specifying response variable or vector of measurements.
+#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
+#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000). 
 #'   
@@ -38,22 +39,27 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #'      data(BodySize)
-#'      attach(BodySize)
-#'      (rpt.BS <- rpt.aov(Tarsus, BirdID, npermut=10))    # reduced number of npermut iterations
-#'      detach(BodySize)
+#'      (rpt.BS <- rpt.aov("Tarsus", "BirdID", data = BodySize, npermut=10))    # reduced number of npermut iterations
 #'      
 #' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #'      data(BodySize)
-#'      attach(BodySize)
-#'      (rpt.Weight <- rpt.aov(Weight, BirdID, npermut=10))   # reduced number of npermut iterations
-#'      detach(BodySize)
+#'      (rpt.Weight <- rpt.aov("Weight", "BirdID", data = BodySize, npermut=10))   # reduced number of npermut iterations
 #' 
 #' @keywords models
 #' 
 #' @export
 
 
-rpt.aov <- function(y, groups, CI=0.95, npermut=1000) {	
+rpt.aov <- function(y, groups, data, CI=0.95, npermut=1000) {	
+        
+        # check inputs
+     if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                y <- data[[y]]
+                groups <- data[[groups]]
+        } else if (!(length(y) == length(groups))){
+                stop("y and groups must have the same length")
+        }
+        
 	# initial checks
     if(length(y) != length(groups)) stop("y and group are not of equal length")
 	if(npermut < 1) npermut <- 1

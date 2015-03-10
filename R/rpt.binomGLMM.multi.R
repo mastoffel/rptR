@@ -7,6 +7,7 @@
 #'        array or data.frame with colums m, n-m, where m is the number of 
 #'        successes and n the number of trials.
 #' @param groups Vector of group identitites.
+#' @param data Data frame containing respnse and groups variable.
 #' @param link Link function, \code{log} and \code{sqrt} are allowed, defaults 
 #'        to \code{log}.  
 #' @param CI Width of the confidence interval (defaults to 0.95).
@@ -77,24 +78,27 @@
 #' 
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
-#'      attach(BroodParasitism)
-#'      (rpt.Host <- rpt.binomGLMM.multi(HostYN[OwnClutchesBothSeasons==1], FemaleID[OwnClutchesBothSeasons==1],
-#'                                 nboot=10, npermut=10)) # low number of nboot and npermut to speed up error checking
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi(cbpYN, FemaleID, nboot=10, npermut=10))  
+#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+#'      (rpt.Host <- rpt.binomGLMM.multi("HostYN", "FemaleID", data = EggDump,  nboot=10, npermut=10))  
 #'      # low number of nboot and npermut to speed up error checking
-#'      detach(BroodParasitism)
+#'      (rpt.BroodPar <- rpt.binomGLMM.multi("cbpYN", "FemaleID", data = BroodParasitism, nboot=10, npermut=10))
+#'      # low number of nboot and npermut to speed up error checking
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #'      data(BroodParasitism)
-#'      attach(BroodParasitism)
-#'      ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)   
-#'      (rpt.Host <- rpt.binomGLMM.multi(ParasitisedOR[OwnClutchesBothSeasons==1,], 
-#'                                 FemaleID[OwnClutchesBothSeasons==1], nboot=10, npermut=10))  # reduced number of npermut iterations
-#'      ParasitismOR <- cbind(cbpEggs, nEggs-cbpEggs)  
+#'      ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, FemaleID))
+#'      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches 
+#'      (rpt.Host <- rpt.binomGLMM.multi(c("HostClutches", "parasitised"), "FemaleID", 
+#'                                      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ], 
+#'                                      nboot=10, npermut=10))
+#'                                       # reduced number of npermut iterations
+#'                                       
+#'      ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
+#'      ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
 #'      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) # some rows have entries 0,0 and need to be removed
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi(ParasitismOR[-zz,], FemaleID[-zz], nboot=10, npermut=10))   
-        # reduced number of npermut iterations
-#'      detach(BroodParasitism)
+#'      (rpt.BroodPar <- rpt.binomGLMM.multi(c("cbpEggs", "parasitised"), "FemaleID", 
+#'                                              data = ParasitismOR[-zz, ], nboot=10, npermut=10))   
+#' 
 #' 
 #' @keywords models
 #' 
@@ -103,8 +107,17 @@
 # @importFrom MASS glmmPQL
 #' @importFrom VGAM probit rbetabinom
 
-rpt.binomGLMM.multi <- function(y, groups, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
-	# initial checks
+rpt.binomGLMM.multi <- function(y, groups, data, link=c("logit", "probit"), CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
+        
+        # data argument check
+        if  (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & (length(groups) == 1)) {
+                # y gets vector is one column, stays df if two columns
+                ifelse(is.data.frame(data[, y]),  y <- as.matrix(data[, y]), y <- data[, y])
+                # y <- as.matrix(data[, y])
+                groups <- data[, groups]
+        }
+        
+        # initial checks
 	if (is.null(dim(y))) 
 		y <- cbind(y, 1-y)
 	if (nrow(y) != length(groups)) 

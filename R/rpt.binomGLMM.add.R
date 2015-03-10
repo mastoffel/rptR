@@ -6,6 +6,7 @@
 #'      matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
 #'      number of trials.
 #' @param groups Vector of group identities.
+#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
 #'      in \pkg{MCMCglmm} (see there for more details). Default priors will be
@@ -55,22 +56,17 @@
 #' @examples  
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
-#'      attach(BroodParasitism)
-#'      (rpt.Host <- rpt.binomGLMM.add(HostYN[OwnClutchesBothSeasons==1], 
-#'                   FemaleID[OwnClutchesBothSeasons==1]))
-#'      (rpt.BroodPar <- rpt.binomGLMM.add(cbpYN, FemaleID))
-#'      detach(BroodParasitism)
+#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+#'      rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump)
+#'      rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism)
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
+#' ## data argument has to work for matrix, to be implemented
 #'      data(BroodParasitism)
-#'      attach(BroodParasitism)
-#'      ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
-#'      (rpt.Host <- rpt.binomGLMM.add(ParasitisedOR[OwnClutchesBothSeasons==1,], 
-#'                   FemaleID[OwnClutchesBothSeasons==1]))
-#'      ParasitismOR <- cbind(cbpEggs, nEggs-cbpEggs)   
-#'      (rpt.BroodPar <- rpt.binomGLMM.add(ParasitismOR, FemaleID))
-#'      detach(BroodParasitism)
-#' 
+#'      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
+#'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches 
+#'      rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR)
+#'  
 #' @keywords models
 #' 
 #' @export
@@ -81,7 +77,15 @@
 
 
 
-rpt.binomGLMM.add <- function(y, groups, CI=0.95, prior=NULL, verbose=FALSE, ...) {
+rpt.binomGLMM.add <- function(y, groups, data, CI=0.95, prior=NULL, verbose=FALSE, ...) {
+        # 
+        if  (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & (length(groups) == 1)) {
+                # y gets vector is one column, stays df if two columns
+                y <- data[, y]
+                groups <- data[[groups]]
+        }
+        # check for equal length y and groups here?
+        
 	# initial checks
 	if (is.null(dim(y))) 
 		y      <- cbind(y, 1-y)

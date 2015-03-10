@@ -3,13 +3,15 @@
 \alias{rpt.remlLMM}
 \title{LMM-based Repeatability Using REML}
 \usage{
-rpt.remlLMM(y, groups, CI = 0.95, nboot = 1000, npermut = 1000,
-  parallel = FALSE, ncores = 0)
+rpt.remlLMM(y, groups, data = NULL, CI = 0.95, nboot = 1000,
+  npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
-\item{y}{Vector of a response values.}
+\item{y}{String specifying response variable or vector of response values.}
 
-\item{groups}{Vector of group identities.}
+\item{groups}{String specifying groups variable or vector of group identities.}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{CI}{Width of the confidence interval (defaults to 0.95).}
 
@@ -48,17 +50,13 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-attach(BodySize)
-(rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=10, npermut=10))
+(rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
-detach(BodySize)
 
 # repeatability estimation for weight (body mass) - a lower R than the previous one
 data(BodySize)
-attach(BodySize)
-(rpt.Weight <- rpt.remlLMM(Weight, BirdID, nboot=10, npermut=10))
+(rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
-detach(BodySize)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
