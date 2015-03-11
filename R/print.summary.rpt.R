@@ -61,7 +61,7 @@ print.summary.rpt <- function(x, ...) {
                 print(format(x$anovatab, digits = 3, width = 6))
         } 
         
-        if(x$datatype=="Gaussian" & x$method == "LMM.REML") { 
+        if(x$datatype=="Gaussian" & x$method == "LMM.REML" & length(x$R) == 1) { 
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
                     "Call = ", deparse(x$call), 
                     "\n", "Data: ", x$nobs, " observations in ", x$ngroups, " groups", "\n\n",
@@ -79,6 +79,25 @@ print.summary.rpt <- function(x, ...) {
                     sep = "")
         } 
         
+        if(x$datatype=="Gaussian" & length(x$P)>1 & length(x$R)>1) {
+                cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
+                    "Call = ", deparse(x$call), "\n", "Data: ", x$nobs, " observations", sep = "")   
+                cat("\n")
+                cat("----------------------------------------")
+            for(i in 1:length(x$R)) {
+                cat("\n\n")
+                cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
+                cat("Repeatability:", "\n")    
+                print(format(x$rpt[[i]], digits = 3, width = 6), row.names = FALSE)
+                cat("\n")
+                cat("Bootstrapping and Permutation test:", "\n")
+                print(format(rbind(x$boot[[i]], x$permut[[i]]), digits = 3, width = 6)) 
+                cat("\n")
+                cat("----------------------------------------")
+            }
+        }
+              
+                
         if(x$datatype=="Gaussian" & x$method == "LMM.MCMC") { 
                 cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n",
                     "Call = ", deparse(x$call), 

@@ -32,8 +32,8 @@
 #' 
 
 summary.rpt <- function(object, ...) {
-        #rpt.corr and  rpt.remlLMM and rpt.aov
-        if(object$datatype =="Gaussian" & ((object$method == "corr") | (object$method == "LMM.REML"))) {
+        #rpt.corr and  rpt.remlLMM and rpt.aov, rpt.remlLMM.adj with one groups
+        if(object$datatype =="Gaussian" & ((object$method == "corr") | (object$method == "LMM.REML")) & length(object$R)==1) {
                 # bootstrap and permutation table 
                 CI.perm  <- quantile(object$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
                 object$rpt    <- structure(data.frame(object$R, object$se ,unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
@@ -82,19 +82,30 @@ summary.rpt <- function(object, ...) {
         } 
         
         if(object$datatype=="Gaussian" & length(object$P)>1 & length(object$R)>1) {
-                warning("Not yet implemented")
+                # warning("Not yet implemented")
 #                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
-#                 for(i in 1: length(object$R)) {
-#                         cat("Repeatability for ", names(object$R)[i], "\n",
-#                             "R  = ", round(object$R[i],3), "\n",
-#                             "SE = ", round(object$se[i],3), "\n",
-#                             "CI = [", round(object$CI.R[i,1],3), ", ", round(object$CI.R[i,2],3), "]", "\n",
-#                             "P  = ", signif(object$P[i,1], 3), " [", attr(object$P, "names")[1], "]", "\n", 
-#                             "     ", signif(object$P[i,2], 3), " [", attr(object$P, "names")[2], "]", "\n\n", 
-#                             sep="")
-#                 }
+        for(i in 1:length(object$R)) {
+                CI.perm  <- quantile(object$R.permut[i, ], c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE) # should be taken out of the loop to the top when impl.
+                object$rpt[[i]]    <- structure(data.frame(object$R[i], object$se[i] ,unname(object$P[i, 1]), object$CI.R[i, 1], object$CI.R[i, 2]), 
+                                           names = c("R", "SE", colnames(object$P)[1], 
+                                                   colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
+                                                   row.names = "rpt")
+                bootperm      <- structure(data.frame(c(ncol(object$R.boot), ncol(object$R.permut)),
+                                                 c(mean(object$R.boot[i, ]), mean(object$R.permut[i, ])),
+                                                 c(median(object$R.boot[i, ]), median(object$R.permut[i, ])),
+                                                 c(unname(object$CI.R[i, 1]), unname(CI.perm[1])), # should be CI.perm[i, 1] when implemented
+                                                 c(unname(object$CI.R[i, 2]), unname(CI.perm[2]))),
+                                           names = c("N", "Mean", "Median", 
+                                                     colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
+                                           row.names = c("boot", "permut"))
+                object$boot[[i]]   <-  bootperm[1, ]
+                object$permut[[i]] <-  bootperm[2, ]
+        }
+                class(object) <- "summary.rpt"
+                return(object)
         }
         
+     
         if(object$datatype!="Gaussian" & object$method=="PQL") {
                 # CI for permutation and bootstrap
                 CI.perm       <- as.data.frame(rbind(quantile(object$R.permut$R.link, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE),

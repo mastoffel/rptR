@@ -126,11 +126,11 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 		rownames(CI.R) = grname
 		names(se) = grname
 	}
-	# significance test by permutation
+	# significance test by permutation of residuals
 	P.permut <- rep(NA, length(grname))
 	# significance test by likelihood-ratio-test
-	terms = attr(terms(formula), "term.labels")
-	randterms = terms[which(regexpr(" | ",terms,perl=TRUE)>0)]
+	terms <- attr(terms(formula), "term.labels")
+	randterms <-  terms[which(regexpr(" | ",terms,perl=TRUE)>0)]
 	if(length(randterms)==1) {
 		LR       <- as.numeric(-2*(logLik(lm(update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") ))), data=data))-logLik(mod)))
 		P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
@@ -148,7 +148,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	rownames(P) = grname
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
 		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
-		    R.boot=R.boot, R.permut=NA,
+		    R.boot=R.boot, R.permut = matrix(rep(NA, length(grnames) * npermut), nrow = length(grnames)),
 		    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))),
 		    nobs = nrow(data),
 		    mod = mod)

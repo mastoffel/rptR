@@ -34,14 +34,11 @@
 #' 
 #' 
 plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"), 
-                     main = NULL, breaks = "FD",  ...) {
-        xlab <- "Repeatability estimates"
+                     main = NULL, breaks = "FD", xlab = "Repeatability estimates", ...) {
+        
         # initialising
         if (length(type) != 1)  type  <- type[1]
         if (length(scale) != 1) scale <- scale[1]
-        
-        
-        
         
         if (x$datatype!="Gaussian" & x$method=="PQL") {
                 if (is.null(main)){
