@@ -11,14 +11,12 @@
 \item{\dots}{Additional arguments; none are used in this method.}
 }
 \description{
-Displays the summary of an rpt object (i.e. the result of a rpt function call) an a nice form.
+Displays the summary of an rpt object (i.e. the result of a rpt function call) in a nice form.
 }
 \examples{
 # repeatability estimation for weight (body mass)
 data(BodySize)
-attach(BodySize)
-print(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-detach(BodySize)
+print(rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

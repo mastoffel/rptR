@@ -23,11 +23,9 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' attach(BodySize)
-#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, nboot=100, npermut=100))   
+#' (rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, nboot=100, npermut=100))   
 #' # reduced number of nboot and npermut iterations
-#' plot(rpt.BS)#
-#' detach(BodySize)
+#' plot(rpt.BS)
 #'       
 #' @keywords models
 #' 

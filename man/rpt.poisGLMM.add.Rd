@@ -3,12 +3,15 @@
 \alias{rpt.poisGLMM.add}
 \title{GLMM-based Repeatability Using MCMC for Count Data}
 \usage{
-rpt.poisGLMM.add(y, groups, CI = 0.95, prior = NULL, verbose = FALSE, ...)
+rpt.poisGLMM.add(y, groups, data, CI = 0.95, prior = NULL,
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{Vector of a response values}
 
 \item{groups}{Vector of group identities.}
+
+\item{data}{Data frame containing respnse and groups variable.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95).}
 
@@ -70,15 +73,11 @@ Models are fitted using the \link{MCMCglmm} function in
 \examples{
 # repeatability for female clutch size over two years.
    data(BroodParasitism)
-   attach(BroodParasitism)
-   (rpt.Host <- rpt.poisGLMM.add(OwnClutches, FemaleID))
-   detach(BroodParasitism)
+   (rpt.Host <- rpt.poisGLMM.add("OwnClutches", "FemaleID", data = BroodParasitism))
 
 # repeatability for male fledgling success
    data(Fledglings)
-   attach(Fledglings)
-   (rpt.Fledge <- rpt.poisGLMM.add(Fledge, MaleID))
-   detach(Fledglings)
+   (rpt.Fledge <- rpt.poisGLMM.add("Fledge", "MaleID", data = Fledglings))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

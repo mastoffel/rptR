@@ -70,7 +70,7 @@
 # @importFrom lme4 VarCorr
 # @importFrom arm sim
  
-rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1000) {
+rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = NULL) {
 	mod         <- lme4::lmer(formula, data=data)
 	if(nboot < 0) 	nboot <- 0
 	if(npermut < 1) npermut <- 1
@@ -91,18 +91,30 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	}
 	R <- R.pe(formula, data, grname, peYN=TRUE)
 	names(R) = grname
+	
 	# confidence interval estimation by parametric bootstrapping
-        
 	Ysim <- as.matrix(simulate(mod, nsim = nboot))
 	bootstr <- function(y, mod, formula, data, grname) {
 		data[,names(model.frame(mod))[1]] = as.vector(y)
 		R.pe(formula, data, grname)
 	}
-	if(nboot > 0){ 
+	if(nboot > 0 & parallel == TRUE){ 
+	        if (is.null(ncores)) {
+	                ncores <- parallel::detectCores()
+	                warning("No core number specified: detectCores() is used to detect the number of 
+                                cores on the local machine")
+	        } 
+	        # start cluster
+	        cl <- parallel::makeCluster(ncores)
+	        R.boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, data = data, grname = grname))
+	        parallel::stopCluster(cl)
+	}
+	if(nboot > 0 & parallel == FALSE){ 
                 R.boot   <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, grname = grname))
-		} else {
-                  R.boot <- matrix(rep(NA, length(grname)), nrow=length(grname))
-		}
+		} 
+	if(nboot == 0) {
+                R.boot <- matrix(rep(NA, length(grname)), nrow=length(grname))
+		} 
 	if(length(grname) == 1) {
 		CI.R     <- quantile(R.boot, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
 		se <- sd(R.boot)

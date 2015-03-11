@@ -1,6 +1,6 @@
 #' Prints the summary of a rpt object
 #'
-#' Displays the summary of an rpt object (i.e. the result of a rpt function call) an a nice form.
+#' Displays the summary of an rpt object (i.e. the result of a rpt function call) in a nice form.
 #' 
 #' @param x An rpt object returned from one of the rpt functions
 #' @param \dots Additional arguments; none are used in this method.
@@ -18,9 +18,7 @@
 #' @examples  
 #' # repeatability estimation for weight (body mass)
 #' data(BodySize)
-#' attach(BodySize)
-#' print(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-#' detach(BodySize)
+#' print(rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
 #'       
 #' @keywords models
 #' 
@@ -30,10 +28,8 @@
 #' @examples  
 #' repeatability estimation for weight (body mass)
 #' data(BodySize)
-#' attach(BodySize)
-#' rpt.Weight <- rpt.mcmcLMM(Weight, BirdID)
+#' rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize)
 #' print(rpt.Weight)  # alternative call to print.rpt() through print()
-#' detach(BodySize)
 #' 
 print.summary.rpt <- function(x, ...) {
         
