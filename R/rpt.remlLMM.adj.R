@@ -30,6 +30,7 @@
 #' \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
 #' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
+#' \item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
@@ -133,17 +134,31 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	# significance test by likelihood-ratio-test
 	terms <- attr(terms(formula), "term.labels")
 	randterms <-  terms[which(regexpr(" | ",terms,perl=TRUE)>0)]
+	
+	## likelihood ratio test variables
+	LRT.mod  <- as.numeric(logLik(mod))
+	LRT.df   <- 1
 	if(length(randterms)==1) {
-		LR       <- as.numeric(-2*(logLik(lm(update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") ))), data=data))-logLik(mod)))
-		P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+	        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") )))
+	        LRT.red  <- as.numeric(logLik(lme4::lmer(formula_red, data = data)))
+	        LRT.D    <- as.numeric(-2*(LRT.red-LRT.mod))
+	        LRT.P    <- ifelse(LRT.D<=0, LRT.df, pchisq(LRT.D,1,lower.tail=FALSE)/2)
+		# LR       <- as.numeric(-2*(logLik(lm(update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") ))), data=data))-logLik(mod)))
+		# P.LRT    <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
 	}
 	if(length(randterms)>1) {
-		P.LRT = rep(NA, length(grname))
-		for(i in 1:length(grname)) {
-			LR       <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") ))), data=data))-logLik(mod)))
-			P.LRT[i] <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+	        for (i in c("LRT.P", "LRT.D", "LRT.red")) assign(i, rep(NA, length(grname)))
+		for (i in 1:length(grname)) {
+		        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") )))
+		        LRT.red[i]  <- as.numeric(logLik(lme4::lmer(formula_red, data = data)))
+		        LRT.D[i]    <- as.numeric(-2*(LRT.red[i]-LRT.mod))
+		        LRT.P[i]    <- ifelse(LRT.D[i]<=0, 1, pchisq(LRT.D[i],1,lower.tail=FALSE)/2)
+			#LR       <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") ))), data=data))-logLik(mod)))
+			#P.LRT[i] <- ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
 		}
 	}
+	
+	
 	# preparing results
 	P = matrix(c(P.LRT, P.permut),ncol=2,byrow=FALSE)
 	colnames(P) = c("P.LRT", "P.permut")
@@ -151,6 +166,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
 		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
 		    R.boot=R.boot, R.permut = matrix(rep(NA, length(grname) * npermut), nrow = length(grname)),
+		    LRT = list(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df, LRT.P=LRT.P),
 		    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))),
 		    nobs = nrow(data),
 		    mod = mod)
