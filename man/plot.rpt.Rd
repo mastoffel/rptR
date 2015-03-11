@@ -4,7 +4,8 @@
 \title{Plot a rpt object}
 \usage{
 \method{plot}{rpt}(x, type = c("boot", "permut"), scale = c("link",
-  "original"), main = NULL, breaks = "FD", ...)
+  "original"), main = NULL, breaks = "FD",
+  xlab = "Repeatability estimates", ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions.}
@@ -16,6 +17,8 @@
 \item{main}{Plot title}
 
 \item{breaks}{hist() argument}
+
+\item{xlab}{x-axis title}
 
 \item{\dots}{Additional arguments to the hist() function.}
 }

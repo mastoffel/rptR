@@ -15,7 +15,9 @@
 #'        asymtotic CI, but may be very time-consuming.
 #' @param npermut Number of permutations used when calculating 
 #'        asymptotic \emph{P} values (defaults to 1000). Currently not in use!
-#' 
+#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used.
 #' 
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
@@ -148,7 +150,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	rownames(P) = grname
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
 		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
-		    R.boot=R.boot, R.permut = matrix(rep(NA, length(grnames) * npermut), nrow = length(grnames)),
+		    R.boot=R.boot, R.permut = matrix(rep(NA, length(grname) * npermut), nrow = length(grname)),
 		    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))),
 		    nobs = nrow(data),
 		    mod = mod)

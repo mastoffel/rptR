@@ -8,6 +8,7 @@
 #' @param scale Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.
 #' @param main Plot title
 #' @param breaks hist() argument
+#' @param xlab x-axis title
 #' @param \dots Additional arguments to the hist() function.
 #'
 #' @references 
