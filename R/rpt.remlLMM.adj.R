@@ -51,20 +51,17 @@
 #' 
 #' @examples  
 #' 
-#' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ Sex + (1|BirdID), "BirdID", 
+#' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c("Sex", "BirdID"), 
 #'  data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
-
 #' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #' data(BodySize)
 #' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize,
 #'  nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 #' 
-#'       
 #' @keywords models
 #' 
 #' @export
@@ -140,7 +137,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	LRT.df   <- 1
 	if(length(randterms)==1) {
 	        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") )))
-	        LRT.red  <- as.numeric(logLik(lme4::lmer(formula_red, data = data)))
+	        LRT.red  <- as.numeric(logLik(lm(formula_red, data = data)))
 	        LRT.D    <- as.numeric(-2*(LRT.red-LRT.mod))
 	        LRT.P    <- ifelse(LRT.D<=0, LRT.df, pchisq(LRT.D,1,lower.tail=FALSE)/2)
 		# LR       <- as.numeric(-2*(logLik(lm(update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") ))), data=data))-logLik(mod)))
@@ -160,7 +157,7 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	
 	
 	# preparing results
-	P = matrix(c(P.LRT, P.permut),ncol=2,byrow=FALSE)
+	P = matrix(c(LRT.P, P.permut),ncol=2,byrow=FALSE)
 	colnames(P) = c("P.LRT", "P.permut")
 	rownames(P) = grname
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 

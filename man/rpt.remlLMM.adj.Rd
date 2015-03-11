@@ -42,6 +42,7 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
+\item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test}
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
@@ -52,7 +53,7 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM.adj(Tarsus ~ Sex + (1|BirdID), "BirdID",
+(rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c("Sex", "BirdID"),
  data=BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 # repeatability estimation for weight (body mass) - a lower R than the previous one
