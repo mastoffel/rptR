@@ -63,10 +63,10 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
         # make bootstrap histogram
         boot_hist <- function(R, R.boot, CI.l, CI.u, xlab. = xlab, breaks. = breaks, main. = main, ...) {
                 # y position of confidence band
-                v.pos <- max((hist(R.boot, breaks = breaks, plot = FALSE))$counts)  
+                v.pos <- max((hist(R.boot, breaks = breaks., plot = FALSE))$counts)  
                 # plot
-                hist(R.boot, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
-                     main=main)
+                hist(R.boot, breaks = breaks., ylim = c(0, v.pos*1.5), xlab = xlab.,
+                     main=main.)
                 lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
                 arrows(CI.l, v.pos*1.15, CI.u, v.pos*1.15, 
                        length=0.3, angle=90, code=3, lwd = 2.5, col = "black")
@@ -80,10 +80,10 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
                 CI.perm  <- quantile(R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
                 Median.R <- median(R.permut)
                 # y position of confidence band
-                v.pos <- max((hist(R.permut, breaks = breaks, plot = FALSE))$counts)  
+                v.pos <- max((hist(R.permut, breaks = breaks., plot = FALSE))$counts)  
                 # plot
-                hist(R.permut, breaks = breaks, ylim = c(0, v.pos*1.5), xlab = xlab,
-                     main=main)
+                hist(R.permut, breaks = breaks., ylim = c(0, v.pos*1.5), xlab = xlab.,
+                     main=main.)
                 lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
                 lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
                 arrows(unname(CI.perm[1]), v.pos*1.15, unname(CI.perm[2]), v.pos*1.15, 
@@ -94,20 +94,39 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
                        c("Median of simulated repeatabilities with CI", "Observed repeatability"), box.lty = 0)
         }
         
-        if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML"))) {
+        if((x$datatype=="Gaussian") & (x$method == "LMM.REML") & (length(x$R)>1)) {
+                devAskNewPage(ask = TRUE)
+                if(type == "boot") {
+                        for (i in 1:length(x$R)) {
+                                boot_hist(R = x$R[i], R.boot = x$R.boot[i, ], 
+                                        CI.l = unname(x$CI.R[i, 1]),
+                                        CI.u = unname(x$CI.R[i, 2]), 
+                                        main. = paste("Bootstrap repeatabilities for", names(x$R)[i]), ...)
+                        }
+                } else if(type == "permut") {
+                        for (i in 1:length(x$R)) {
+                                permut_hist(R = x$R[i], R.permut = x$R.permut[i, ], 
+                                            main. = paste("Permutation repeatabilities for", names(x$R)[i]), ...)
+                        }
+                } 
+                devAskNewPage(ask = NULL)
+        }
+        
+        if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML")) & length(x$R)==1) {
                 if(type == "boot") {
                         boot_hist(R = x$R, R.boot = x$R.boot, 
                                   CI.l = unname(x$CI.R[1]),
                                   CI.u = unname(x$CI.R[2]), ...)
                 } else if(type == "permut") {
                         if (x$method == "corr") {
-                                permut_hist(P = x$P, R.permut = x$R.permut, ...)
+                                permut_hist(R = x$R, R.permut = x$R.permut, ...) # x$P??
                         } else if (x$method == "LMM.REML") {
                                 # no red point. unclear which p to plot
                                 permut_hist(R = x$R, R.permut = x$R.permut, ...)      
                         }
                 } 
         }
+        
         
         if(x$datatype=="Gaussian" & x$method == "ANOVA") {
               if (type == "boot") {
