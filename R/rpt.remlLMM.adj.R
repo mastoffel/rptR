@@ -27,7 +27,8 @@
 #' \item{R}{Point estimate for repeatability.}
 #' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
 #' \item{CI.R}{Confidence interval for  repeatability.}
-#' \item{P}{Approximate \emph{P} value from a significance test based on permutation.}
+#' \item{P}{Approximate \emph{P} value from a significance test based on likelihood-ratio.}
+#' \item{P.permut}{Approximate \emph{P} value from a significance test based on permutation of residuals.}
 #' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 #' \item{R.permut}{Permutation samples for \emph{R}.}
 #' \item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
@@ -128,11 +129,47 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	}
 	# significance test by permutation of residuals
 	P.permut <- rep(NA, length(grname))
+	
 	# significance test by likelihood-ratio-test
 	terms <- attr(terms(formula), "term.labels")
 	randterms <-  terms[which(regexpr(" | ",terms,perl=TRUE)>0)]
 	
-	## likelihood ratio test variables
+	# no permutation test
+	if (npermut == 1) {
+	        R.permut = R
+	        P.permut <- NA
+	}
+	
+	# significance test by permutation of residuals
+	permut <- function(formula, mod_red, dep_var, grname, i) {
+	        y_perm <- fitted(mod_red) + sample(resid(mod_red))
+	        data_perm <- data
+	        data_perm[dep_var] <- y_perm
+	        R.pe <- R.pe(formula, data_perm, grname)[i]
+	}
+	# response variable
+	dep_var <- as.character(formula)[2]
+	# one random effect, uses lm()
+	if(length(randterms) == 1) {
+	        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")") )))
+	        mod_red <- lm(formula_red, data = data)
+	        # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
+	        R.permut <- c(R, replicate(npermut-1, permut(formula, mod_red, dep_var, grname), simplify=TRUE))
+	        P.permut <- sum(R.permut >= R)/npermut
+	}
+	# multiple random effects, uses lmer()
+	if(length(randterms) > 1) {
+	        R.permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
+	        P.permut <- rep(NA, length(grname))
+	        for (i in 1:length(grname)) {
+	                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")") )))
+	                mod_red <- lme4::lmer(formula_red, data = data)
+	                R.permut[i, ] <- c(R[i], replicate(npermut-1, permut(formula, mod_red, dep_var, grname, i), simplify=TRUE))
+	                P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
+	        }
+	}
+	
+	## likelihood-ratio-test 
 	LRT.mod  <- as.numeric(logLik(mod))
 	LRT.df   <- 1
 	if(length(randterms)==1) {
@@ -161,8 +198,8 @@ rpt.remlLMM.adj = function(formula, grname, data, CI=0.95, nboot=1000, npermut=1
 	colnames(P) = c("P.LRT", "P.permut")
 	rownames(P) = grname
 	res  = list(call=match.call(), datatype="Gaussian", method="LMM.REML", 
-		    CI=CI,R=R, se=se, CI.R=CI.R, P = P,
-		    R.boot=R.boot, R.permut = matrix(rep(NA, length(grname) * npermut), nrow = length(grname)),
+		    CI=CI,R=R, se=se, CI.R=CI.R, P = P, P.permut = P.permut,
+		    R.boot=R.boot, R.permut = R.permut,
 		    LRT = list(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df, LRT.P=LRT.P),
 		    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))),
 		    nobs = nrow(data),

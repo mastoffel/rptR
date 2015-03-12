@@ -39,7 +39,8 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{R}{Point estimate for repeatability.}
 \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
 \item{CI.R}{Confidence interval for  repeatability.}
-\item{P}{Approximate \emph{P} value from a significance test based on permutation.}
+\item{P}{Approximate \emph{P} value from a significance test based on likelihood-ratio.}
+\item{P.permut}{Approximate \emph{P} value from a significance test based on permutation of residuals.}
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
 \item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test}
