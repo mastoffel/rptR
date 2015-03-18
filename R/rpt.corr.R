@@ -49,7 +49,7 @@
 
 rpt.corr <- function(y, groups, data, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
         
-        # check inputs
+        # check inputs for data argument
         if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
                 y <- data[[y]]
                 groups <- data[[groups]]
