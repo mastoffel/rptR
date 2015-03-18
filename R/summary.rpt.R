@@ -35,7 +35,7 @@ summary.rpt <- function(object, ...) {
         #rpt.corr and  rpt.remlLMM and rpt.aov, rpt.remlLMM.adj with one groups
         if(object$datatype =="Gaussian" & ((object$method == "corr") | (object$method == "LMM.REML")) & length(object$R)==1) {
                 # bootstrap and permutation table 
-                CI.perm  <- quantile(object$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+                CI.perm  <- quantile(object$R.permut, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)
                 object$rpt    <- structure(data.frame(object$R, object$se ,unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
                                       names = c("R", "SE", attr(object$P, "names")[1], 
                                                 attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
@@ -56,7 +56,7 @@ summary.rpt <- function(object, ...) {
         
         if(object$datatype=="Gaussian" & object$method == "ANOVA") {
                 # anova repeatability and permutation table 
-                CI.perm  <- quantile(object$R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
+                CI.perm  <- quantile(object$R.permut, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)
                 object$rpt    <- structure(data.frame(object$R, object$se, unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
                                       names = c("R", "SE", attr(object$P, "names")[1], 
                                                 attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))

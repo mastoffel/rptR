@@ -96,6 +96,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
         
         if((x$datatype=="Gaussian") & (x$method == "LMM.REML") & (length(x$R)>1)) {
                 devAskNewPage(ask = TRUE)
+                on.exit(devAskNewPage(ask = NULL))
                 if(type == "boot") {
                         for (i in 1:length(x$R)) {
                                 boot_hist(R = x$R[i], R.boot = x$R.boot[i, ], 
@@ -109,7 +110,6 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
                                             main. = paste("Permutation repeatabilities for", names(x$R)[i]), ...)
                         }
                 } 
-                devAskNewPage(ask = NULL)
         }
         
         if(x$datatype=="Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML")) & length(x$R)==1) {
