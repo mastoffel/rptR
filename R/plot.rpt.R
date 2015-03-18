@@ -75,7 +75,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
                        c("Repeatability with CI"), box.lty = 0)
         }
         
-        permut_hist <- function(R, R.permut, xlab. = xlab, breaks. = breaks, main. = main, ...) {
+        permut_hist <- function(R, R.permut, xlab. = xlab, CI = x$CI, breaks. = breaks, main. = main, ...) {
                 # get CI for permutation
                 CI.perm  <- quantile(R.permut, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
                 Median.R <- median(R.permut)

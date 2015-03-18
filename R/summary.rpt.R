@@ -85,7 +85,7 @@ summary.rpt <- function(object, ...) {
                 # warning("Not yet implemented")
 #                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
         for(i in 1:length(object$R)) {
-                CI.perm  <- quantile(object$R.permut[i, ], c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE) # should be taken out of the loop to the top when impl.
+                CI.perm  <- quantile(object$R.permut[i, ], c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE) # should be taken out of the loop to the top when impl.
                 object$rpt[[i]]    <- structure(data.frame(object$R[i], object$se[i] ,unname(object$P[i, 1]), object$CI.R[i, 1], object$CI.R[i, 2]), 
                                            names = c("R", "SE", colnames(object$P)[1], 
                                                    colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
@@ -108,8 +108,8 @@ summary.rpt <- function(object, ...) {
      
         if(object$datatype!="Gaussian" & object$method=="PQL") {
                 # CI for permutation and bootstrap
-                CI.perm       <- as.data.frame(rbind(quantile(object$R.permut$R.link, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE),
-                                         quantile(object$R.permut$R.org, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)))
+                CI.perm       <- as.data.frame(rbind(quantile(object$R.permut$R.link, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE),
+                                         quantile(object$R.permut$R.org, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)))
                 CI.boot       <- as.data.frame(rbind(object$CI.link, object$CI.org))
                 # Rpt table with link and original scale
                 object$rpt    <- structure(data.frame(c(object$R.link,  object$R.org), 
