@@ -67,13 +67,23 @@
 
 # much to do here
 rpt.remlLMM <- function(y, groups, data = NULL, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
-        # check inputs
-        if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-                y <- data[[y]]
-                groups <- data[[groups]]
-        } else if (!(length(y) == length(groups))){
-                stop("y and groups must have the same length")
+       
+        if (!is.null(data)) {
+                y      <- eval(substitute(y), data)
+                groups <- eval(substitute(groups), data)
+                if(is.character(y) & (length(y) <= 2) & is.character(groups) & (length(groups) == 1)) {
+                        y <- data[, y]
+                        groups <- data[, groups]
+                }
         }
+  
+#         # check inputs
+#         if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+#                 y <- data[[y]]
+#                 groups <- data[[groups]]
+#         } else if (!(length(y) == length(groups))){
+#                 stop("y and groups must have the same length")
+#         }
         
         # model
         formula  <- y ~ 1 + (1|groups)

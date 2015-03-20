@@ -3,10 +3,12 @@
 #' Calculates repeatability from a generalised linear mixed-effects models fitted
 #' by PQL (penalized-quasi likelihood) estimation for binary and proportion data.
 #' 
-#' @param y Vector of a response values (for binary data) or a two-column matrix,
-#'        array or data.frame with colums m, n-m, where m is the number of 
-#'        successes and n the number of trials.
-#' @param groups Vector of group identitites.
+#' @param y If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data 
+#'       (the first specifying the variable for number of successes and the second the variable for number of trials)
+#'        Alternative: Vector of a response values (for binary data) or a two-column
+#'        matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
+#'        number of trials.
+#' @param groups String indicating group variable or Vector of group identities.
 #' @param data Data frame containing respnse and groups variable.
 #' @param link Link function, \code{log} and \code{sqrt} are allowed, defaults 
 #'        to \code{log}.  
@@ -70,8 +72,9 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
-#'      
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
+#'         
 #' @seealso \link{rpt.binomGLMM.add}, \link{rpt}, \link{print.rpt}
 #' 
 #' @examples  

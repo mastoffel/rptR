@@ -147,7 +147,7 @@ summary.rpt <- function(object, ...) {
                                                  c(object$CI.link[1], object$CI.org[1]),
                                                  c(object$CI.link[2], object$CI.org[2])),
                                       names = c("R", "SE", "P", 
-                                                attr(CI.link, "names")[1], attr(CI.link, "names")[2]),
+                                                attr(object$CI.link, "names")[1], attr(object$CI.link, "names")[2]),
                                       row.names = c("link", "original"))
                 class(object) <- "summary.rpt"
                 return(object) 

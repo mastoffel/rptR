@@ -2,18 +2,20 @@
 #' 
 #' Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for binary and proportion data.
 #' 
-#' @param y Vector of a response values (for binary data) or a two-column
-#'      matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
-#'      number of trials.
-#' @param groups Vector of group identities.
-#' @param data Data frame containing respnse and groups variable.
+#' @param y If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data 
+#'       (the first specifying the variable for number of successes and the second the variable for number of trials)
+#'        Alternative: Vector of a response values (for binary data) or a two-column
+#'        matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
+#'        number of trials.
+#' @param groups String indicating group variable or Vector of group identities.
+#' @param data Data frame containing response and groups variable.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
-#'      in \pkg{MCMCglmm} (see there for more details). Default priors will be
-#'      used if prior is \code{NULL}.
+#'        in \pkg{MCMCglmm} (see there for more details). Default priors will be
+#'        used if prior is \code{NULL}.
 #' @param verbose Whether or not \link{MCMCglmm} should print MH diagnostics 
-#'      are printed to screen. Defaults to FALSE.
-#' @param ... Additonal arguements that are passed on to \link{MCMCglmm}
+#'        are printed to screen. Defaults to FALSE.
+#' @param ... Additonal arguments that are passed on to \link{MCMCglmm}
 #'       (e.g. length of chain, thinning interval).
 #'   
 #'   
@@ -49,9 +51,10 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
-#' @seealso \link{rpt.binomGLMM.multi}, \link{rpt}, \link{print.rpt} 
+#' @seealso \link{rpt.binomGLMM.multi}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt} 
 #' 
 #' @examples  
 #' # repeatability estimations for egg dumping (binary data)
@@ -61,7 +64,6 @@
 #'      (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism))
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
-#' ## data argument has to work for matrix, to be implemented
 #'      data(BroodParasitism)
 #'      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
 #'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches 

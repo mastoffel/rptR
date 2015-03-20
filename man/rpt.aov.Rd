@@ -27,15 +27,10 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{R.permut}{Repeatability \emph{R} estimates for each permutation run.}
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
-\item{mod}{.}
+\item{mod}{Anova model.}
 }
 \description{
 Repeatability calculations based on Analysis of Variance (ANOVA).
-}
-\details{
-For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
-  or rpt.mcmcLMM.adj (methods "REML" and "MCMC", respecitvely) (Note that
-  rpt.mcmcLMM.adj is not yet implemented).
 }
 \examples{
 # repeatability estimation for tarsus length - a very high R
@@ -48,7 +43,8 @@ For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Becker, W. A. (1992) \emph{A manual of quantitative genetics}. 5th edn. Academic Enterprises, Pullman, WA. \cr
@@ -58,7 +54,7 @@ Lessells, C. M. and Boag, P. T. (1987) \emph{Unrepeatable repeatabilities: a com
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.corr}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{print.rpt}
+\link{rpt.corr}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt}
 }
 \keyword{models}
 

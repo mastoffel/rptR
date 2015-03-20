@@ -7,13 +7,15 @@ rpt.binomGLMM.add(y, groups, data, CI = 0.95, prior = NULL,
   verbose = FALSE, ...)
 }
 \arguments{
-\item{y}{Vector of a response values (for binary data) or a two-column
-matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the
-number of trials.}
+\item{y}{If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data
+(the first specifying the variable for number of successes and the second the variable for number of trials)
+ Alternative: Vector of a response values (for binary data) or a two-column
+ matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the
+ number of trials.}
 
-\item{groups}{Vector of group identities.}
+\item{groups}{String indicating group variable or Vector of group identities.}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{data}{Data frame containing response and groups variable.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95)}
 
@@ -24,7 +26,7 @@ used if prior is \code{NULL}.}
 \item{verbose}{Whether or not \link{MCMCglmm} should print MH diagnostics
 are printed to screen. Defaults to FALSE.}
 
-\item{...}{Additonal arguements that are passed on to \link{MCMCglmm}
+\item{...}{Additonal arguments that are passed on to \link{MCMCglmm}
       (e.g. length of chain, thinning interval).}
 }
 \value{
@@ -63,7 +65,6 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
      (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism))
 
 # repeatability estimations for egg dumping (proportion data)
-## data argument has to work for matrix, to be implemented
      data(BroodParasitism)
      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches
@@ -71,7 +72,8 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Browne, W. J., Subramanian, S. V., et al. (2005). \emph{Variance partitioning in multilevel logistic models that exhibit overdispersion}. Journal of the Royal Statistical Society A 168: 599-613. \cr
@@ -81,7 +83,7 @@ Goldstein, H., Browne, W., et al. (2002). \emph{Partitioning variation in multil
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.binomGLMM.multi}, \link{rpt}, \link{print.rpt}
+\link{rpt.binomGLMM.multi}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt}
 }
 \keyword{models}
 

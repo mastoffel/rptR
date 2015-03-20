@@ -50,7 +50,8 @@ Calculates repeatability based on inter-class correlations
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Sokal, R. R. and F. J. Rohlf (1995). \emph{Biometry: The principles and practice of statistics in biological research}. New York, W.H. Freeman and Company.
@@ -58,7 +59,7 @@ Sokal, R. R. and F. J. Rohlf (1995). \emph{Biometry: The principles and practice
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{print.rpt}
+\link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt}
 }
 \keyword{models}
 

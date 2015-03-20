@@ -1,7 +1,7 @@
 Package: rptR
 Title: Repeatability for Gaussian and non-Gaussian data
 Version: 0.6.405
-Depends: 
+Depends:
     R (>= 3.1.1)
 Date: 2011-11-24
 Author: Holger Schielzeth <holger.schielzeth@ebc.uu.se>, Shinichi Nakagawa
@@ -11,7 +11,7 @@ Maintainer: Holger Schielzeth <holger.schielzeth@ebc.uu.se>
 Description: R functions for calculating repeatability (intra-class
     correlation) from normal, binary, proportion and count data.
 License: GPL (>= 2)
-Imports: 
+Imports:
     methods,
     VGAM (>= 0.9-4),
     MCMCglmm (>= 2.21),
@@ -19,4 +19,5 @@ Imports:
     lme4 (>= 1.1-7),
     coda (>= 0.16-1),
     parallel (>= 3.1.2)
-Suggests: testthat
+Suggests:
+    testthat

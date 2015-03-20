@@ -59,7 +59,8 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
@@ -67,7 +68,7 @@ Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized concorda
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.remlLMM}, \link{rpt.aov}, \link{rpt.corr}, \link{rpt}, \link{print.rpt}
+\link{rpt.remlLMM}, \link{rpt.aov}, \link{rpt.corr}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt}
 }
 \keyword{models}
 
