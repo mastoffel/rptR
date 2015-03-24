@@ -5,7 +5,7 @@
 #' significance tests of the repeatability (intra-class correlation coefficient) of measurements.
 #' The function \link{rpt} is a the core functions that calls more specialised functions as required. 
 #' Specialised functions can also be called directly (see \link{rpt} for details).
-#' All functions return lists of values. The functions \link{summary.rpt} produces summaries in a more appealing format.
+#' All functions return lists of values. The function \link{summary.rpt} produces summaries in a detailed format.
 #' 
 #' @note Currently there is are a number of functions that use the two arguments \code{y} and \code{groups} to 
 #' estimate standard repeatabilities (see e.g. function \link{rpt}). There is another group of 

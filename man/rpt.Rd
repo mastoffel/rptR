@@ -3,10 +3,10 @@
 \alias{rpt}
 \title{Repeatability Calculation for Gaussian and Non-Gaussian Data}
 \usage{
-rpt(y, groups, datatype = c("Gaussian", "binomial", "proportion", "count"),
-  method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"),
-  link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000,
-  npermut = 1000)
+rpt(y, groups, data, datatype = c("Gaussian", "binomial", "proportion",
+  "count"), method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add",
+  "GLMM.multi"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95,
+  nboot = 1000, npermut = 1000)
 }
 \arguments{
 \item{y}{Vector of measurements (or two-column matrix or dataframe in case of
@@ -91,21 +91,19 @@ For \code{datatype="Gaussian"} calls function \link{rpt.corr}, \link{rpt.aov},
 
        # for Gaussian data - correlation-based repeatability
        # repeatability for male breeding success on a transformed scale
-       data(Fledglings)
-       Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-       attach(Fledglings)
-       (rpt.Fledge <- rpt(sqrtFledge, MaleID, datatype="Gaussian", method="corr", nboot=10, npermut=10))
-       detach(Fledglings)
+         data(Fledglings)
+         Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
+        (rpt.Fledge <- rpt("sqrtFledge", "MaleID", data = Fledglings, datatype="Gaussian", method="corr", nboot=10, npermut=10))  # reduced number of iterations
+
 
        # for Gaussian data - ANOVA-based and two LMM-based repeatabilities
-       # repeatability estimation for weight (body mass)
+       # repeatability estimation for tarsus length - a very high R
        data(BodySize)
-       attach(BodySize)
-       (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="ANOVA", npermut=10))
-       (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="REML", nboot=10, npermut=10))
+       (rpt.BS <- rpt("Tarsus", "BirdID", data = BodySize, datatype="Gaussian", method="ANOVA", npermut=10))
+
+       (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", method="REML", nboot=10, npermut=10))
        # reduced number of nboot and npermut iterations
        (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="MCMC"))
-       detach(BodySize)
 
        # for Binary data - additive and multiplicative overdispersion models
        # repeatability estimations for egg dumping (binary data)

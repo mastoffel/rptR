@@ -84,21 +84,21 @@
 #'        
 #'        # for Gaussian data - correlation-based repeatability
 #'        # repeatability for male breeding success on a transformed scale
-#'        data(Fledglings)
-#'        Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'        attach(Fledglings)
-#'        (rpt.Fledge <- rpt(sqrtFledge, MaleID, datatype="Gaussian", method="corr", nboot=10, npermut=10))
-#'        detach(Fledglings)
+#'          data(Fledglings)
+#'          Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
+#'         (rpt.Fledge <- rpt("sqrtFledge", "MaleID", data = Fledglings, datatype="Gaussian", 
+#'                             method="corr", nboot=10, npermut=10))  # reduced number of iterations
+#'   
 #'        
-#'        # for Gaussian data - ANOVA-based and two LMM-based repeatabilities
-#'        # repeatability estimation for weight (body mass)
+#'        # for Gaussian data - ANOVA-based and LMM-based repeatabilities
+#'        # repeatability estimation for tarsus length - a very high R
 #'        data(BodySize)
-#'        attach(BodySize)
-#'        (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="ANOVA", npermut=10))
-#'        (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="REML", nboot=10, npermut=10)) 
-#'        # reduced number of nboot and npermut iterations
-#'        (rpt.Weight <- rpt(Weight, BirdID, datatype="Gaussian", method="MCMC"))
-#'        detach(BodySize)
+#'        # ANOVA based
+#'        (rpt.BS <- rpt("Tarsus", "BirdID", data = BodySize, datatype="Gaussian", method="ANOVA", npermut=10)) 
+#'        # LMM based
+#'        (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", method="REML", nboot=10, npermut=10)) 
+#'        # LMM based with MCMC
+#'        (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", method="MCMC"))
 #'        
 #'        # for Binary data - additive and multiplicative overdispersion models
 #'        # repeatability estimations for egg dumping (binary data)
@@ -135,7 +135,7 @@
 #' 
 #' @export
 #' 
-rpt <- function(y, groups, 
+rpt <- function(y, groups, data, 
 			   datatype=c("Gaussian", "binomial", "proportion", "count"),  
 			   method=c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"),  
 			   link=c("logit", "probit", "log", "sqrt"),
@@ -145,18 +145,18 @@ rpt <- function(y, groups,
 			warning("Linear mixed model fitted by REML used by default. Change using argument 'method', if required ('corr', 'ANOVA', 'REML' and 'MCMC' allowed for Gaussian data).")
 			method<-"REML" 
 		}
-		if (method=="REML")  return(rpt.remlLMM(y, groups, CI=CI, nboot=nboot, npermut=npermut))
-		if (method=="MCMC")  return(rpt.mcmcLMM(y, groups, CI=CI))
-		if (method=="ANOVA") return(rpt.aov(y, groups, CI=CI, npermut=npermut))	
-		if (method=="corr")  return(rpt.corr(y, groups, CI=CI, nboot=nboot, npermut=npermut)) 
+		if (method=="REML")  return(rpt.remlLMM(y, groups, data, CI=CI, nboot=nboot, npermut=npermut))
+		if (method=="MCMC")  return(rpt.mcmcLMM(y, groups, data, CI=CI))
+		if (method=="ANOVA") return(rpt.aov(y, groups, data, CI=CI, npermut=npermut))	
+		if (method=="corr")  return(rpt.corr(y, groups, data, CI=CI, nboot=nboot, npermut=npermut)) 
 	}
 	if(datatype=="binomial" | datatype=="proportion") {
 		if(length(method)>1) {
 			warning("Generalised linear mixed model with multiplicative overdispersion fitted by PQL used by default. Change using argument 'method', if required ('GLMM.add' and 'GLMM.multi' allowed for Binomial data).")
 			method<-"GLMM.multi" 
 		}
-		if (method=="GLMM.multi") return(rpt.binomGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut))
-		if (method=="GLMM.add") return(rpt.binomGLMM.add(y, groups, CI=CI))
+		if (method=="GLMM.multi") return(rpt.binomGLMM.multi(y, groups, data, link, CI=CI, nboot=nboot, npermut=npermut))
+		if (method=="GLMM.add") return(rpt.binomGLMM.add(y, groups, data, CI=CI))
 	}
 	if(datatype=="count") {
 		if(length(method)>1) {
@@ -167,7 +167,7 @@ rpt <- function(y, groups,
 			link="log"
 			warning("Log link will be used.")
 		}
-		if (method=="GLMM.multi") return(rpt.poisGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut)) 
-		if (method=="GLMM.add")   return(rpt.poisGLMM.add(y, groups, CI=CI)) 
+		if (method=="GLMM.multi") return(rpt.poisGLMM.multi(y, groups, data, link, CI=CI, nboot=nboot, npermut=npermut)) 
+		if (method=="GLMM.add")   return(rpt.poisGLMM.add(y, groups, data, CI=CI)) 
 	} 
 }
