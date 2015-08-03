@@ -81,26 +81,37 @@
 #' 
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
-#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
-#'      (rpt.Host <- rpt.binomGLMM.multi("HostYN", "FemaleID", data = EggDump,  nboot=10, npermut=10))  
+#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
+#'                        select = c(HostYN, FemaleID))
+#'      (rpt.Host <- rpt.binomGLMM.multi("HostYN", "FemaleID", data = EggDump,  
+#'                                        nboot=10, npermut=10))  
 #'      # low number of nboot and npermut to speed up error checking
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi("cbpYN", "FemaleID", data = BroodParasitism, nboot=10, npermut=10))
+#'      (rpt.BroodPar <- rpt.binomGLMM.multi("cbpYN", "FemaleID", 
+#'                                            data = BroodParasitism, nboot=10, 
+#'                                            npermut=10))
 #'      # low number of nboot and npermut to speed up error checking
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #'      data(BroodParasitism)
-#'      ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, FemaleID))
-#'      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.multi(c("HostClutches", "parasitised"), "FemaleID", 
-#'                                      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ], 
-#'                                      nboot=10, npermut=10))
-#'                                       # reduced number of npermut iterations
+#'      ParasitisedOR <- subset(BroodParasitism,  
+#'                              select= c(HostClutches, OwnClutches, FemaleID))
+#'      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - 
+#'                                    ParasitisedOR$HostClutches 
+#'      (rpt.Host <- rpt.binomGLMM.multi(c("HostClutches", "parasitised"), 
+#'      "FemaleID", 
+#'      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ], 
+#'      nboot=10, npermut=10))
+#'      # reduced number of npermut iterations
 #'                                       
-#'      ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
+#'      ParasitismOR <- subset(BroodParasitism,  
+#'                             select= c(cbpEggs, nEggs, FemaleID))
 #'      ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
-#'      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) # some rows have entries 0,0 and need to be removed
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi(c("cbpEggs", "parasitised"), "FemaleID", 
-#'                                              data = ParasitismOR[-zz, ], nboot=10, npermut=10))   
+#'      # some rows have entries 0,0 and need to be removed
+#'      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
+#'      (rpt.BroodPar <- rpt.binomGLMM.multi(c("cbpEggs", "parasitised"), 
+#'                                             "FemaleID", 
+#'                                              data = ParasitismOR[-zz, ],
+#'                                              nboot=10, npermut=10))   
 #' 
 #' 
 #' @keywords models

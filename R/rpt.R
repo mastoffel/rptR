@@ -3,10 +3,11 @@
 #' A wrapper function for repeatability calculations. Calls specialised functions 
 #' depending of the choice of datatype and method.
 #' 
-#' @param y Vector of measurements (or two-column matrix or dataframe in case of 
+#' @param y String specifying response variable  (or two-column matrix or dataframe in case of 
 #'        proprotion data, see \link{rpt.binomGLMM.add} and
 #'         \link{rpt.binomGLMM.multi} for details.
-#' @param groups Vector of group identitities (will be converted to a factor).
+#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
+#' @param data Data frame containing respnse and groups variable.
 #' @param datatype Character string specifying the data type
 #'       ("Gaussian", "binomial", "proportion", "count"). "binomial" and 
 #'       "proportion" are interchangable and call the same functions.
@@ -80,55 +81,63 @@
 #' 
 #' @examples  
 #' 
-#'        # all examples use a reduced number of npermut and nboot iterations!
+#' # all examples use a reduced number of npermut and nboot iterations!
 #'        
-#'        # for Gaussian data - correlation-based repeatability
-#'        # repeatability for male breeding success on a transformed scale
-#'          data(Fledglings)
-#'          Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'         (rpt.Fledge <- rpt("sqrtFledge", "MaleID", data = Fledglings, datatype="Gaussian", 
-#'                             method="corr", nboot=10, npermut=10))  # reduced number of iterations
+#' # for Gaussian data - correlation-based repeatability
+#' # repeatability for male breeding success on a transformed scale
+#'   data(Fledglings)
+#'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
+#'   (rpt.Fledge <- rpt("sqrtFledge", "MaleID", data = Fledglings, 
+#'                      datatype="Gaussian", method="corr", nboot=10, 
+#'                      npermut=10))  # reduced number of iterations
+#'
+#'
+#' # for Gaussian data - ANOVA-based and LMM-based repeatabilities
+#' # repeatability estimation for tarsus length - a very high R
+#' data(BodySize)
+#' # ANOVA based
+#' (rpt.BS <- rpt("Tarsus", "BirdID", data = BodySize, datatype="Gaussian", 
+#'                method="ANOVA", npermut=10))
+#' # LMM based
+#' (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", 
+#'                    method="REML", nboot=10, npermut=10))
+#' # LMM based with MCMC
+#' (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", 
+#'                     method="MCMC"))
+#'
+#' # for Binary data - additive and multiplicative overdispersion models
+#' # repeatability estimations for egg dumping (binary data)
+#' data(BroodParasitism)
+#' attach(BroodParasitism)
+#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism, 
+#'                      datatype="binomial", method="GLMM.multi", link="logit",
+#'                      nboot=10, npermut=10))
+#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism,
+#'                      datatype="binomial", method="GLMM.multi", link="probit",
+#'                      nboot=10, npermut=10))
+#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism,
+#'                      datatype="binomial", method="GLMM.add"))
 #'   
-#'        
-#'        # for Gaussian data - ANOVA-based and LMM-based repeatabilities
-#'        # repeatability estimation for tarsus length - a very high R
-#'        data(BodySize)
-#'        # ANOVA based
-#'        (rpt.BS <- rpt("Tarsus", "BirdID", data = BodySize, datatype="Gaussian", method="ANOVA", npermut=10)) 
-#'        # LMM based
-#'        (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", method="REML", nboot=10, npermut=10)) 
-#'        # LMM based with MCMC
-#'        (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", method="MCMC"))
-#'        
-#'        # for Binary data - additive and multiplicative overdispersion models
-#'        # repeatability estimations for egg dumping (binary data)
-#'        data(BroodParasitism)
-#'        attach(BroodParasitism)
-#'        (rpt.BroodPar <- rpt(cbpYN, FemaleID, datatype="binomial", method="GLMM.multi", link="logit", 
-#'                             nboot=10, npermut=10))
-#'        (rpt.BroodPar <- rpt(cbpYN, FemaleID, datatype="binomial", method="GLMM.multi", link="probit", 
-#'                             nboot=10, npermut=10))
-#'        (rpt.BroodPar <- rpt(cbpYN, FemaleID, datatype="binomial", method="GLMM.add"))
-#'        detach(BroodParasitism)
-#'        
-#'        # for proportion data - additive and multiplicative overdispersion models
-#'        # repeatability estimations for egg dumping (proportion data)
-#'        data(BroodParasitism)
-#'        attach(BroodParasitism)
-#'        ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)   
-#'        (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1], 
-#'                         datatype="proportion", method="GLMM.multi", nboot=10, npermut=10))
-#'        (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1], 
-#'                         datatype="proportion", method="GLMM.add"))
-#'        detach(BroodParasitism)
-#'        
-#'        # for count data - additive and multiplicative overdispersion models
-#'        # repeatability for male fledgling success
-#'        data(Fledglings)
-#'        attach(Fledglings)
-#'        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.multi", nboot=10, npermut=10))
-#'        (rpt.Fledge <- rpt(Fledge, MaleID, datatype="count", method="GLMM.add"))
-#'        detach(Fledglings)
+#'
+#' # for proportion data - additive and multiplicative overdispersion models
+#' # repeatability estimations for egg dumping (proportion data)
+#' data(BroodParasitism)
+#' attach(BroodParasitism)
+#' ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
+#' (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
+#'                  datatype="proportion", method="GLMM.multi", nboot=10, npermut=10))
+#' (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
+#'                  datatype="proportion", method="GLMM.add"))
+#' detach(BroodParasitism)
+#'
+#' # for count data - additive and multiplicative overdispersion models
+#' # repeatability for male fledgling success
+#' data(Fledglings)
+#' (rpt.Fledge <- rpt("Fledge", "MaleID", data = Fledglings,
+#'                    datatype="count", method="GLMM.multi", 
+#'                    nboot=10, npermut=10))
+#' (rpt.Fledge <- rpt("Fledge", "MaleID", data = Fledglings,
+#'                    datatype="count", method="GLMM.add"))
 #'
 #'
 #' @keywords models

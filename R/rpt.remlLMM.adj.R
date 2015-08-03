@@ -57,10 +57,12 @@
 #' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c("Sex", "BirdID"), 
 #'  data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
-#' # repeatability estimation for weight (body mass) - a lower R than the previous one
+#' 
+#' # repeatability estimation for weight (body mass) - a lower R 
+#' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize,
-#'  nboot=10, npermut=10))
+#' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID", 
+#'                                data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 #' 
 #' @keywords models

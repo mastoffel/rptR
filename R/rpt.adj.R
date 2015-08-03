@@ -80,15 +80,19 @@
 #' 
 #' @examples  
 #' \dontrun{
-#' # for Gaussian data - correlation-based repeatability for male breeding success on a transformed scale
-#'      data(Fledglings)
-#'      Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'      rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID), 
+#' # for Gaussian data - correlation-based repeatability for male breeding 
+#' # success on a transformed scale
+#' data(Fledglings)
+#' Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
+#' # reduced number of nboot and npermut iterations
+#' rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID), 
 #'                    "MaleID", data=Fledglings, datatype="Gaussian", 
-#'                    method="REML", nboot=10, npermut=10)   # reduced number of nboot and npermut iterations
-#'      data(BodySize)
-#'      (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), "BirdID", data=BodySize, datatype="Gaussian", 
-#'                     method="MCMC"))
+#'                    method="REML", nboot=10, npermut=10)   
+#'                   
+#' data(BodySize)
+#' (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), "BirdID", 
+#'                             data=BodySize, datatype="Gaussian", 
+#'                              method="MCMC"))
 #' }
 #' @keywords models
 #' 

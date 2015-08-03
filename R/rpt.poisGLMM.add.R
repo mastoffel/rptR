@@ -71,7 +71,8 @@
 #' @examples  
 #' # repeatability for female clutch size over two years.
 #'    data(BroodParasitism)
-#'    (rpt.Host <- rpt.poisGLMM.add("OwnClutches", "FemaleID", data = BroodParasitism))
+#'    (rpt.Host <- rpt.poisGLMM.add("OwnClutches", "FemaleID", 
+#'                                   data = BroodParasitism))
 #'     
 #' # repeatability for male fledgling success
 #'    data(Fledglings)

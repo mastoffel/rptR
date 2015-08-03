@@ -47,12 +47,13 @@
 #' 
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
-#'     data(BodySize)
-#'     (rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))  
+#' data(BodySize)
+#' (rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))  
 #'     
-#' # repeatability estimation for weight (body mass) - a lower R than the previous one
-#'     data(BodySize)
-#'     (rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
+#' # repeatability estimation for weight (body mass) - a lower R than the 
+#' # previous one
+#' data(BodySize)
+#' (rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
 #'       
 #' @keywords models
 #' 

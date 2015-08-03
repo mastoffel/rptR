@@ -51,12 +51,15 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, nboot=10, npermut=10))   
+#' (rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, 
+#'                        nboot=10, npermut=10))   
 #' # reduced number of nboot and npermut iterations
 #'
-#' # repeatability estimation for weight (body mass) - a lower R than the previous one
+#' # repeatability estimation for weight (body mass) - a lower R 
+#' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize, nboot=10, npermut=10)) 
+#' (rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize, 
+#'                             nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #'       
 #'       

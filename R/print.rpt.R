@@ -10,7 +10,7 @@
 #'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
 #'      
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}

@@ -59,15 +59,20 @@
 #' @examples  
 #' # repeatability estimations for egg dumping (binary data)
 #'      data(BroodParasitism)
-#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
+#'                        select = c(HostYN, FemaleID))
 #'      (rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump))
-#'      (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", data = BroodParasitism))
+#'      (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID", 
+#'                       data = BroodParasitism))
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #'      data(BroodParasitism)
-#'      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select= c(HostClutches, OwnClutches, FemaleID))
-#'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  ParasitismOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), "FemaleID", data = ParasitismOR))
+#'      ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
+#'                             select= c(HostClutches, OwnClutches, FemaleID))
+#'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  
+#'                                   ParasitismOR$HostClutches 
+#'      (rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"), 
+#'                                       "FemaleID", data = ParasitismOR))
 #'  
 #' @keywords models
 #' 
