@@ -23,4 +23,4 @@
 #'             
 #' @docType package
 #' @name rptR
-NULL
+NULL 

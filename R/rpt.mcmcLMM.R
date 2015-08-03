@@ -20,8 +20,8 @@
 #' 
 #' 
 #' @return Returns an object of class rpt that is a a list with the following elements: 
-#'  \item{datatype}{Response distribution (here: "Gaussian").}
-#'  \item{method}{Method used to calculate repeatability (intra-class correlation, ICC) (here: "MCMC").}
+#'  \item{datatype}{Response distribution (here: 'Gaussian').}
+#'  \item{method}{Method used to calculate repeatability (intra-class correlation, ICC) (here: 'MCMC').}
 #'  \item{CI}{Width of the Bayesian credibility interval.}
 #'  \item{R}{Point estimate for repeatability (intra-class correlation, ICC), i.e. the mode of the posterior distribution.}
 #'  \item{se}{Standard error (\emph{se}) for repeatability (ICC), i.e. the standard deviation of the posterior distribution. Note that the distribution might not be symmetrical, in which case the se is less informative.}
@@ -48,50 +48,51 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))  
+#' (rpt.BS <- rpt.mcmcLMM('Tarsus', 'BirdID', data = BodySize))  
 #'     
 #' # repeatability estimation for weight (body mass) - a lower R than the 
 #' # previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
+#' (rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
 #'       
 #' @keywords models
 #' 
 #' @export
 #' 
-# @importFrom MCMCglmm MCMCglmm
-# @importFrom MCMCglmm posterior.mode
-# @importFrom coda HPDinterval
- 
-rpt.mcmcLMM <- function(y, groups, data, CI=0.95, prior=NULL, verbose=FALSE, ...){
-        
-        # check inputs
-        if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-                y <- data[[y]]
-                groups <- data[[groups]]
-        } 
-	# initial checks
-	if(length(y)!= length(groups)) stop("y and group are of unequal length")
-	# preparation
-	groups <- factor(groups)
-	if(is.null(prior)) prior <- list(R=list(V=1,n=10e-2), G=list(G1=list(V=1,n=10e-2)) )
- 	# point estimation according to model 8 and equation 9
-	mod   <- MCMCglmm::MCMCglmm(y ~ 1, random=~groups, family="gaussian", data=data.frame(y=y,groups=groups), prior=prior, verbose=verbose, ...)
-	var.a <- mod$VCV[,"groups"]
-	var.e <- mod$VCV[,"units"]
-	postR <- var.a / (var.a + var.e)
-	# point estimate
-	R     <- MCMCglmm::posterior.mode( postR )
-	# credibility interval estimation from posterior distribution
-	CI.R    <- coda::HPDinterval(postR,CI)[1,]
-	se 	    <- sd(postR)
-	# 'significance test'
-	P 	  <- NA
-	res = list(call=match.call(), datatype="Gaussian", method="LMM.MCMC", CI=CI, 
-				R=R, CI.R=CI.R, se=se, P=P, R.post=postR, 
-				MCMCpars = attr(mod$Sol, "mcpar"),
-				ngroups = length(unique(groups)), nobs = length(y),
-				mod=mod ) 
-	class(res) <- "rpt"
-	return(res) 
-}
+# @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
+# HPDinterval
+
+rpt.mcmcLMM <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+    
+    # check inputs
+    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 
+        1)) {
+        y <- data[[y]]
+        groups <- data[[groups]]
+    }
+    # initial checks
+    if (length(y) != length(groups)) 
+        stop("y and group are of unequal length")
+    # preparation
+    groups <- factor(groups)
+    if (is.null(prior)) 
+        prior <- list(R = list(V = 1, n = 0.1), G = list(G1 = list(V = 1, n = 0.1)))
+    # point estimation according to model 8 and equation 9
+    mod <- MCMCglmm::MCMCglmm(y ~ 1, random = ~groups, family = "gaussian", data = data.frame(y = y, 
+        groups = groups), prior = prior, verbose = verbose, ...)
+    var.a <- mod$VCV[, "groups"]
+    var.e <- mod$VCV[, "units"]
+    postR <- var.a/(var.a + var.e)
+    # point estimate
+    R <- MCMCglmm::posterior.mode(postR)
+    # credibility interval estimation from posterior distribution
+    CI.R <- coda::HPDinterval(postR, CI)[1, ]
+    se <- sd(postR)
+    # 'significance test'
+    P <- NA
+    res <- list(call = match.call(), datatype = "Gaussian", method = "LMM.MCMC", CI = CI, 
+        R = R, CI.R = CI.R, se = se, P = P, R.post = postR, MCMCpars = attr(mod$Sol, 
+            "mcpar"), ngroups = length(unique(groups)), nobs = length(y), mod = mod)
+    class(res) <- "rpt"
+    return(res)
+} 

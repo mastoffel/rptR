@@ -95,9 +95,9 @@ summary.rpt <- function(object, ...) {
                                                  c(median(object$R.boot[i, ]), median(object$R.permut[i, ])),
                                                  c(unname(object$CI.R[i, 1]), unname(CI.perm[1])), # should be CI.perm[i, 1] when implemented
                                                  c(unname(object$CI.R[i, 2]), unname(CI.perm[2]))),
-                                           names = c("N", "Mean", "Median", 
-                                                     colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
-                                           row.names = c("boot", "permut"))
+                                                 names = c("N", "Mean", "Median", 
+                                                 colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
+                                                 row.names = c("boot", "permut"))
                 object$boot[[i]]   <-  bootperm[1, ]
                 object$permut[[i]] <-  bootperm[2, ]
         }

@@ -9,35 +9,35 @@
 #' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
 #' @param data Data frame containing respnse and groups variable.
 #' @param datatype Character string specifying the data type
-#'       ("Gaussian", "binomial", "proportion", "count"). "binomial" and 
-#'       "proportion" are interchangable and call the same functions.
+#'       ('Gaussian', 'binomial', 'proportion', 'count'). 'binomial' and 
+#'       'proportion' are interchangable and call the same functions.
 #' @param method character string specifying the method of calculation. 
-#'        Defaults to "REML" for Gaussian data and to "GLMM.multi" for binomial
+#'        Defaults to 'REML' for Gaussian data and to 'GLMM.multi' for binomial
 #'        and count data.
-#' @param link Character string specifying the link function. Ignored for "Gaussian" 
-#'        datatype and for the "GLMM.add" method.
+#' @param link Character string specifying the link function. Ignored for 'Gaussian' 
+#'        datatype and for the 'GLMM.add' method.
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param nboot Number of bootstrapping runs used when calculating the asymtotic 
-#'        confidence interval (defaults to 1000). Ignored for the "GLMM.add",
-#'        "corr" and "ANOVA" methods.
+#'        confidence interval (defaults to 1000). Ignored for the 'GLMM.add',
+#'        'corr' and 'ANOVA' methods.
 #' @param npermut Number of permutations used when calculating asymtotic
-#'        \emph{P} values (defaults to 1000). Ignored for the "GLMM.add" method.
+#'        \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.
 #' 
-#' @details For \code{datatype="Gaussian"} calls function \link{rpt.corr}, \link{rpt.aov}, 
-#'          \link{rpt.remlLMM} or \link{rpt.mcmcLMM} (methods "corr", "ANOVA", 
-#'          "REML" and "MCMC", respectively).
+#' @details For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov}, 
+#'          \link{rpt.remlLMM} or \link{rpt.mcmcLMM} (methods 'corr', 'ANOVA', 
+#'          'REML' and 'MCMC', respectively).
 #'          
-#'          For \code{datatype="binomial"} or \code{datatype="proportion"} calls function
-#'          \link{rpt.binomGLMM.multi} or \link{rpt.binomGLMM.add} (methods "GLMM.multi" 
-#'          and "GLMM.add", respectively).
+#'          For \code{datatype='binomial'} or \code{datatype='proportion'} calls function
+#'          \link{rpt.binomGLMM.multi} or \link{rpt.binomGLMM.add} (methods 'GLMM.multi' 
+#'          and 'GLMM.add', respectively).
 #'          
-#'          For \code{datatype="count"} calls function \link{rpt.poisGLMM.multi} 
-#'          or \link{rpt.poisGLMM.add} (methods "GLMM.multi" and "GLMM.add", respectively). 
+#'          For \code{datatype='count'} calls function \link{rpt.poisGLMM.multi} 
+#'          or \link{rpt.poisGLMM.add} (methods 'GLMM.multi' and 'GLMM.add', respectively). 
 #' 
 #' @return Returns an object of class rpt. See details for specific functions.
-#' \item{datatype}{Type of repsonse ("Gaussian", "binomial" or "count").}
-#' \item{method}{Method used to calculate repeatability ("REML", "MCMC", "ANOVA", 
-#'      "corr", "GLMM.add" or "GLMM.multi").}
+#' \item{datatype}{Type of repsonse ('Gaussian', 'binomial' or 'count').}
+#' \item{method}{Method used to calculate repeatability ('REML', 'MCMC', 'ANOVA', 
+#'      'corr', 'GLMM.add' or 'GLMM.multi').}
 #' \item{link}{Link functions used (GLMMs only).}
 #' \item{CI}{Width of the confidence interval or Bayesian credibility interval.}
 #' \item{R}{Point estimate for repeatability.}
@@ -87,8 +87,8 @@
 #' # repeatability for male breeding success on a transformed scale
 #'   data(Fledglings)
 #'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'   (rpt.Fledge <- rpt("sqrtFledge", "MaleID", data = Fledglings, 
-#'                      datatype="Gaussian", method="corr", nboot=10, 
+#'   (rpt.Fledge <- rpt('sqrtFledge', 'MaleID', data = Fledglings, 
+#'                      datatype='Gaussian', method='corr', nboot=10, 
 #'                      npermut=10))  # reduced number of iterations
 #'
 #'
@@ -96,27 +96,27 @@
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
 #' # ANOVA based
-#' (rpt.BS <- rpt("Tarsus", "BirdID", data = BodySize, datatype="Gaussian", 
-#'                method="ANOVA", npermut=10))
+#' (rpt.BS <- rpt('Tarsus', 'BirdID', data = BodySize, datatype='Gaussian', 
+#'                method='ANOVA', npermut=10))
 #' # LMM based
-#' (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", 
-#'                    method="REML", nboot=10, npermut=10))
+#' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
+#'                    method='REML', nboot=10, npermut=10))
 #' # LMM based with MCMC
-#' (rpt.Weight <- rpt("Weight", "BirdID", data = BodySize, datatype="Gaussian", 
-#'                     method="MCMC"))
+#' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
+#'                     method='MCMC'))
 #'
 #' # for Binary data - additive and multiplicative overdispersion models
 #' # repeatability estimations for egg dumping (binary data)
 #' data(BroodParasitism)
 #' attach(BroodParasitism)
-#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism, 
-#'                      datatype="binomial", method="GLMM.multi", link="logit",
+#' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism, 
+#'                      datatype='binomial', method='GLMM.multi', link='logit',
 #'                      nboot=10, npermut=10))
-#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism,
-#'                      datatype="binomial", method="GLMM.multi", link="probit",
+#' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
+#'                      datatype='binomial', method='GLMM.multi', link='probit',
 #'                      nboot=10, npermut=10))
-#' (rpt.BroodPar <- rpt("cbpYN", "FemaleID", data = BroodParasitism,
-#'                      datatype="binomial", method="GLMM.add"))
+#' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
+#'                      datatype='binomial', method='GLMM.add'))
 #'   
 #'
 #' # for proportion data - additive and multiplicative overdispersion models
@@ -125,58 +125,66 @@
 #' attach(BroodParasitism)
 #' ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
 #' (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
-#'                  datatype="proportion", method="GLMM.multi", nboot=10, npermut=10))
+#'                  datatype='proportion', method='GLMM.multi', nboot=10, npermut=10))
 #' (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
-#'                  datatype="proportion", method="GLMM.add"))
+#'                  datatype='proportion', method='GLMM.add'))
 #' detach(BroodParasitism)
 #'
 #' # for count data - additive and multiplicative overdispersion models
 #' # repeatability for male fledgling success
 #' data(Fledglings)
-#' (rpt.Fledge <- rpt("Fledge", "MaleID", data = Fledglings,
-#'                    datatype="count", method="GLMM.multi", 
+#' (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+#'                    datatype='count', method='GLMM.multi', 
 #'                    nboot=10, npermut=10))
-#' (rpt.Fledge <- rpt("Fledge", "MaleID", data = Fledglings,
-#'                    datatype="count", method="GLMM.add"))
+#' (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+#'                    datatype='count', method='GLMM.add'))
 #'
 #'
 #' @keywords models
 #' 
 #' @export
 #' 
-rpt <- function(y, groups, data, 
-			   datatype=c("Gaussian", "binomial", "proportion", "count"),  
-			   method=c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"),  
-			   link=c("logit", "probit", "log", "sqrt"),
-			   CI=0.95, nboot=1000, npermut=1000) {
-	if(datatype=="Gaussian") {
-		if(length(method)>1) {
-			warning("Linear mixed model fitted by REML used by default. Change using argument 'method', if required ('corr', 'ANOVA', 'REML' and 'MCMC' allowed for Gaussian data).")
-			method<-"REML" 
-		}
-		if (method=="REML")  return(rpt.remlLMM(y, groups, data, CI=CI, nboot=nboot, npermut=npermut))
-		if (method=="MCMC")  return(rpt.mcmcLMM(y, groups, data, CI=CI))
-		if (method=="ANOVA") return(rpt.aov(y, groups, data, CI=CI, npermut=npermut))	
-		if (method=="corr")  return(rpt.corr(y, groups, data, CI=CI, nboot=nboot, npermut=npermut)) 
-	}
-	if(datatype=="binomial" | datatype=="proportion") {
-		if(length(method)>1) {
-			warning("Generalised linear mixed model with multiplicative overdispersion fitted by PQL used by default. Change using argument 'method', if required ('GLMM.add' and 'GLMM.multi' allowed for Binomial data).")
-			method<-"GLMM.multi" 
-		}
-		if (method=="GLMM.multi") return(rpt.binomGLMM.multi(y, groups, data, link, CI=CI, nboot=nboot, npermut=npermut))
-		if (method=="GLMM.add") return(rpt.binomGLMM.add(y, groups, data, CI=CI))
-	}
-	if(datatype=="count") {
-		if(length(method)>1) {
-			warning("Generalised linear mixed model with multiplicative overdispersion fitted by PQL used by default. Change using argument 'method', if required ('GLMM.add' and 'GLMM.multi' allowed for count data).")
-			method<-"GLMM.multi"
-		}
-		if(length(link)>1) {
-			link="log"
-			warning("Log link will be used.")
-		}
-		if (method=="GLMM.multi") return(rpt.poisGLMM.multi(y, groups, data, link, CI=CI, nboot=nboot, npermut=npermut)) 
-		if (method=="GLMM.add")   return(rpt.poisGLMM.add(y, groups, data, CI=CI)) 
-	} 
-}
+rpt <- function(y, groups, data, datatype = c("Gaussian", "binomial", "proportion", "count"), 
+    method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"), link = c("logit", 
+        "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000) {
+    if (datatype == "Gaussian") {
+        if (length(method) > 1) {
+            warning("Linear mixed model fitted by REML used by default. Change using argument 'method', if required ('corr', 'ANOVA', 'REML' and 'MCMC' allowed for Gaussian data).")
+            method <- "REML"
+        }
+        if (method == "REML") 
+            return(rpt.remlLMM(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
+        if (method == "MCMC") 
+            return(rpt.mcmcLMM(y, groups, data, CI = CI))
+        if (method == "ANOVA") 
+            return(rpt.aov(y, groups, data, CI = CI, npermut = npermut))
+        if (method == "corr") 
+            return(rpt.corr(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
+    }
+    if (datatype == "binomial" | datatype == "proportion") {
+        if (length(method) > 1) {
+            warning("Generalised linear mixed model with multiplicative overdispersion fitted by PQL used by default. Change using argument 'method', if required ('GLMM.add' and 'GLMM.multi' allowed for Binomial data).")
+            method <- "GLMM.multi"
+        }
+        if (method == "GLMM.multi") 
+            return(rpt.binomGLMM.multi(y, groups, data, link, CI = CI, nboot = nboot, 
+                npermut = npermut))
+        if (method == "GLMM.add") 
+            return(rpt.binomGLMM.add(y, groups, data, CI = CI))
+    }
+    if (datatype == "count") {
+        if (length(method) > 1) {
+            warning("Generalised linear mixed model with multiplicative overdispersion fitted by PQL used by default. Change using argument 'method', if required ('GLMM.add' and 'GLMM.multi' allowed for count data).")
+            method <- "GLMM.multi"
+        }
+        if (length(link) > 1) {
+            link <- "log"
+            warning("Log link will be used.")
+        }
+        if (method == "GLMM.multi") 
+            return(rpt.poisGLMM.multi(y, groups, data, link, CI = CI, nboot = nboot, 
+                npermut = npermut))
+        if (method == "GLMM.add") 
+            return(rpt.poisGLMM.add(y, groups, data, CI = CI))
+    }
+} 

@@ -19,8 +19,8 @@
 #' 
 #' Returns an object of class rpt that is a a list with the following elements: 
 #' \item{call}{Model call.}
-#' \item{datatype}{Response distribution (here: "Gaussian").}
-#' \item{method}{Method used to calculate repeatability (here: "REML").}
+#' \item{datatype}{Response distribution (here: 'Gaussian').}
+#' \item{method}{Method used to calculate repeatability (here: 'REML').}
 #' \item{CI}{Width of the confidence interval.}
 #' \item{R}{Point estimate for repeatability.}
 #' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
@@ -51,14 +51,14 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, 
+#' (rpt.BS <- rpt.remlLMM('Tarsus', 'BirdID', data = BodySize, 
 #'                        nboot=10, npermut=10))   
 #' # reduced number of nboot and npermut iterations
 #'
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize, 
+#' (rpt.Weight <- rpt.remlLMM('Weight', 'BirdID', data = BodySize, 
 #'                             nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #'       
@@ -69,96 +69,93 @@
 #' 
 
 # much to do here
-rpt.remlLMM <- function(y, groups, data = NULL, CI=0.95, nboot=1000, npermut=1000, parallel = FALSE, ncores = 0) {
-       
-        if (!is.null(data)) {
-                y      <- eval(substitute(y), data)
-                groups <- eval(substitute(groups), data)
-                if(is.character(y) & (length(y) <= 2) & is.character(groups) & (length(groups) == 1)) {
-                        y <- data[, y]
-                        groups <- data[, groups]
-                }
+rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
+    parallel = FALSE, ncores = 0) {
+    
+    if (!is.null(data)) {
+        y <- eval(substitute(y), data)
+        groups <- eval(substitute(groups), data)
+        if (is.character(y) & (length(y) <= 2) & is.character(groups) & (length(groups) == 
+            1)) {
+            y <- data[, y]
+            groups <- data[, groups]
         }
-  
-#         # check inputs
-#         if  (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-#                 y <- data[[y]]
-#                 groups <- data[[groups]]
-#         } else if (!(length(y) == length(groups))){
-#                 stop("y and groups must have the same length")
-#         }
-        
-        # model
-        formula  <- y ~ 1 + (1|groups)
-        mod         <- lme4::lmer(formula) 
-        # checks 
-        if(nboot < 0)         nboot <- 0
-        if(npermut < 1) npermut <- 1
-        
-        # point estimates of R
-        R.pe <- function(y, groups) { 
-                formula <- y ~ 1 + (1|groups)
-                mod.fnc  <- lme4::lmer(formula)
-                varComps <- lme4::VarCorr(mod.fnc)
-                var.a    <- as.numeric(varComps)
-                var.p    <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
-                R        <- var.a / var.p
-                return(R) 
-        }
-        R <- R.pe(y, groups)
-        if(R==0 & nboot > 0) {
-                nboot <- 0
-                warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-        }
-        
-        # confidence interval estimation by parametric bootstrapping
-        if(nboot > 0) {
+    }
+    
+    # # check inputs if (is.character(y) & (length(y) == 1) & is.character(groups) &
+    # (length(groups) == 1)) { y <- data[[y]] groups <- data[[groups]] } else if
+    # (!(length(y) == length(groups))){ stop('y and groups must have the same length') }
+    
+    # model
+    formula <- y ~ 1 + (1 | groups)
+    mod <- lme4::lmer(formula)
+    # checks
+    if (nboot < 0) 
+        nboot <- 0
+    if (npermut < 1) 
+        npermut <- 1
+    
+    # point estimates of R
+    R.pe <- function(y, groups) {
+        formula <- y ~ 1 + (1 | groups)
+        mod.fnc <- lme4::lmer(formula)
+        varComps <- lme4::VarCorr(mod.fnc)
+        var.a <- as.numeric(varComps)
+        var.p <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
+        R <- var.a/var.p
+        return(R)
+    }
+    R <- R.pe(y, groups)
+    if (R == 0 & nboot > 0) {
+        nboot <- 0
+        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+    }
+    
+    # confidence interval estimation by parametric bootstrapping
+    if (nboot > 0) {
         Ysim <- as.matrix(simulate(mod, nsim = nboot))
+    }
+    if (nboot > 0 & parallel == TRUE) {
+        if (ncores == 0) {
+            ncores <- parallel::detectCores()
+            warning("No core number specified: detectCores() is used to detect the number of \n                                cores on the local machine")
         }
-        if(nboot > 0 & parallel == TRUE){ 
-                if (ncores == 0) {
-                        ncores <- parallel::detectCores()
-                        warning("No core number specified: detectCores() is used to detect the number of 
-                                cores on the local machine")
-                } 
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                R.boot <- unname(parallel::parApply(cl, Ysim, 2, R.pe, groups = groups))
-                parallel::stopCluster(cl)
-        } else if (nboot > 0 & parallel == FALSE) {
-                R.boot   <- unname(apply(Ysim, 2, R.pe, groups = groups))
-        } else {
-                R.boot <- matrix(rep(NA, length(groups)), nrow=length(groups))
-        }
-        CI.R     <- quantile(R.boot, c((1-CI)/2,1-(1-CI)/2), na.rm=TRUE)
-        se <- sd(R.boot)
-        
-        # significance test by likelihood-ratio-test
-        LRT.mod  <- logLik(mod)
-        LRT.red  <- logLik(lm(y~1))
-        LRT.D    <- as.numeric(-2*(LRT.red-LRT.mod))
-        LRT.df   <- 1
-        LRT.P    <- ifelse(LRT.D<=0, LRT.df, pchisq(LRT.D,1,lower.tail=FALSE)/2)
-        # significance test by permutation
-        permut <- function(formula, groups) {
-                groups <- sample(as.character(groups))
-                R.pe(y, groups) 
-        }
-        if(npermut > 1) {
-                # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-                R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-                P.permut <- sum(R.permut >= R)/npermut
-        } else {
-                R.permut = R
-                P.permut <- NA
-        }
-        # return of results
-        res  <- list(call=match.call(), datatype="Gaussian", method="LMM.REML", CI=CI, 
-                     R=R, se=se, CI.R=CI.R, 
-                     P = c(P.LRT=LRT.P, P.permut=P.permut),
-                     LRT = c(LRT.mod=LRT.mod, LRT.red=LRT.red, LRT.D=LRT.D, LRT.df=LRT.df,LRT.P=LRT.P),
-                     R.boot=R.boot, R.permut=R.permut,
-                     ngroups = length(unique(groups)), nobs = length(y), mod=mod)
-        class(res) <- "rpt"
-        return(res)
-}
+        # start cluster
+        cl <- parallel::makeCluster(ncores)
+        R.boot <- unname(parallel::parApply(cl, Ysim, 2, R.pe, groups = groups))
+        parallel::stopCluster(cl)
+    } else if (nboot > 0 & parallel == FALSE) {
+        R.boot <- unname(apply(Ysim, 2, R.pe, groups = groups))
+    } else {
+        R.boot <- matrix(rep(NA, length(groups)), nrow = length(groups))
+    }
+    CI.R <- quantile(R.boot, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+    se <- sd(R.boot)
+    
+    # significance test by likelihood-ratio-test
+    LRT.mod <- logLik(mod)
+    LRT.red <- logLik(lm(y ~ 1))
+    LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
+    LRT.df <- 1
+    LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
+    # significance test by permutation
+    permut <- function(formula, groups) {
+        groups <- sample(as.character(groups))
+        R.pe(y, groups)
+    }
+    if (npermut > 1) {
+        # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
+        R.permut <- c(R, replicate(npermut - 1, permut(formula, groups), simplify = TRUE))
+        P.permut <- sum(R.permut >= R)/npermut
+    } else {
+        R.permut <- R
+        P.permut <- NA
+    }
+    # return of results
+    res <- list(call = match.call(), datatype = "Gaussian", method = "LMM.REML", CI = CI, 
+        R = R, se = se, CI.R = CI.R, P = c(P.LRT = LRT.P, P.permut = P.permut), LRT = c(LRT.mod = LRT.mod, 
+            LRT.red = LRT.red, LRT.D = LRT.D, LRT.df = LRT.df, LRT.P = LRT.P), R.boot = R.boot, 
+        R.permut = R.permut, ngroups = length(unique(groups)), nobs = length(y), mod = mod)
+    class(res) <- "rpt"
+    return(res)
+} 
