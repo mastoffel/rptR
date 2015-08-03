@@ -30,8 +30,8 @@ confidence interval (defaults to 1000).}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Response distribution (here: "Gaussian").}
-\item{method}{Method used to calculate repeatability (here: "corr").}
+\item{datatype}{Response distribution (here: 'Gaussian').}
+\item{method}{Method used to calculate repeatability (here: 'corr').}
 \item{R}{Point estimate for repeatability \emph{R}.}
 \item{se}{Asymptotic standard error for repeatability based on non-parametric bootstrapping.}
 \item{CI}{Asymptotic confidence interval for repeatability based on non-parametric bootstrapping.}
@@ -47,7 +47,7 @@ Calculates repeatability based on inter-class correlations
 # repeatability for male breeding success on a transformed scale
   data(Fledglings)
   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-  (rpt.Fledge <- rpt.corr("sqrtFledge", "MaleID", data = Fledglings,
+  (rpt.Fledge <- rpt.corr('sqrtFledge', 'MaleID', data = Fledglings,
   nboot=10, npermut=10))  # reduced number of iterations
 }
 \author{

@@ -17,7 +17,7 @@ Displays the summary of an rpt object (i.e. the result of a rpt function call) i
 \examples{
 # repeatability estimation for weight (body mass)
 data(BodySize)
-print(rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
+print(rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

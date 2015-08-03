@@ -39,9 +39,9 @@ asymtotic \emph{P} values, but may be very time-consuming.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Type of response (here: "binomial").}
-\item{method}{Method used to calculate repeatability (here: "PQL").}
-\item{link}{Link function used (here: "logit" or "probit").}
+\item{datatype}{Type of response (here: 'binomial').}
+\item{method}{Method used to calculate repeatability (here: 'PQL').}
+\item{link}{Link function used (here: 'logit' or 'probit').}
 \item{CI}{Width of the confidence interval.}
 \item{R.link}{Point estimate for repeatability on the link scale.}
 \item{se.link}{Standard error  (\emph{se}) for repeatability on the link

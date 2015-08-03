@@ -74,12 +74,12 @@ Models are fitted using the \link{MCMCglmm} function in
 \examples{
 # repeatability for female clutch size over two years.
    data(BroodParasitism)
-   (rpt.Host <- rpt.poisGLMM.add("OwnClutches", "FemaleID",
+   (rpt.Host <- rpt.poisGLMM.add('OwnClutches', 'FemaleID',
                                   data = BroodParasitism))
 
 # repeatability for male fledgling success
    data(Fledglings)
-   (rpt.Fledge <- rpt.poisGLMM.add("Fledge", "MaleID", data = Fledglings))
+   (rpt.Fledge <- rpt.poisGLMM.add('Fledge', 'MaleID', data = Fledglings))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

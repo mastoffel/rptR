@@ -38,9 +38,9 @@ asymtotic \emph{P} values, but may be very time-consuming.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Type of response (here: "binomial").}
-\item{method}{Method used to calculate repeatability (here: "PQL").}
-\item{link}{Link function used (here: "logit" or "probit").}
+\item{datatype}{Type of response (here: 'binomial').}
+\item{method}{Method used to calculate repeatability (here: 'PQL').}
+\item{link}{Link function used (here: 'logit' or 'probit').}
 \item{CI}{Width of the confidence interval.}
 \item{R.link}{Point estimate for repeatability on the link scale.}
 \item{se.link}{Standard error  (\emph{se}) for repeatability on the link
@@ -87,10 +87,10 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
      data(BroodParasitism)
      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1,
                        select = c(HostYN, FemaleID))
-     (rpt.Host <- rpt.binomGLMM.multi("HostYN", "FemaleID", data = EggDump,
+     (rpt.Host <- rpt.binomGLMM.multi('HostYN', 'FemaleID', data = EggDump,
                                        nboot=10, npermut=10))
      # low number of nboot and npermut to speed up error checking
-     (rpt.BroodPar <- rpt.binomGLMM.multi("cbpYN", "FemaleID",
+     (rpt.BroodPar <- rpt.binomGLMM.multi('cbpYN', 'FemaleID',
                                            data = BroodParasitism, nboot=10,
                                            npermut=10))
      # low number of nboot and npermut to speed up error checking
@@ -101,8 +101,8 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
                              select= c(HostClutches, OwnClutches, FemaleID))
      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches -
                                    ParasitisedOR$HostClutches
-     (rpt.Host <- rpt.binomGLMM.multi(c("HostClutches", "parasitised"),
-     "FemaleID",
+     (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'),
+     'FemaleID',
      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
      nboot=10, npermut=10))
      # reduced number of npermut iterations
@@ -112,8 +112,8 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
      ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
      # some rows have entries 0,0 and need to be removed
      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0)
-     (rpt.BroodPar <- rpt.binomGLMM.multi(c("cbpEggs", "parasitised"),
-                                            "FemaleID",
+     (rpt.BroodPar <- rpt.binomGLMM.multi(c('cbpEggs', 'parasitised'),
+                                            'FemaleID',
                                              data = ParasitismOR[-zz, ],
                                              nboot=10, npermut=10))
 }

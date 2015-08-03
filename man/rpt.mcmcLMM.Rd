@@ -28,8 +28,8 @@ are printed to screen. Defaults to FALSE.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
- \item{datatype}{Response distribution (here: "Gaussian").}
- \item{method}{Method used to calculate repeatability (intra-class correlation, ICC) (here: "MCMC").}
+ \item{datatype}{Response distribution (here: 'Gaussian').}
+ \item{method}{Method used to calculate repeatability (intra-class correlation, ICC) (here: 'MCMC').}
  \item{CI}{Width of the Bayesian credibility interval.}
  \item{R}{Point estimate for repeatability (intra-class correlation, ICC), i.e. the mode of the posterior distribution.}
  \item{se}{Standard error (\emph{se}) for repeatability (ICC), i.e. the standard deviation of the posterior distribution. Note that the distribution might not be symmetrical, in which case the se is less informative.}
@@ -52,12 +52,12 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.mcmcLMM("Tarsus", "BirdID", data = BodySize))
+(rpt.BS <- rpt.mcmcLMM('Tarsus', 'BirdID', data = BodySize))
 
 # repeatability estimation for weight (body mass) - a lower R than the
 # previous one
 data(BodySize)
-(rpt.Weight <- rpt.mcmcLMM("Weight", "BirdID", data = BodySize))
+(rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

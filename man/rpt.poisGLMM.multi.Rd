@@ -32,9 +32,9 @@ but may be very time-consuming.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Type of response (here: "count").}
-\item{method}{Method used to calculate repeatability (here: "PQL").}
-\item{link}{Link function used (here: "log" or "sqrt").}
+\item{datatype}{Type of response (here: 'count').}
+\item{method}{Method used to calculate repeatability (here: 'PQL').}
+\item{link}{Link function used (here: 'log' or 'sqrt').}
 \item{CI}{Width of the confidence interval.}
 \item{R.link}{Point estimate for repeatability (ICC) \emph{R} on the link
      scale, i.e. the mode of the posterior distribution}
@@ -79,14 +79,14 @@ parametric bootstrapping allows only \emph{omega} greater than or equal to  1.
 \examples{
 # repeatability for female clutch size over two years.
        data(BroodParasitism)
-       (rpt.Host <- rpt.poisGLMM.multi("OwnClutches", "FemaleID",
+       (rpt.Host <- rpt.poisGLMM.multi('OwnClutches', 'FemaleID',
                                         data = BroodParasitism,
                                         nboot=10, npermut=10))
        # reduced number of nboot and npermut iterations
 
        # repeatability for male fledgling success
        data(Fledglings)
-       (rpt.Fledge <- rpt.poisGLMM.multi("Fledge", "MaleID",
+       (rpt.Fledge <- rpt.poisGLMM.multi('Fledge', 'MaleID',
                                           data = Fledglings, nboot=10,
                                           npermut=10))
        # reduced number of nboot and npermut iterations

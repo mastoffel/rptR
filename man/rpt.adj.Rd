@@ -23,32 +23,32 @@ estimated. Spelling needs to match the random effect names as given in
 \item{data}{A dataframe that contains the variables included in the formula
 argument.}
 
-\item{datatype}{Character string specifying the data type ("Gaussian",
-"binomial", "proportion", "count"). "binomial" and "proportion" are
+\item{datatype}{Character string specifying the data type ('Gaussian',
+'binomial', 'proportion', 'count'). 'binomial' and 'proportion' are
 interchangable and call the same functions.}
 
 \item{method}{character string specifying the method of calculation. Defaults
-to "REML" for Gaussian data and to "GLMM.multi" for binomial and count
+to 'REML' for Gaussian data and to 'GLMM.multi' for binomial and count
 data.}
 
 \item{link}{Character string specifying the link function. Ignored for
-"Gaussian" datatype and for the "GLMM.add" method.}
+'Gaussian' datatype and for the 'GLMM.add' method.}
 
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to
 0.95).}
 
 \item{nboot}{Number of bootstrapping runs used when calculating the asymtotic
-confidence interval (defaults to 1000). Ignored for the "GLMM.add", "corr"
-and "ANOVA" methods.}
+confidence interval (defaults to 1000). Ignored for the 'GLMM.add', 'corr'
+and 'ANOVA' methods.}
 
 \item{npermut}{Number of permutations used when calculating asymtotic
-  \emph{P} values (defaults to 1000). Ignored for the "GLMM.add" method.}
+  \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.}
 }
 \value{
 Returns an object of class rpt. See details for specific functions.
-\item{datatype}{Type of repsonse ("Gaussian", "binomial" or "count").}
-\item{method}{Method used to calculate repeatability ("REML", "MCMC", "ANOVA",
-      "corr", "GLMM.add" or "GLMM.multi").}
+\item{datatype}{Type of repsonse ('Gaussian', 'binomial' or 'count').}
+\item{method}{Method used to calculate repeatability ('REML', 'MCMC', 'ANOVA',
+      'corr', 'GLMM.add' or 'GLMM.multi').}
 \item{link}{Link functions used (GLMMs only).}
 \item{CI}{Width of the confidence interval or Bayesian credibility interval.}
 \item{R}{Point estimate for repeatability.}
@@ -84,8 +84,8 @@ A wrapper function for (adjusted) repeatability calculations. Calls
 specialised functions depending of the choice of datatype and method.
 }
 \details{
-For \code{datatype="Gaussian"} calls function \link{rpt.remlLMM.adj}
-  or rpt.mcmcLMM.adj (methods "REML" and "MCMC", respecitvely) (Note that
+For \code{datatype='Gaussian'} calls function \link{rpt.remlLMM.adj}
+  or rpt.mcmcLMM.adj (methods 'REML' and 'MCMC', respecitvely) (Note that
   rpt.mcmcLMM.adj is not yet implemented).
 }
 \examples{
@@ -96,13 +96,13 @@ data(Fledglings)
 Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
 # reduced number of nboot and npermut iterations
 rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID),
-                   "MaleID", data=Fledglings, datatype="Gaussian",
-                   method="REML", nboot=10, npermut=10)
+                   'MaleID', data=Fledglings, datatype='Gaussian',
+                   method='REML', nboot=10, npermut=10)
 
 data(BodySize)
-(rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), "BirdID",
-                            data=BodySize, datatype="Gaussian",
-                             method="MCMC"))
+(rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), 'BirdID',
+                            data=BodySize, datatype='Gaussian',
+                             method='MCMC'))
 }
 }
 \author{

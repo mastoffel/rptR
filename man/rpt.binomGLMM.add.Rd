@@ -32,8 +32,8 @@ are printed to screen. Defaults to FALSE.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Type of response (here: "binomial").}
-\item{method}{Method used to calculate repeatability (here: "MCMC").}
+\item{datatype}{Type of response (here: 'binomial').}
+\item{method}{Method used to calculate repeatability (here: 'MCMC').}
 \item{CI}{Width of the Bayesian credibility interval.}
 \item{R.link}{Point estimate for repeatability on the link scale, i.e. the mode of the posterior distribution.}
 \item{se.link}{Standard error (\emph{se}) for the repeatability on the link scale, i.e. the standard deviation of the posterior distribution. Note that the distribution might not be symmetrical, in which case \emph{se} is less informative.}
@@ -63,8 +63,8 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
      data(BroodParasitism)
      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1,
                        select = c(HostYN, FemaleID))
-     (rpt.Host <- rpt.binomGLMM.add("HostYN", "FemaleID", data = EggDump))
-     (rpt.BroodPar <- rpt.binomGLMM.add("cbpYN", "FemaleID",
+     (rpt.Host <- rpt.binomGLMM.add('HostYN', 'FemaleID', data = EggDump))
+     (rpt.BroodPar <- rpt.binomGLMM.add('cbpYN', 'FemaleID',
                       data = BroodParasitism))
 
 # repeatability estimations for egg dumping (proportion data)
@@ -73,8 +73,8 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
                             select= c(HostClutches, OwnClutches, FemaleID))
      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -
                                   ParasitismOR$HostClutches
-     (rpt.Host <- rpt.binomGLMM.add(c("HostClutches", "parasitised"),
-                                      "FemaleID", data = ParasitismOR))
+     (rpt.Host <- rpt.binomGLMM.add(c('HostClutches', 'parasitised'),
+                                      'FemaleID', data = ParasitismOR))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

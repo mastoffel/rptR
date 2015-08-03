@@ -34,8 +34,8 @@ asymptotic \emph{P} values (defaults to 1000). Currently not in use!}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Response distribution (here: "Gaussian").}
-\item{method}{Method used to calculate repeatability (here: "REML").}
+\item{datatype}{Response distribution (here: 'Gaussian').}
+\item{method}{Method used to calculate repeatability (here: 'REML').}
 \item{CI}{Width of the confidence interval.}
 \item{R}{Point estimate for repeatability.}
 \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
@@ -55,14 +55,14 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c("Sex", "BirdID"),
+(rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'),
  data=BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 
 # repeatability estimation for weight (body mass) - a lower R
 # than the previous one
 data(BodySize)
-(rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), "BirdID",
+(rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), 'BirdID',
                                data=BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 }

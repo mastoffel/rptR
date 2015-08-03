@@ -19,8 +19,8 @@ rpt.aov(y, groups, data, CI = 0.95, npermut = 1000)
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:
-\item{datatype}{Response distribution (here: "Gaussian").}
-\item{method}{Method used to calculate repeatability (here: "ANOVA").}
+\item{datatype}{Response distribution (here: 'Gaussian').}
+\item{method}{Method used to calculate repeatability (here: 'ANOVA').}
 \item{R}{Point estimate for the repeatability (denoted as \emph{R}).}
 \item{se}{Asymptotic standard error for repeatability (ICC) based Becker (1982).}
 \item{CI.R}{Asymptotic confidence interval for repeatability.}
@@ -37,12 +37,12 @@ Repeatability calculations based on Analysis of Variance (ANOVA).
 # repeatability estimation for tarsus length - a very high R
 # reduced number of npermut iterations
      data(BodySize)
-     (rpt.BS <- rpt.aov("Tarsus", "BirdID", data = BodySize, npermut=10))
+     (rpt.BS <- rpt.aov('Tarsus', 'BirdID', data = BodySize, npermut=10))
 
 # repeatability estimation for weight (body mass) - a lower R
 # than the previous one
      data(BodySize)
-     (rpt.Weight <- rpt.aov("Weight", "BirdID", data = BodySize, npermut=10))
+     (rpt.Weight <- rpt.aov('Weight', 'BirdID', data = BodySize, npermut=10))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
