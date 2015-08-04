@@ -3,7 +3,8 @@ Title: Repeatability for Gaussian and non-Gaussian data
 Version: 0.6.405
 Depends:
     R (>= 3.2.1),
-    methods
+    methods,
+    stats
 Date: 2011-11-24
 Author: Holger Schielzeth <holger.schielzeth@ebc.uu.se>, Shinichi Nakagawa
     <shinichi.nakagawa@otago.ac.nz>, Martin Stoffel
