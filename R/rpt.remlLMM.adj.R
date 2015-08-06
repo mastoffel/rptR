@@ -74,10 +74,8 @@
 rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = NULL) {
     mod <- lme4::lmer(formula, data = data)
-    if (nboot < 0) 
-        nboot <- 0
-    if (npermut < 1) 
-        npermut <- 1
+    if (nboot < 0) nboot <- 0
+    if (npermut < 1) npermut <- 1
     e1 <- environment()
     # point estimates of R
     R.pe <- function(formula, data, grname, peYN = FALSE) {

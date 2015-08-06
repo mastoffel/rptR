@@ -17,6 +17,6 @@ check_inputs(y, groups, data = NULL)
 returns a list containing the response and the grouping variable
 }
 \description{
-Checks for data argument and uses non-standard evaluation
+NOT in USE at the moment
 }
 

@@ -1,6 +1,6 @@
 #' Checks for data argument and uses non-standard evaluation
 #' 
-#' Checks inputs for all 
+#' NOT in USE at the moment
 #'
 #'@param y response variable
 #'@param groups grouping variable

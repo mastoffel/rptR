@@ -103,9 +103,11 @@ rpt.poisGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose =
     # preparation
     groups <- factor(groups)
     # model fitting
-    if (is.null(prior)) 
+    if (is.null(prior)) {
         prior <- list(R = list(V = 1e-10, nu = -1), G = list(G1 = list(V = 1, nu = 1, 
-            alpha.mu = 0, alpha.V = 25^2)))
+                 alpha.mu = 0, alpha.V = 25^2)))
+    }
+    
     mod <- MCMCglmm::MCMCglmm(y ~ 1, random = ~groups, family = "poisson", data = data.frame(y = y, 
         groups = groups), prior = prior, verbose = verbose, ...)
     # ezxtraction of posterior distributions

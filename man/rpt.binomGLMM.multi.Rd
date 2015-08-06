@@ -101,8 +101,7 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
                              select= c(HostClutches, OwnClutches, FemaleID))
      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches -
                                    ParasitisedOR$HostClutches
-     (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'),
-     'FemaleID',
+     (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'), 'FemaleID',
      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
      nboot=10, npermut=10))
      # reduced number of npermut iterations

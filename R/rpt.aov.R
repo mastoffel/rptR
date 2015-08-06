@@ -53,8 +53,7 @@
 rpt.aov <- function(y, groups, data, CI = 0.95, npermut = 1000) {
     
     # check inputs
-    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 
-        1)) {
+    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
         y <- data[[y]]
         groups <- data[[groups]]
     } else if (!(length(y) == length(groups))) {
@@ -74,8 +73,7 @@ rpt.aov <- function(y, groups, data, CI = 0.95, npermut = 1000) {
     # functions: point estimates of R
     R.pe <- function(y, groups, n0) {
         gm <- mean(y)
-        MSa <- sum(tapply(y, groups, function(x) (mean(x) - gm)^2 * length(x)))/(k - 
-            1)
+        MSa <- sum(tapply(y, groups, function(x) (mean(x) - gm)^2 * length(x)))/(k - 1)
         MSw <- sum(tapply(y, groups, function(x) sum((x - mean(x))^2)))/(N - k)
         R <- ((MSa - MSw)/n0)/((MSa - MSw)/n0 + MSw)
         return(R)
@@ -83,8 +81,7 @@ rpt.aov <- function(y, groups, data, CI = 0.95, npermut = 1000) {
     # point estimation according to equations 4 and 5
     R <- R.pe(y, groups, n0)
     # confidence interval estimation according to equation 6 and 7
-    se <- sqrt((2 * (N - 1) * (1 - R)^2 * (1 + (n0 - 1) * R)^2)/(n0^2 * (N - k) * (k - 
-        1)))
+    se <- sqrt((2 * (N - 1) * (1 - R)^2 * (1 + (n0 - 1) * R)^2)/(n0^2 * (N - k) * (k - 1)))
     CI.R <- R + c(1, -1) * qt((1 - CI)/2, k - 1) * se
     # significance test from ANOVA
     P.aov <- anova(lm(y ~ groups))[5][1, 1]
@@ -104,6 +101,7 @@ rpt.aov <- function(y, groups, data, CI = 0.95, npermut = 1000) {
     res <- list(call = match.call(), datatype = "Gaussian", method = "ANOVA", R = R, 
         se = se, CI = CI, CI.R = CI.R, P = c(P.aov = P.aov, P.permut = P.permut), R.permut = R.permut, 
         ngroups = length(unique(groups)), nobs = length(y), mod = anova(lm(y ~ groups)))
+    
     class(res) <- "rpt"
     return(res)
 } 

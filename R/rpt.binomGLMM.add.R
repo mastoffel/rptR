@@ -83,8 +83,7 @@
 
 
 
-rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, 
-    ...) {
+rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
@@ -97,29 +96,31 @@ rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose 
     # check for equal length y and groups here?
     
     # initial checks
-    if (is.null(dim(y))) 
-        y <- cbind(y, 1 - y)
-    if (any(is.na(y))) 
-        warning("missing values in y")
+    if (is.null(dim(y))) y <- cbind(y, 1 - y)
+    if (any(is.na(y))) warning("missing values in y")
+    
     # preparation
     n <- rowSums(y)
     groups <- factor(groups)
     # model fitting # change MCMCglmm with lme4 function plus factor(rownames(data) and
     # family argument --> binomial)
     if (all(n == 1)) {
-        if (is.null(prior)) 
+        if (is.null(prior)) {
             prior <- list(R = list(V = 1, fix = 1), G = list(G1 = list(V = 1, nu = 1, 
-                alpha.mu = 0, alpha.V = 25^2)))
-        mod <- MCMCglmm::MCMCglmm(m ~ 1, random = ~groups, data = data.frame(m = y[, 
-            1], nm = y[, 2], groups = groups), prior = prior, family = "categorical", 
-            verbose = verbose, ...)
+                     alpha.mu = 0, alpha.V = 25^2)))
+            mod <- MCMCglmm::MCMCglmm(m ~ 1, random = ~groups, data = data.frame(m = y[, 1], 
+                   nm = y[, 2], groups = groups), prior = prior, family = "categorical", 
+                   verbose = verbose, ...)
+        }
     } else {
-        if (is.null(prior)) 
+        if (is.null(prior)) {
             prior <- list(R = list(V = 1e-10, nu = -1), G = list(G1 = list(V = 1, nu = 1, 
-                alpha.mu = 0, alpha.V = 25^2)))
-        mod <- MCMCglmm::MCMCglmm(cbind(m, nm) ~ 1, random = ~groups, data = data.frame(m = y[, 
-            1], nm = y[, 2], groups = groups), prior = prior, family = "multinomial2", 
-            verbose = verbose, ...)
+                     alpha.mu = 0, alpha.V = 25^2)))
+            mod <- MCMCglmm::MCMCglmm(cbind(m, nm) ~ 1, random = ~groups, 
+                   data = data.frame(m = y[, 1], nm = y[, 2], groups = groups), 
+                   prior = prior, family = "multinomial2", 
+                   verbose = verbose, ...)
+        }
     }
     # extraction of posterior distributions
     var.a <- mod$VCV[, "groups"]
@@ -128,7 +129,7 @@ rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose 
     beta0 <- mod$Sol
     P <- exp(beta0)/(1 + exp(beta0))
     postR.org <- (var.a * P * P/(1 + exp(beta0))^2)/((var.a + var.e) * P * P/(1 + exp(beta0))^2 + 
-        P * (1 - P))
+                 P * (1 - P))
     # point estimate on link and original scale
     R.link <- MCMCglmm::posterior.mode(postR.link)
     R.org <- MCMCglmm::posterior.mode(postR.org)
@@ -142,10 +143,10 @@ rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose 
     P.org <- NA
     # return of results
     res <- list(call = match.call(), datatype = "binomial", method = "MCMC", CI = CI, 
-        R.link = R.link, se.link = se.link, CI.link = CI.link, P.link = P.link, R.org = R.org, 
-        se.org = se.org, CI.org = CI.org, P.org = P.org, R.post = list(R.link = as.vector(postR.link), 
-            R.org = as.vector(postR.org)), MCMCpars = attr(beta0, "mcpar"), ngroups = length(unique(groups)), 
-        nobs = length(y), mod = mod)
+                R.link = R.link, se.link = se.link, CI.link = CI.link, P.link = P.link, R.org = R.org, 
+                se.org = se.org, CI.org = CI.org, P.org = P.org, R.post = list(R.link = as.vector(postR.link), 
+                R.org = as.vector(postR.org)), MCMCpars = attr(beta0, "mcpar"), ngroups = length(unique(groups)), 
+                nobs = length(y), mod = mod)
     class(res) <- "rpt"
     return(res)
 } 

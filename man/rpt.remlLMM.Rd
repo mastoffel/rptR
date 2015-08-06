@@ -51,20 +51,21 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM('Tarsus', 'BirdID', data = BodySize,
+(rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize,
                        nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 
 # repeatability estimation for weight (body mass) - a lower R
 # than the previous one
 data(BodySize)
-(rpt.Weight <- rpt.remlLMM('Weight', 'BirdID', data = BodySize,
+(rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize,
                             nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),
+        Martin A. Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized

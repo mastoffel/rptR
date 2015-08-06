@@ -97,7 +97,7 @@
 #' 
 # @importFrom MASS glmmPQL @importFrom lme4 VarCorr
 #' 
-rpt.poisGLMM.multi <- function(y, groups, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
+rpt.poisGLMM.multi <- function(y, groups, data = NULL, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
     npermut = 1000, parallel = FALSE, ncores = 0) {
     
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
@@ -111,12 +111,9 @@ rpt.poisGLMM.multi <- function(y, groups, data, link = c("log", "sqrt"), CI = 0.
     # initial checks
     if (length(y) != length(groups)) 
         stop("y and group hav to be of equal length")
-    if (nboot < 0) 
-        nboot <- 0
-    if (npermut < 1) 
-        npermut <- 1
-    if (length(link) > 1) 
-        link <- link[1]
+    if (nboot < 0) nboot <- 0
+    if (npermut < 1) npermut <- 1
+    if (length(link) > 1) link <- link[1]
     if (link != "log" & link != "sqrt") 
         stop("inappropriate link (has to be 'log' or 'sqrt')")
     if (any(is.na(y))) {

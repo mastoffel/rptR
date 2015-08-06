@@ -97,8 +97,7 @@
 #'                              select= c(HostClutches, OwnClutches, FemaleID))
 #'      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - 
 #'                                    ParasitisedOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'), 
-#'      'FemaleID', 
+#'      (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'), 'FemaleID', 
 #'      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ], 
 #'      nboot=10, npermut=10))
 #'      # reduced number of npermut iterations
@@ -121,7 +120,7 @@
 # @importFrom MASS glmmPQL
 #' @importFrom VGAM probit rbetabinom
 
-rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI = 0.95, 
+rpt.binomGLMM.multi <- function(y, groups, data = NULL, link = c("logit", "probit"), CI = 0.95, 
     nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
     
     # data argument check
@@ -134,16 +133,12 @@ rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI
     }
     
     # initial checks
-    if (is.null(dim(y))) 
-        y <- cbind(y, 1 - y)
+    if (is.null(dim(y))) y <- cbind(y, 1 - y)
     if (nrow(y) != length(groups)) 
-        stop("y and group have to be of equal length")
-    if (nboot < 0) 
-        nboot <- 0
-    if (npermut < 1) 
-        npermut <- 1
-    if (length(link) > 1) 
-        link <- link[1]
+            stop("y and group have to be of equal length")
+    if (nboot < 0) nboot <- 0
+    if (npermut < 1) npermut <- 1
+    if (length(link) > 1) link <- link[1]
     if (link != "logit" & link != "probit") 
         stop("inappropriate link (has to be 'logit' or 'probit')")
     if (any(is.na(y))) {
@@ -158,14 +153,23 @@ rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI
     k <- length(levels(groups))
     # functions
     pqlglmm.binom.model <- function(y, groups, n, link, returnR = TRUE) {
-        if (all(n == 1)) 
+        if (all(n == 1)) {
             mod <- MASS::glmmPQL(y ~ 1, random = ~1 | groups, family = binomial(link = eval(link)), 
-                verbose = FALSE) else mod <- MASS::glmmPQL(y ~ 1, random = ~1 | groups, family = quasibinomial(link = eval(link)), 
-            verbose = FALSE)
+                   verbose = FALSE) 
+        } else { 
+            mod <- MASS::glmmPQL(y ~ 1, random = ~1 | groups, family = quasibinomial(link = eval(link)), 
+                   verbose = FALSE)
+        }
+            
         VarComp <- lme4::VarCorr(mod)
         beta0 <- as.numeric(mod$coefficients$fixed)
-        if (all(n == 1)) 
-            omega <- 1 else omega <- (as.numeric(VarComp[2, 1]))
+        
+        if (all(n == 1)) {
+                omega <- 1 
+        } else {
+                omega <- (as.numeric(VarComp[2, 1]))
+        }
+        
         var.a <- (as.numeric(VarComp[1, 1]))
         if (link == "logit") {
             R.link <- var.a/(var.a + omega * pi^2/3)
@@ -177,8 +181,11 @@ rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI
             R.link <- var.a/(var.a + omega)
             R.org <- NA
         }
-        if (returnR) 
-            return(list(R.link = R.link, R.org = R.org)) else return(list(beta0 = beta0, omega = omega, var.a = var.a))
+        if (returnR) {
+            return(list(R.link = R.link, R.org = R.org)) 
+        } else {
+            return(list(beta0 = beta0, omega = omega, var.a = var.a))
+        }
     }
     # point estimate
     R <- pqlglmm.binom.model(y, groups, n, link)
@@ -191,9 +198,9 @@ rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI
             p <- exp(p.link)/(1 + exp(p.link))
         if (link == "probit") 
             p <- probit(p.link, inverse = TRUE)  # VGAM::probit(p.link, inverse=TRUE)
-        if (all(n == 1)) 
+        if (all(n == 1)) {
             m <- rbinom(N, 1, p)  # binomial model
- else {
+        } else {
             rho <- (omega - 1)/(n - 1)
             rho[rho <= 0] <- 0  # underdispersion is ignored
             rho[rho >= 1] <- 9e-10  # strong overdispersion is forced to have rho ~ 1
@@ -225,11 +232,12 @@ rpt.binomGLMM.multi <- function(y, groups, data, link = c("logit", "probit"), CI
         R.boot <- replicate(nboot, bootstr(y = y, groups = groups, k = k, N = N, n = n, 
             beta0 = mod.ests$beta0, var.a = mod.ests$var.a, omega = mod.ests$omega, link = link), 
             simplify = TRUE)
-        R.boot <- list(R.link = as.numeric(unlist(R.boot["R.link", ])), R.org = as.numeric(unlist(R.boot["R.org", 
-            ])))
+        R.boot <- list(R.link = as.numeric(unlist(R.boot["R.link", ])), 
+                       R.org = as.numeric(unlist(R.boot["R.org", ])))
     } else {
         R.boot <- list(R.link = NA, R.org = NA)
     }
+    
     CI.link <- quantile(R.boot$R.link, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
     CI.org <- quantile(R.boot$R.org, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
     se.link <- sd(R.boot$R.link, na.rm = TRUE)

@@ -65,8 +65,7 @@
 rpt.mcmcLMM <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
     # check inputs
-    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 
-        1)) {
+    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
         y <- data[[y]]
         groups <- data[[groups]]
     }
@@ -75,11 +74,11 @@ rpt.mcmcLMM <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALS
         stop("y and group are of unequal length")
     # preparation
     groups <- factor(groups)
-    if (is.null(prior)) 
-        prior <- list(R = list(V = 1, n = 0.1), G = list(G1 = list(V = 1, n = 0.1)))
+    if (is.null(prior)) prior <- list(R = list(V = 1, n = 0.1), G = list(G1 = list(V = 1, n = 0.1)))
     # point estimation according to model 8 and equation 9
-    mod <- MCMCglmm::MCMCglmm(y ~ 1, random = ~groups, family = "gaussian", data = data.frame(y = y, 
-        groups = groups), prior = prior, verbose = verbose, ...)
+    mod <- MCMCglmm::MCMCglmm(y ~ 1, random = ~groups, family = "gaussian", 
+                              data = data.frame(y = y, groups = groups), prior = prior, 
+                              verbose = verbose, ...)
     var.a <- mod$VCV[, "groups"]
     var.e <- mod$VCV[, "units"]
     postR <- var.a/(var.a + var.e)
