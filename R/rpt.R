@@ -147,13 +147,26 @@
 rpt <- function(y, groups, data, datatype = c("Gaussian", "binomial", "proportion", "count"), 
     method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"), link = c("logit", 
         "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000) {
+        
+        # non-standard evaluation if non-string plus data argument provided
+        if (is.null(data)) {
+                if (is.character(y) | is.character(groups)) {
+                        stop("Provide a data argument or vector names (non-character)")
+                }
+        }
+        if (!is.null(data)) {
+                if (!is.expression(y) & !is.character(y)) y <- substitute(y)
+                if (!is.expression(groups) & !is.character(groups)) groups <- substitute(groups)
+        }
+        
     if (datatype == "Gaussian") {
         if (length(method) > 1) {
             warning("Linear mixed model fitted by REML used by default. Change using argument 'method', if required ('corr', 'ANOVA', 'REML' and 'MCMC' allowed for Gaussian data).")
             method <- "REML"
         }
-        if (method == "REML") 
+        if (method == "REML") {
             return(rpt.remlLMM(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
+        }
         if (method == "MCMC") 
             return(rpt.mcmcLMM(y, groups, data, CI = CI))
         if (method == "ANOVA") 

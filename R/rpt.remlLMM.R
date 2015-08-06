@@ -42,8 +42,9 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se), 
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
+#'         Martin A. Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt.mcmcLMM}, \link{rpt.aov}, \link{rpt.corr}, \link{print.rpt}, \link{rpt.remlLMM.adj}
 #' 
@@ -51,14 +52,14 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM('Tarsus', 'BirdID', data = BodySize, 
+#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, 
 #'                        nboot=10, npermut=10))   
 #' # reduced number of nboot and npermut iterations
 #'
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM('Weight', 'BirdID', data = BodySize, 
+#' (rpt.Weight <- rpt.remlLMM(Weight, BirdID, data = BodySize, 
 #'                             nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #'       
@@ -71,24 +72,36 @@
 # much to do here
 rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = 0) {
-    
-    if (!is.null(data)) {
-        y <- eval(substitute(y), data)
-        groups <- eval(substitute(groups), data)
-        if (is.character(y) & (length(y) <= 2) & is.character(groups) & (length(groups) == 
-            1)) {
-            y <- data[, y]
-            groups <- data[, groups]
-        }
-    }
-    
-    # # check inputs if (is.character(y) & (length(y) == 1) & is.character(groups) &
-    # (length(groups) == 1)) { y <- data[[y]] groups <- data[[groups]] } else if
-    # (!(length(y) == length(groups))){ stop('y and groups must have the same length') }
-    
+   
+        
+# check inputs
+if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 
+                                                                 1)) {
+        y <- data[, y]
+        groups <- data[, groups]
+} else if (!(length(y) == length(groups))) {
+        stop("y and groups must have the same length")
+}
+    # non-standard evaluation if non-string plus data argument provided
+#     if (!is.null(data)) {
+#                 y <- as.character(substitute(y))
+#                 groups <- as.character(substitute(groups))
+#                 y <- data[, y]
+#                 groups <- data[, groups]
+#         } 
+#   
+#     if (is.null(data)) {
+#     # check whether inputs are wrong
+#                 if (is.character(y) | is.character(groups)) {
+#                         stop("Provide a data argument or vector names (non-character)")
+#                 }
+#     }
+        
+        
     # model
     formula <- y ~ 1 + (1 | groups)
     mod <- lme4::lmer(formula)
+    
     # checks
     if (nboot < 0) 
         nboot <- 0
