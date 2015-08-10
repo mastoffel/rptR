@@ -99,7 +99,7 @@
 #' (rpt.BS <- rpt('Tarsus', 'BirdID', data = BodySize, datatype='Gaussian', 
 #'                method='ANOVA', npermut=10))
 #' # LMM based
-#' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
+#' (rpt.Weight <- rpt(Weight, BirdID, data = BodySize, datatype='Gaussian', 
 #'                    method='REML', nboot=10, npermut=10))
 #' # LMM based with MCMC
 #' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
@@ -165,9 +165,6 @@ rpt <- function(y, groups, data, datatype = c("Gaussian", "binomial", "proportio
             method <- "REML"
         }
         if (method == "REML") {
-            get_call <- as.list(match.call())
-            y <- as.character(get_call$y)
-            groups <- as.character(get_call$groups)
             return(rpt.remlLMM(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
         }
         if (method == "MCMC") 

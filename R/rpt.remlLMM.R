@@ -59,7 +59,7 @@
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize, 
+#' (rpt.Weight <- rpt.remlLMM(Weight, BirdID, data = BodySize, 
 #'                             nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #'       
@@ -69,35 +69,23 @@
 #' @export
 #' 
 
-# much to do here
 rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = 0) {
    
-
 # check inputs
      if (!is.null(data)) {
-             if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-                y <- data[, y]
-                groups <- data[, groups]
-             } else {
-                # non-standard evaluation if non-string plus data argument provided
-                y <- as.character(substitute(y))
-                groups <- as.character(substitute(groups))
-                y <- data[, y]
-                groups <- data[, groups]    
-             }
+             y <- lazyeval::lazy(y)
+             groups <- lazyeval::lazy(groups)
+             y <- lazyeval::lazy_eval(y$expr, data)
+             groups <- lazyeval::lazy_eval(groups$expr, data)
      }
-      if (!(length(y) == length(groups))) {
+
+     
+     # check length equality
+     if (!(length(y) == length(groups))) {
                 stop("y and groups must have the same length")
       }
     
-
-     if (is.null(data)) {
-     # check whether inputs are wrong
-                 if (is.character(y) | is.character(groups)) {
-                         stop("Provide a data argument or vector names (non-character)")
-                 }
-     }
         
         
     # model
@@ -133,7 +121,7 @@ rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut
     if (nboot > 0 & parallel == TRUE) {
         if (ncores == 0) {
             ncores <- parallel::detectCores()
-            warning("No core number specified: detectCores() is used to detect the number of \n                                cores on the local machine")
+            warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster
         cl <- parallel::makeCluster(ncores)

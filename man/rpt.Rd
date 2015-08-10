@@ -108,7 +108,7 @@ data(BodySize)
 (rpt.BS <- rpt('Tarsus', 'BirdID', data = BodySize, datatype='Gaussian',
                method='ANOVA', npermut=10))
 # LMM based
-(rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian',
+(rpt.Weight <- rpt(Weight, BirdID, data = BodySize, datatype='Gaussian',
                    method='REML', nboot=10, npermut=10))
 # LMM based with MCMC
 (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian',

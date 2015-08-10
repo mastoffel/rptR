@@ -50,15 +50,26 @@
 #' @export
 
 
-rpt.aov <- function(y, groups, data, CI = 0.95, npermut = 1000) {
+rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
     
-    # check inputs
-    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-        y <- data[[y]]
-        groups <- data[[groups]]
-    } else if (!(length(y) == length(groups))) {
-        stop("y and groups must have the same length")
-    }
+        # check inputs
+        if (!is.null(data)) {
+                if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                        y <- data[, y]
+                        groups <- data[, groups]
+                } else {
+                        # non-standard evaluation if non-string plus data argument provided
+                        y <- as.character(substitute(y))
+                        groups <- as.character(substitute(groups))
+                        y <- data[, y]
+                        groups <- data[, groups]
+                }
+        }
+        # check length equality
+        if (!(length(y) == length(groups))) {
+                stop("y and groups must have the same length")
+        }
+        
     
     # initial checks
     if (length(y) != length(groups)) 

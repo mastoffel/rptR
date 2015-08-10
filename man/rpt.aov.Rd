@@ -4,7 +4,7 @@
 \alias{rpt.aov}
 \title{ANOVA-based Repeatability}
 \usage{
-rpt.aov(y, groups, data, CI = 0.95, npermut = 1000)
+rpt.aov(y, groups, data = NULL, CI = 0.95, npermut = 1000)
 }
 \arguments{
 \item{y}{String specifying response variable or vector of measurements.}

@@ -58,7 +58,7 @@ data(BodySize)
 # repeatability estimation for weight (body mass) - a lower R
 # than the previous one
 data(BodySize)
-(rpt.Weight <- rpt.remlLMM("Weight", "BirdID", data = BodySize,
+(rpt.Weight <- rpt.remlLMM(Weight, BirdID, data = BodySize,
                             nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 }

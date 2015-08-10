@@ -4,8 +4,9 @@
 \alias{rpt.binomGLMM.multi}
 \title{GLMM-based Repeatability Using PQL Estimation for Binomial Data}
 \usage{
-rpt.binomGLMM.multi(y, groups, data, link = c("logit", "probit"), CI = 0.95,
-  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
+rpt.binomGLMM.multi(y, groups, data = NULL, link = c("logit", "probit"),
+  CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
+  ncores = 0)
 }
 \arguments{
 \item{y}{If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data

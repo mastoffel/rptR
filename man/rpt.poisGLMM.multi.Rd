@@ -4,8 +4,9 @@
 \alias{rpt.poisGLMM.multi}
 \title{GLMM-based Repeatability Using PQL Estimation for Count Data}
 \usage{
-rpt.poisGLMM.multi(y, groups, data, link = c("log", "sqrt"), CI = 0.95,
-  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0)
+rpt.poisGLMM.multi(y, groups, data = NULL, link = c("log", "sqrt"),
+  CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
+  ncores = 0)
 }
 \arguments{
 \item{y}{Vector of a response values.}
