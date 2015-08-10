@@ -165,6 +165,9 @@ rpt <- function(y, groups, data, datatype = c("Gaussian", "binomial", "proportio
             method <- "REML"
         }
         if (method == "REML") {
+            get_call <- as.list(match.call())
+            y <- as.character(get_call$y)
+            groups <- as.character(get_call$groups)
             return(rpt.remlLMM(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
         }
         if (method == "MCMC") 

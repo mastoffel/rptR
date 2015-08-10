@@ -73,29 +73,31 @@
 rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = 0) {
    
-        
+
 # check inputs
-if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 
-                                                                 1)) {
-        y <- data[, y]
-        groups <- data[, groups]
-} else if (!(length(y) == length(groups))) {
-        stop("y and groups must have the same length")
-}
-    # non-standard evaluation if non-string plus data argument provided
-#     if (!is.null(data)) {
-#                 y <- as.character(substitute(y))
-#                 groups <- as.character(substitute(groups))
-#                 y <- data[, y]
-#                 groups <- data[, groups]
-#         } 
-#   
-#     if (is.null(data)) {
-#     # check whether inputs are wrong
-#                 if (is.character(y) | is.character(groups)) {
-#                         stop("Provide a data argument or vector names (non-character)")
-#                 }
-#     }
+     if (!is.null(data)) {
+             if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
+                y <- data[, y]
+                groups <- data[, groups]
+             } else {
+                # non-standard evaluation if non-string plus data argument provided
+                y <- as.character(substitute(y))
+                groups <- as.character(substitute(groups))
+                y <- data[, y]
+                groups <- data[, groups]    
+             }
+     }
+      if (!(length(y) == length(groups))) {
+                stop("y and groups must have the same length")
+      }
+    
+
+     if (is.null(data)) {
+     # check whether inputs are wrong
+                 if (is.character(y) | is.character(groups)) {
+                         stop("Provide a data argument or vector names (non-character)")
+                 }
+     }
         
         
     # model
