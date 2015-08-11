@@ -85,6 +85,19 @@
 
 rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
+#         # check inputs
+#         if (!is.null(data)) {
+#                 y <- lazyeval::lazy(y)
+#                 groups <- lazyeval::lazy(groups)
+#                 groups <- lazyeval::lazy_eval(groups$expr, data)
+#                 
+#                 if (length(is.character(y$expr)) > 1) {
+#                         y <- lazyeval::lazy_eval(is.character(y$expr)[2:3], data)
+#                 } else {
+#                         y <- lazyeval::lazy_eval(y$expr, data)
+#                 }
+#                 
+#         }
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {

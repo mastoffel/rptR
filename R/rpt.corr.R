@@ -42,7 +42,7 @@
 #' # repeatability for male breeding success on a transformed scale
 #'   data(Fledglings)
 #'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'   (rpt.Fledge <- rpt.corr('sqrtFledge', 'MaleID', data = Fledglings, 
+#'   (rpt.Fledge <- rpt.corr(sqrtFledge, MaleID, data = Fledglings, 
 #'   nboot=10, npermut=10))  # reduced number of iterations
 #'   
 #' @keywords models
@@ -52,11 +52,14 @@
 rpt.corr <- function(y, groups, data, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
     ncores = 0) {
     
-    # check inputs for data argument
-    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-        y <- data[[y]]
-        groups <- data[[groups]]
-    }
+    # check inputs
+        if (!is.null(data)) {
+                y <- lazyeval::lazy(y)
+                groups <- lazyeval::lazy(groups)
+                y <- lazyeval::lazy_eval(y$expr, data)
+                groups <- lazyeval::lazy_eval(groups$expr, data)
+        }
+        
     
     # initial checks
     if (length(y) != length(groups)) 

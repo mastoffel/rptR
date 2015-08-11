@@ -38,12 +38,12 @@
 #' # repeatability estimation for tarsus length - a very high R
 #' # reduced number of npermut iterations
 #'      data(BodySize)
-#'      (rpt.BS <- rpt.aov('Tarsus', 'BirdID', data = BodySize, npermut=10))    
+#'      (rpt.BS <- rpt.aov(Tarsus, BirdID, data = BodySize, npermut=10))    
 #'      
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #'      data(BodySize)
-#'      (rpt.Weight <- rpt.aov('Weight', 'BirdID', data = BodySize, npermut=10))  
+#'      (rpt.Weight <- rpt.aov(Weight, BirdID, data = BodySize, npermut=10))  
 #' 
 #' @keywords models
 #' 
@@ -54,16 +54,10 @@ rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
     
         # check inputs
         if (!is.null(data)) {
-                if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-                        y <- data[, y]
-                        groups <- data[, groups]
-                } else {
-                        # non-standard evaluation if non-string plus data argument provided
-                        y <- as.character(substitute(y))
-                        groups <- as.character(substitute(groups))
-                        y <- data[, y]
-                        groups <- data[, groups]
-                }
+                y <- lazyeval::lazy(y)
+                groups <- lazyeval::lazy(groups)
+                y <- lazyeval::lazy_eval(y$expr, data)
+                groups <- lazyeval::lazy_eval(groups$expr, data)
         }
         # check length equality
         if (!(length(y) == length(groups))) {

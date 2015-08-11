@@ -13,8 +13,16 @@ resp = alpha + group.dev[as.numeric(pred)] + epsilon
 md = data.frame(resp, pred)
 
 
-test_that("point estimates are correct", {
-        expect_equal(rpt.aov(resp, pred, md)$R, 0.0995, tolerance = 0.01)
-        expect_equal(rpt.aov(resp, pred, md)$se, 0.115, tolerance = 0.01)
+test_that("all input formats work and point estimates for repeatability correct", {
+        # non-standard eval
+        expect_equal(rpt.aov(y = resp, groups = pred, data = md, npermut = 0)$R, 0.0995, tolerance = 0.01)
+        expect_equal(rpt.aov(resp, pred, md, npermut = 0)$R, 0.0995, tolerance = 0.01)
+        # standard eval
+        expect_equal(rpt.aov(y = "resp", groups = "pred", data = md, npermut = 0)$R, 0.0995, tolerance = 0.01)
+        expect_equal(rpt.aov("resp", "pred", md, npermut = 0)$R, 0.0995, tolerance = 0.01)
+        # no df
+        attach(md)
+        expect_equal(rpt.aov(resp, pred, npermut = 0)$R, 0.0995, tolerance = 0.01)
+        detach(md)
 })
 

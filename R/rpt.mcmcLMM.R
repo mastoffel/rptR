@@ -48,12 +48,12 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.mcmcLMM('Tarsus', 'BirdID', data = BodySize))  
+#' (rpt.BS <- rpt.mcmcLMM(Tarsus, BirdID, data = BodySize))  
 #'     
 #' # repeatability estimation for weight (body mass) - a lower R than the 
 #' # previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
+#' (rpt.Weight <- rpt.mcmcLMM(Weight, BirdID, data = BodySize))
 #'       
 #' @keywords models
 #' 
@@ -62,13 +62,16 @@
 # @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
 # HPDinterval
 
-rpt.mcmcLMM <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+rpt.mcmcLMM <- function(y, groups, data = NULL, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
-    # check inputs
-    if (is.character(y) & (length(y) == 1) & is.character(groups) & (length(groups) == 1)) {
-        y <- data[[y]]
-        groups <- data[[groups]]
+    # NSE or SE
+    if (!is.null(data)) {
+                y <- lazyeval::lazy(y)
+                groups <- lazyeval::lazy(groups)
+                y <- lazyeval::lazy_eval(y$expr, data)
+                groups <- lazyeval::lazy_eval(groups$expr, data)
     }
+        
     # initial checks
     if (length(y) != length(groups)) 
         stop("y and group are of unequal length")
