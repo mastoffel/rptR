@@ -58,7 +58,6 @@
 #' @keywords models
 #' 
 #' @export
-#' 
 # @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
 # HPDinterval
 

@@ -4,8 +4,8 @@
 \alias{rpt.mcmcLMM}
 \title{LMM-based repeatability estimated using MCMC sampling}
 \usage{
-rpt.mcmcLMM(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE,
-  ...)
+rpt.mcmcLMM(y, groups, data = NULL, CI = 0.95, prior = NULL,
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{String specifying response variable or vector of measurements.}
@@ -52,12 +52,12 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.mcmcLMM('Tarsus', 'BirdID', data = BodySize))
+(rpt.BS <- rpt.mcmcLMM(Tarsus, BirdID, data = BodySize))
 
 # repeatability estimation for weight (body mass) - a lower R than the
 # previous one
 data(BodySize)
-(rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
+(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID, data = BodySize))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

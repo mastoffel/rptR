@@ -48,6 +48,7 @@
 #' @keywords models
 #' 
 #' @export
+#' @import methods stats
 
 
 rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {

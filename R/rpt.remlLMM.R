@@ -67,7 +67,6 @@
 #' @keywords models
 #' 
 #' @export
-#' 
 
 rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = 0) {
@@ -86,8 +85,6 @@ rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut
                 stop("y and groups must have the same length")
       }
     
-        
-        
     # model
     formula <- y ~ 1 + (1 | groups)
     mod <- lme4::lmer(formula)

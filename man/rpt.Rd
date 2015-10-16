@@ -4,10 +4,10 @@
 \alias{rpt}
 \title{Repeatability Calculation for Gaussian and Non-Gaussian Data}
 \usage{
-rpt(y, groups, data, datatype = c("Gaussian", "binomial", "proportion",
-  "count"), method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add",
-  "GLMM.multi"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95,
-  nboot = 1000, npermut = 1000)
+rpt(y, groups, data = NULL, datatype = c("Gaussian", "binomial",
+  "proportion", "count"), method = c("corr", "ANOVA", "REML", "MCMC",
+  "GLMM.add", "GLMM.multi"), link = c("logit", "probit", "log", "sqrt"),
+  CI = 0.95, nboot = 1000, npermut = 1000)
 }
 \arguments{
 \item{y}{String specifying response variable  (or two-column matrix or dataframe in case of
@@ -96,7 +96,7 @@ For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov},
 # repeatability for male breeding success on a transformed scale
   data(Fledglings)
   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-  (rpt.Fledge <- rpt('sqrtFledge', 'MaleID', data = Fledglings,
+  (rpt.Fledge <- rpt(sqrtFledge, MaleID, data = Fledglings,
                      datatype='Gaussian', method='corr', nboot=10,
                      npermut=10))  # reduced number of iterations
 
@@ -105,12 +105,12 @@ For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov},
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
 # ANOVA based
-(rpt.BS <- rpt('Tarsus', 'BirdID', data = BodySize, datatype='Gaussian',
+(rpt.BS <- rpt(Tarsus, BirdID, data = BodySize, datatype='Gaussian',
                method='ANOVA', npermut=10))
 # LMM based
 (rpt.Weight <- rpt(Weight, BirdID, data = BodySize, datatype='Gaussian',
                    method='REML', nboot=10, npermut=10))
-# LMM based with MCMC
+# LMM based with MCMC (results to check)
 (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian',
                     method='MCMC'))
 

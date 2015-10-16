@@ -48,7 +48,8 @@
 #' @keywords models
 #' 
 #' @export
-
+#' 
+#' 
 rpt.corr <- function(y, groups, data, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
     ncores = 0) {
     

@@ -118,7 +118,8 @@
 #' @export
 #' 
 # @importFrom MASS glmmPQL
-#' @importFrom VGAM probit rbetabinom
+#'@importFrom VGAM probit rbetabinom
+
 
 rpt.binomGLMM.multi <- function(y, groups, data = NULL, link = c("logit", "probit"), CI = 0.95, 
     nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
