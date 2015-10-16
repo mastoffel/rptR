@@ -4,10 +4,10 @@ Version: 0.6.405
 Depends:
     R (>= 3.2.1)
 Date: 2011-11-24
-Author: Holger Schielzeth <holger.schielzeth@ebc.uu.se>, Shinichi Nakagawa
-    <shinichi.nakagawa@otago.ac.nz>, Martin Stoffel
-    <martin.adam.stoffel@gmail.com>
-Maintainer: Holger Schielzeth <holger.schielzeth@ebc.uu.se>
+Author: Martin Stoffel <martin.adam.stoffel@gmail.com>,
+       Holger Schielzeth <holger.schielzeth@ebc.uu.se>, 
+       Shinichi Nakagawa <shinichi.nakagawa@otago.ac.nz>
+Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: R functions for calculating repeatability (intra-class
     correlation) from normal, binary, proportion and count data.
 License: GPL (>= 2)

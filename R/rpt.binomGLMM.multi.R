@@ -215,7 +215,7 @@ rpt.binomGLMM.multi <- function(y, groups, data = NULL, link = c("logit", "probi
         mod.ests <- pqlglmm.binom.model(y, groups, n, link, returnR = FALSE)
         if (ncores == 0) {
             ncores <- parallel::detectCores()
-            warning("No core number specified: detectCores() is used to detect the number of \n                        cores on the local machine")
+            warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster
         cl <- parallel::makeCluster(ncores)

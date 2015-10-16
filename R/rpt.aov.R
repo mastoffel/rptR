@@ -64,7 +64,6 @@ rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
         if (!(length(y) == length(groups))) {
                 stop("y and groups must have the same length")
         }
-        
     
     # initial checks
     if (length(y) != length(groups)) 

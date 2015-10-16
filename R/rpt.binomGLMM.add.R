@@ -146,7 +146,7 @@ rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose 
     # point estimate on link and original scale
     R.link <- MCMCglmm::posterior.mode(postR.link)
     R.org <- MCMCglmm::posterior.mode(postR.org)
-    # credibility interval estimation from paterior distribution
+    # credibility interval estimation from posterior distribution
     CI.link <- coda::HPDinterval(postR.link, CI)[1, ]
     CI.org <- coda::HPDinterval(postR.org, CI)[1, ]
     se.link <- sd(postR.link)
