@@ -2,10 +2,10 @@
 #' 
 #' Calculates repeatability based on inter-class correlations
 #' 
-#' @param y String specifying response variable or vector of response values. Missing values are not allowed.
-#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
+#' @param data data.frame containing response and groups variable.
+#' @param y Response variable. Missing values are not allowed.
+#' @param groups Group variable (will be converted to a factor).
 #'        Note that each group identity has to appear exactly twice.
-#' @param data Data frame containing respnse and groups variable.
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param nboot Number of bootstrapping runs used when calculating an asymptotic
 #'        confidence interval (defaults to 1000).
@@ -50,29 +50,42 @@
 #' @export
 #' 
 #' 
-rpt.corr <- function(y, groups, data, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
-    ncores = 0) {
-    
-    # check inputs
-        if (!is.null(data)) {
-                y <- lazyeval::lazy(y)
-                groups <- lazyeval::lazy(groups)
-                y <- lazyeval::lazy_eval(y$expr, data)
-                groups <- lazyeval::lazy_eval(groups$expr, data)
+
+# Non-standard evaluation with deprecated option to pass strings
+rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
+                     parallel = FALSE, ncores = 0) {
+        
+        if (is.character(substitute(y)) & is.character(substitute(groups))){
+                warning("use of quoted expressions is deprecated. Pass an unquoted expression instead.")
+                rpt.corr_(y, groups, data, CI = 0.95, nboot = 1000, 
+                          npermut = 1000, parallel = FALSE, ncores = 0)
+        } else {
+                
+        rpt.corr_(lazyeval::lazy(y), lazyeval::lazy(groups), data, CI = 0.95, nboot = 1000, 
+                  npermut = 1000, parallel = FALSE, ncores = 0)
         }
         
+}
+
+# Standard evaluation
+rpt.corr_ <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
+    ncores = 0) {
+    
+    # data argument should be used
+    if (missing(data)) {
+            warning("Vector inputs is deprecated. Always give a data.frame to the data argument")
+    }
+    
+    y <- lazyeval::lazy_eval(y, data = data)
+    groups <- lazyeval::lazy_eval(groups, data = data)
     
     # initial checks
-    if (length(y) != length(groups)) 
-        stop("y and group have to be of equal length")
+    if (length(y) != length(groups)) stop("y and group have to be of equal length")
     if (nboot < 0) nboot <- 0
     if (npermut < 1) npermut <- 1
-    if (any(is.na(y))) 
-        stop("missing values in y ")
-    if (any(is.na(groups))) 
-        stop("missing values in groups ")
-    if (!all(table(groups) == 2)) 
-        stop("not exactly two data points per group")
+    if (any(is.na(y))) stop("missing values in y ")
+    if (any(is.na(groups))) stop("missing values in groups ")
+    if (!all(table(groups) == 2)) stop("not exactly two data points per group")
     # preparation
     sortix <- sort.int(as.numeric(groups), index.return = TRUE)$ix
     y1 <- y[sortix][seq(1, length(y), by = 2)]
@@ -110,6 +123,7 @@ rpt.corr <- function(y, groups, data, CI = 0.95, nboot = 1000, npermut = 1000, p
     }
     CI.R <- quantile(R.boot, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
     se <- sd(R.boot, na.rm = TRUE)
+    
     # significance test by permutation
     permut <- function(y1, y2, k) {
         samp <- sample(1:k, k)
