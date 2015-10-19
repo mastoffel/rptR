@@ -99,6 +99,7 @@ rpt.corr_ <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut =
     }
     # point estimation according to equations 4 and 5
     R <- R.pe(y1, y2, k)
+    
     # confidence interval estimation according to equation 6 and 7
     bootstr <- function(nboot, y1, y2, k) {
         samp <- sample(1:k, k, replace = TRUE)
@@ -129,7 +130,20 @@ rpt.corr_ <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut =
         samp <- sample(1:k, k)
         R.pe(y1[samp], y2, k)
     }
-    if (npermut > 1) {
+    
+    if (npermut > 1 & parallel == TRUE) {
+            if (ncores == 0) {
+                    ncores <- parallel::detectCores()
+                    warning("No core number specified: detectCores() is used to 
+                            detect the number of \n cores on the local machine")
+            }
+            # start cluster
+            cl <- parallel::makeCluster(ncores)
+            parallel::clusterExport(cl, "R.pe")
+            # parallel computing
+            R.permut <- (parallel::parSapply(cl, 1:npermut, bootstr, y1, y2, k))
+            parallel::stopCluster(cl)
+    } else if (npermut > 1) {
         R.permut <- c(R, replicate(npermut - 1, permut(y1, y2, k), simplify = TRUE))
         P.permut <- sum(R.permut >= R)/npermut
     } else {
