@@ -10,9 +10,9 @@ rpt.corr(data = NULL, y, groups, CI = 0.95, nboot = 1000,
 \arguments{
 \item{data}{data.frame containing response and groups variable.}
 
-\item{y}{Response variable. Missing values are not allowed.}
+\item{y}{Name of response variable in the data.frame. Missing values are not allowed.}
 
-\item{groups}{Group variable (will be converted to a factor).
+\item{groups}{Name of group variable in the data.frame (will be converted to a factor).
 Note that each group identity has to appear exactly twice.}
 
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}

@@ -3,8 +3,8 @@
 #' Calculates repeatability based on inter-class correlations
 #' 
 #' @param data data.frame containing response and groups variable.
-#' @param y Response variable. Missing values are not allowed.
-#' @param groups Group variable (will be converted to a factor).
+#' @param y Name of response variable in the data.frame. Missing values are not allowed.
+#' @param groups Name of group variable in the data.frame (will be converted to a factor).
 #'        Note that each group identity has to appear exactly twice.
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param nboot Number of bootstrapping runs used when calculating an asymptotic
@@ -62,18 +62,18 @@ rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 
         
         if (is.character(substitute(y)) & is.character(substitute(groups))){
                 warning("use of quoted expressions is deprecated. Pass an unquoted expression instead.")
-                rpt.corr_(y, groups, data, CI = 0.95, nboot = 1000, 
+                rpt.corr_(data, y, groups, CI = 0.95, nboot = 1000, 
                           npermut = 1000, parallel = FALSE, ncores = 0)
         } else {
                 
-        rpt.corr_(lazyeval::lazy(y), lazyeval::lazy(groups), data, CI = 0.95, nboot = 1000, 
+        rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI = 0.95, nboot = 1000, 
                   npermut = 1000, parallel = FALSE, ncores = 0)
         }
         
 }
 
 # Standard evaluation
-rpt.corr_ <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
+rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
     ncores = 0) {
     
     y <- lazyeval::lazy_eval(y, data = data)

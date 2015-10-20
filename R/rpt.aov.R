@@ -2,9 +2,9 @@
 #' 
 #' Repeatability calculations based on Analysis of Variance (ANOVA).
 #' 
-#' @param y String specifying response variable or vector of measurements.
-#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
-#' @param data Data frame containing respnse and groups variable.
+#' @param data data.frame containing response and groups variable.
+#' @param y Name of the response variable in the data.frame
+#' @param groups Name of the variable containing the group identities in the data.frame (will be converted to a factor).
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000). 
 #'   
@@ -43,7 +43,7 @@
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #'      data(BodySize)
-#'      (rpt.Weight <- rpt.aov(Weight, BirdID, data = BodySize, npermut=10))  
+#'      (rpt.Weight <- rpt.aov(data = BodySize, y = Weight, groups = BirdID, CI = 0.95, npermut=10))  
 #' 
 #' @keywords models
 #' 
@@ -51,15 +51,22 @@
 #' @import methods stats
 
 
-rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
-    
-        # check inputs
-        if (!is.null(data)) {
-                y <- lazyeval::lazy(y)
-                groups <- lazyeval::lazy(groups)
-                y <- lazyeval::lazy_eval(y$expr, data)
-                groups <- lazyeval::lazy_eval(groups$expr, data)
+rpt.aov <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000){
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
         }
+        
+        rpt.aov_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI = 0.95, npermut = 1000)
+}
+
+
+rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000) {
+    
+     y <- lazyeval::lazy_eval(y, data = data)
+     groups <- lazyeval::lazy_eval(groups, data = data)
+     
      # check length equality
      if (!(length(y) == length(groups))) {
              stop("y and groups must have the same length")
@@ -70,6 +77,7 @@ rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
         stop("y and group are not of equal length")
     if (npermut < 1) 
         npermut <- 1
+ 
     # preparation
     groups <- factor(groups)
     k <- length(levels(groups))
@@ -95,6 +103,7 @@ rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
         sampy <- sample(y, N)
         return(R.pe(sampy, groups, n0))
     }
+    
     if (npermut > 1) {
         R.permut <- c(R, replicate(npermut - 1, permut(y, groups, N, n0), simplify = TRUE))
         P.permut <- sum(R.permut >= R)/npermut

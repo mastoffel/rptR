@@ -4,14 +4,14 @@
 \alias{rpt.aov}
 \title{ANOVA-based Repeatability}
 \usage{
-rpt.aov(y, groups, data = NULL, CI = 0.95, npermut = 1000)
+rpt.aov(data = NULL, y, groups, CI = 0.95, npermut = 1000)
 }
 \arguments{
-\item{y}{String specifying response variable or vector of measurements.}
+\item{data}{data.frame containing response and groups variable.}
 
-\item{groups}{String specifying groups variable or vector of group identities (will be converted to a factor).}
+\item{y}{Name of the response variable in the data.frame}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{groups}{Name of the variable containing the group identities in the data.frame (will be converted to a factor).}
 
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}
 
@@ -42,7 +42,7 @@ Repeatability calculations based on Analysis of Variance (ANOVA).
 # repeatability estimation for weight (body mass) - a lower R
 # than the previous one
      data(BodySize)
-     (rpt.Weight <- rpt.aov(Weight, BirdID, data = BodySize, npermut=10))
+     (rpt.Weight <- rpt.aov(data = BodySize, y = Weight, groups = BirdID, CI = 0.95, npermut=10))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
