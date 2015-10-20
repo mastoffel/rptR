@@ -55,6 +55,11 @@
 rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
                      parallel = FALSE, ncores = 0) {
         
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        
         if (is.character(substitute(y)) & is.character(substitute(groups))){
                 warning("use of quoted expressions is deprecated. Pass an unquoted expression instead.")
                 rpt.corr_(y, groups, data, CI = 0.95, nboot = 1000, 
@@ -70,11 +75,6 @@ rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 
 # Standard evaluation
 rpt.corr_ <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
     ncores = 0) {
-    
-    # data argument should be used
-    if (missing(data)) {
-            warning("Vector inputs is deprecated. Always give a data.frame to the data argument")
-    }
     
     y <- lazyeval::lazy_eval(y, data = data)
     groups <- lazyeval::lazy_eval(groups, data = data)

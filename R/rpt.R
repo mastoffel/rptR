@@ -172,7 +172,7 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
         if (method == "ANOVA") 
             return(rpt.aov(y, groups, data, CI = CI, npermut = npermut))
         if (method == "corr") 
-            return(rpt.corr(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
+            return(rpt.corr(data, y, groups, CI = CI, nboot = nboot, npermut = npermut))
     }
     if (datatype == "binomial" | datatype == "proportion") {
         if (length(method) > 1) {

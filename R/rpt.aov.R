@@ -60,10 +60,10 @@ rpt.aov <- function(y, groups, data = NULL, CI = 0.95, npermut = 1000) {
                 y <- lazyeval::lazy_eval(y$expr, data)
                 groups <- lazyeval::lazy_eval(groups$expr, data)
         }
-        # check length equality
-        if (!(length(y) == length(groups))) {
-                stop("y and groups must have the same length")
-        }
+     # check length equality
+     if (!(length(y) == length(groups))) {
+             stop("y and groups must have the same length")
+     }
     
     # initial checks
     if (length(y) != length(groups)) 

@@ -4,16 +4,16 @@
 \alias{rpt.corr}
 \title{Correlation-based Repeatability}
 \usage{
-rpt.corr(y, groups, data, CI = 0.95, nboot = 1000, npermut = 1000,
-  parallel = FALSE, ncores = 0)
+rpt.corr(data = NULL, y, groups, CI = 0.95, nboot = 1000,
+  npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
-\item{y}{String specifying response variable or vector of response values. Missing values are not allowed.}
+\item{data}{data.frame containing response and groups variable.}
 
-\item{groups}{String specifying groups variable or vector of group identities (will be converted to a factor).
+\item{y}{Response variable. Missing values are not allowed.}
+
+\item{groups}{Group variable (will be converted to a factor).
 Note that each group identity has to appear exactly twice.}
-
-\item{data}{Data frame containing respnse and groups variable.}
 
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}
 
