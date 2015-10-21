@@ -2,9 +2,13 @@
 % Please edit documentation in R/rpt.corr.R
 \name{rpt.corr}
 \alias{rpt.corr}
+\alias{rpt.corr_}
 \title{Correlation-based Repeatability}
 \usage{
 rpt.corr(data = NULL, y, groups, CI = 0.95, nboot = 1000,
+  npermut = 1000, parallel = FALSE, ncores = NULL)
+
+rpt.corr_(data = NULL, y, groups, CI = 0.95, nboot = 1000,
   npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
@@ -23,7 +27,7 @@ confidence interval (defaults to 1000).}
 \item{npermut}{Number of permutations used when calculating asymptotic
 \emph{P} values (defaults to 1000).}
 
-\item{parallel}{If TRUE, bootstraps will be distributed.}
+\item{parallel}{If TRUE, bootstraps and permutations will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
        all cores are used.}
@@ -51,7 +55,7 @@ Calculates repeatability based on inter-class correlations
   nboot=10, npermut=10))  # reduced number of iterations
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
         Martin Stoffel (martin.adam.stoffel@gmail.com)
 }

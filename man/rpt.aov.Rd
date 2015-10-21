@@ -2,9 +2,14 @@
 % Please edit documentation in R/rpt.aov.R
 \name{rpt.aov}
 \alias{rpt.aov}
+\alias{rpt.aov_}
 \title{ANOVA-based Repeatability}
 \usage{
-rpt.aov(data = NULL, y, groups, CI = 0.95, npermut = 1000)
+rpt.aov(data = NULL, y, groups, CI = 0.95, npermut = 1000,
+  parallel = FALSE, ncores = NULL)
+
+rpt.aov_(data = NULL, y, groups, CI = 0.95, npermut = 1000,
+  parallel = FALSE, ncores = NULL)
 }
 \arguments{
 \item{data}{data.frame containing response and groups variable.}
@@ -16,6 +21,11 @@ rpt.aov(data = NULL, y, groups, CI = 0.95, npermut = 1000)
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}
 
 \item{npermut}{Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000).}
+
+\item{parallel}{If TRUE, permutations will be distributed.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+       all cores are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements:

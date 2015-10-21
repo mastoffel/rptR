@@ -11,7 +11,7 @@
 #'        confidence interval (defaults to 1000).
 #' @param npermut Number of permutations used when calculating asymptotic 
 #'        \emph{P} values (defaults to 1000).
-#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param parallel If TRUE, bootstraps and permutations will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores are used.  
 #' 
@@ -32,7 +32,7 @@
 #' 
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'         
@@ -53,7 +53,7 @@
 
 # Non-standard evaluation with deprecated option to pass strings
 rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
-                     parallel = FALSE, ncores = 0) {
+                     parallel = FALSE, ncores = NULL) {
         
         # data argument should be used
         if (is.null(data)) {
@@ -62,16 +62,18 @@ rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 
         
         if (is.character(substitute(y)) & is.character(substitute(groups))){
                 warning("use of quoted expressions is deprecated. Pass an unquoted expression instead.")
-                rpt.corr_(data, y, groups, CI = 0.95, nboot = 1000, 
-                          npermut = 1000, parallel = FALSE, ncores = 0)
+                rpt.corr_(data, y, groups, CI, nboot, 
+                          npermut, parallel = FALSE, ncores = 0)
         } else {
                 
-        rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI = 0.95, nboot = 1000, 
-                  npermut = 1000, parallel = FALSE, ncores = 0)
+        rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI = 0.95, 
+                  npermut, parallel = FALSE, ncores = 0)
         }
         
 }
 
+#' @export
+#' @rdname rpt.corr
 # Standard evaluation
 rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
     ncores = 0) {
@@ -106,7 +108,7 @@ rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut =
         R.pe(y1[samp], y2[samp], k)
     }
     if (nboot > 0 & parallel == TRUE) {
-        if (ncores == 0) {
+        if (is.null(ncores)) {
             ncores <- parallel::detectCores()
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
@@ -132,7 +134,7 @@ rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut =
     }
     
     if (npermut > 1 & parallel == TRUE) {
-            if (ncores == 0) {
+            if (is.null(ncores))  {
                     ncores <- parallel::detectCores()
                     warning("No core number specified: detectCores() is used to 
                             detect the number of \n cores on the local machine")
@@ -141,7 +143,7 @@ rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut =
             cl <- parallel::makeCluster(ncores)
             parallel::clusterExport(cl, "R.pe")
             # parallel computing
-            R.permut <- (parallel::parSapply(cl, 1:npermut, bootstr, y1, y2, k))
+            R.permut <- (parallel::parSapply(cl, 1:npermut, permut, y1, y2, k))
             parallel::stopCluster(cl)
     } else if (npermut > 1) {
         R.permut <- c(R, replicate(npermut - 1, permut(y1, y2, k), simplify = TRUE))

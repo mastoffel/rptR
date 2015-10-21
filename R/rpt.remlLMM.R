@@ -2,9 +2,9 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
 #' 
-#' @param y String specifying response variable or vector of response values.
-#' @param groups String specifying groups variable or vector of group identities.
-#' @param data Data frame containing respnse and groups variable.
+#' @param data data.frame containing response and groups variable.
+#' @param y Name of response variable in the data.frame. Missing values are not allowed.
+#' @param groups Name of group variable in the data.frame.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation. 
 #'        Defaults to 1000. Larger numbers of permutations give a better 
@@ -52,7 +52,7 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize, 
+#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, 
 #'                        nboot=10, npermut=10))   
 #' # reduced number of nboot and npermut iterations
 #'
@@ -68,17 +68,27 @@
 #' 
 #' @export
 
-rpt.remlLMM <- function(y, groups, data = NULL, CI = 0.95, nboot = 1000, npermut = 1000, 
+
+rpt.remlLMM <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
+                         parallel = FALSE, ncores = 0) {
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        
+        rpt.remlLMM_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI = 0.95,
+                     nboot, npermut, parallel = FALSE, ncores = 0)
+        
+}
+
+#' @export 
+#' @rdname rpt.remlLMM
+rpt.remlLMM_ <- function( data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = 0) {
    
-# check inputs
-     if (!is.null(data)) {
-             y <- lazyeval::lazy(y)
-             groups <- lazyeval::lazy(groups)
-             y <- lazyeval::lazy_eval(y$expr, data)
-             groups <- lazyeval::lazy_eval(groups$expr, data)
-     }
-
+     y <- lazyeval::lazy_eval(y, data = data)
+     groups <- lazyeval::lazy_eval(groups, data = data)
      
      # check length equality
      if (!(length(y) == length(groups))) {

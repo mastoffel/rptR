@@ -15,9 +15,7 @@ md = data.frame(resp, pred)
 test_that("all input formats work and point estimates for repeatability correct", {
         
         expect_equal(rpt.corr(resp, pred, data = md)$R, 0.141, tolerance = 0.01) 
-        expect_equal(rpt.corr("resp", "pred", data = md)$R, 0.141, tolerance = 0.01) 
+        expect_equal(rpt.corr_("resp", "pred", data = md)$R, 0.141, tolerance = 0.01) 
         
 })
 
-out <- rpt.corr(resp, pred, data = md)
-str(out)

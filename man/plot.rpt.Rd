@@ -30,7 +30,7 @@ For MCMC methods
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM('Tarsus', 'BirdID', data = BodySize, nboot=100, npermut=100))
+(rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, nboot=100, npermut=100))
 # reduced number of nboot and npermut iterations
 plot(rpt.BS)
 }

@@ -96,7 +96,7 @@ For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov},
 # repeatability for male breeding success on a transformed scale
   data(Fledglings)
   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-  (rpt.Fledge <- rpt(sqrtFledge, MaleID, data = Fledglings,
+  (rpt.Fledge <- rpt( data = Fledglings, y = sqrtFledge, groups = MaleID,
                      datatype='Gaussian', method='corr', nboot=10,
                      npermut=10))  # reduced number of iterations
 
@@ -105,10 +105,10 @@ For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov},
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
 # ANOVA based
-(rpt.BS <- rpt(Tarsus, BirdID, data = BodySize, datatype='Gaussian',
+(rpt.BS <- rpt(data = BodySize, y = Tarsus, groups = BirdID,  datatype='Gaussian',
                method='ANOVA', npermut=10))
 # LMM based
-(rpt.Weight <- rpt(Weight, BirdID, data = BodySize, datatype='Gaussian',
+(rpt.Weight <- rpt(data = BodySize, y = Weight, groups = BirdID, datatype='Gaussian',
                    method='REML', nboot=10, npermut=10))
 # LMM based with MCMC (results to check)
 (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian',
@@ -130,6 +130,7 @@ attach(BroodParasitism)
 
 # for proportion data - additive and multiplicative overdispersion models
 # repeatability estimations for egg dumping (proportion data)
+\dontrun{
 data(BroodParasitism)
 attach(BroodParasitism)
 ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
@@ -147,6 +148,7 @@ data(Fledglings)
                    nboot=10, npermut=10))
 (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
                    datatype='count', method='GLMM.add'))
+}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

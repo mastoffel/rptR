@@ -2,17 +2,21 @@
 % Please edit documentation in R/rpt.remlLMM.R
 \name{rpt.remlLMM}
 \alias{rpt.remlLMM}
+\alias{rpt.remlLMM_}
 \title{LMM-based Repeatability Using REML}
 \usage{
-rpt.remlLMM(y, groups, data = NULL, CI = 0.95, nboot = 1000,
+rpt.remlLMM(data = NULL, y, groups, CI = 0.95, nboot = 1000,
+  npermut = 1000, parallel = FALSE, ncores = 0)
+
+rpt.remlLMM_(data = NULL, y, groups, CI = 0.95, nboot = 1000,
   npermut = 1000, parallel = FALSE, ncores = 0)
 }
 \arguments{
-\item{y}{String specifying response variable or vector of response values.}
+\item{data}{data.frame containing response and groups variable.}
 
-\item{groups}{String specifying groups variable or vector of group identities.}
+\item{y}{Name of response variable in the data.frame. Missing values are not allowed.}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{groups}{Name of group variable in the data.frame.}
 
 \item{CI}{Width of the confidence interval (defaults to 0.95).}
 
@@ -51,7 +55,7 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM("Tarsus", "BirdID", data = BodySize,
+(rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize,
                        nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 

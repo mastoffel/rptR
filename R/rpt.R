@@ -87,7 +87,7 @@
 #' # repeatability for male breeding success on a transformed scale
 #'   data(Fledglings)
 #'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'   (rpt.Fledge <- rpt(sqrtFledge, MaleID, data = Fledglings, 
+#'   (rpt.Fledge <- rpt( data = Fledglings, y = sqrtFledge, groups = MaleID,
 #'                      datatype='Gaussian', method='corr', nboot=10, 
 #'                      npermut=10))  # reduced number of iterations
 #'
@@ -96,10 +96,10 @@
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
 #' # ANOVA based
-#' (rpt.BS <- rpt(Tarsus, BirdID, data = BodySize, datatype='Gaussian', 
+#' (rpt.BS <- rpt(data = BodySize, y = Tarsus, groups = BirdID,  datatype='Gaussian', 
 #'                method='ANOVA', npermut=10))
 #' # LMM based
-#' (rpt.Weight <- rpt(Weight, BirdID, data = BodySize, datatype='Gaussian', 
+#' (rpt.Weight <- rpt(data = BodySize, y = Weight, groups = BirdID, datatype='Gaussian', 
 #'                    method='REML', nboot=10, npermut=10))
 #' # LMM based with MCMC (results to check)
 #' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
@@ -121,6 +121,7 @@
 #'
 #' # for proportion data - additive and multiplicative overdispersion models
 #' # repeatability estimations for egg dumping (proportion data)
+#' \dontrun{
 #' data(BroodParasitism)
 #' attach(BroodParasitism)
 #' ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
@@ -138,7 +139,7 @@
 #'                    nboot=10, npermut=10))
 #' (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
 #'                    datatype='count', method='GLMM.add'))
-#'
+#'}
 #'
 #' @keywords models
 #' 
@@ -165,12 +166,12 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             method <- "REML"
         }
         if (method == "REML") {
-            return(rpt.remlLMM(y, groups, data, CI = CI, nboot = nboot, npermut = npermut))
+            return(rpt.remlLMM(data, y, groups,  CI = CI, nboot = nboot, npermut = npermut))
         }
         if (method == "MCMC") 
             return(rpt.mcmcLMM(y, groups, data, CI = CI))
         if (method == "ANOVA") 
-            return(rpt.aov(y, groups, data, CI = CI, npermut = npermut))
+            return(rpt.aov(data, y, groups, CI = CI, npermut = npermut))
         if (method == "corr") 
             return(rpt.corr(data, y, groups, CI = CI, nboot = nboot, npermut = npermut))
     }

@@ -7,7 +7,9 @@
 #' @param groups Name of the variable containing the group identities in the data.frame (will be converted to a factor).
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000). 
-#'   
+#' @param parallel If TRUE, permutations will be distributed. 
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores are used.  
 #' 
 #' @return Returns an object of class rpt that is a a list with the following elements: 
 #' \item{datatype}{Response distribution (here: 'Gaussian').}
@@ -51,18 +53,20 @@
 #' @import methods stats
 
 
-rpt.aov <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000){
+rpt.aov <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000, parallel = FALSE, ncores = NULL){
         
         # data argument should be used
         if (is.null(data)) {
                 stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
         }
         
-        rpt.aov_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI = 0.95, npermut = 1000)
+        rpt.aov_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI = 0.95, npermut,
+                 parallel, ncores)
 }
 
-
-rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000) {
+#' @export
+#' @rdname rpt.aov
+rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000, parallel = FALSE, ncores = NULL) {
     
      y <- lazyeval::lazy_eval(y, data = data)
      groups <- lazyeval::lazy_eval(groups, data = data)
@@ -104,7 +108,19 @@ rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000) {
         return(R.pe(sampy, groups, n0))
     }
     
-    if (npermut > 1) {
+    if (npermut > 1 & parallel == TRUE) {
+            if (is.null(ncores)) {
+                    ncores <- parallel::detectCores()
+                    warning("No core number specified: detectCores() is used to 
+                            detect the number of \n cores on the local machine")
+            }
+            # start cluster
+            cl <- parallel::makeCluster(ncores)
+            parallel::clusterExport(cl, "R.pe")
+            # parallel computing
+            R.permut <- c(R, (parallel::parSapply(cl, 1:(npermut-1), permut, y, groups, N, n0)))
+            parallel::stopCluster(cl)
+    } else if (npermut > 1) {
         R.permut <- c(R, replicate(npermut - 1, permut(y, groups, N, n0), simplify = TRUE))
         P.permut <- sum(R.permut >= R)/npermut
     } else {
