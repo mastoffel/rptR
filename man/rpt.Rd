@@ -111,7 +111,7 @@ data(BodySize)
 (rpt.Weight <- rpt(data = BodySize, y = Weight, groups = BirdID, datatype='Gaussian',
                    method='REML', nboot=10, npermut=10))
 # LMM based with MCMC (results to check)
-(rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian',
+(rpt.Weight <- rpt( data = BodySize, Weight, BirdID, datatype='Gaussian',
                     method='MCMC'))
 
 # for Binary data - additive and multiplicative overdispersion models

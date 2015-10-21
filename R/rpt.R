@@ -102,7 +102,7 @@
 #' (rpt.Weight <- rpt(data = BodySize, y = Weight, groups = BirdID, datatype='Gaussian', 
 #'                    method='REML', nboot=10, npermut=10))
 #' # LMM based with MCMC (results to check)
-#' (rpt.Weight <- rpt('Weight', 'BirdID', data = BodySize, datatype='Gaussian', 
+#' (rpt.Weight <- rpt( data = BodySize, Weight, BirdID, datatype='Gaussian', 
 #'                     method='MCMC'))
 #'
 #' # for Binary data - additive and multiplicative overdispersion models
@@ -169,7 +169,7 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             return(rpt.remlLMM(data, y, groups,  CI = CI, nboot = nboot, npermut = npermut))
         }
         if (method == "MCMC") 
-            return(rpt.mcmcLMM(y, groups, data, CI = CI))
+            return(rpt.mcmcLMM(data, y, groups, CI = CI))
         if (method == "ANOVA") 
             return(rpt.aov(data, y, groups, CI = CI, npermut = npermut))
         if (method == "corr") 

@@ -13,14 +13,10 @@ resp = alpha + group.dev[as.numeric(pred)] + epsilon
 md = data.frame(resp, pred)
 
 # test_that("all input formats work and point estimates for repeatability correct", {
-#         # non-standard eval
-#         expect_equal(rpt.mcmcLMM(y = resp, groups = pred, data = md)$R, 0.0624, tolerance = 0.1)
-#         expect_equal(rpt.mcmcLMM(resp, pred, md)$R, 0.0924, tolerance = 0.01)
-#         # standard eval
-#         expect_equal(rpt.mcmcLMM(y = "resp", groups = "pred", data = md)$R, 0.0924, tolerance = 0.01)
-#         expect_equal(rpt.mcmcLMM("resp", "pred", md)$R, 0.0924, tolerance = 0.01)
-#         # no df
-#         attach(md)
-#         expect_equal(rpt.mcmcLMM(resp, pred)$R, 0.0924, tolerance = 0.01)
-#         detach(md)
+        # non-standard eval
+        expect_equal(is.numeric(rpt.mcmcLMM(data = md, y = resp, groups = pred)$R), TRUE)
+
+        # standard eval
+        expect_equal(is.numeric(rpt.mcmcLMM_(data = md, y = "resp", groups = "pred")$R), TRUE)
+
 # })

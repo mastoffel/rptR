@@ -15,20 +15,15 @@
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
 #' 
-#' @examples  
-#' # repeatability estimation for weight (body mass)
-#' data(BodySize)
-#' print(rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize))
-#'       
 #' @keywords models
 #' 
 #' @export
 #' 
 #' 
 #' @examples  
-#' repeatability estimation for weight (body mass)
+#' # repeatability estimation for weight (body mass)
 #' data(BodySize)
-#' rpt.Weight <- rpt.mcmcLMM('Weight', 'BirdID', data = BodySize)
+#' rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID) 
 #' print(rpt.Weight)  # alternative call to print.rpt() through print()
 #' 
 print.summary.rpt <- function(x, ...) {

@@ -2,9 +2,9 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by MCMC
 #' 
-#' @param y String specifying response variable or vector of measurements.
-#' @param groups String specifying groups variable or vector of group identities (will be converted to a factor).
-#' @param data Data frame containing respnse and groups variable.
+#' @param data data.frame containing response and groups variable.
+#' @param y Name of response variable in the data.frame. Missing values are not allowed.
+#' @param groups Name of group variable in the data.frame.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). Default priors will 
@@ -48,12 +48,12 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.mcmcLMM(Tarsus, BirdID, data = BodySize))  
+#' (rpt.BS <- rpt.mcmcLMM(data = BodySize, Tarsus, BirdID))  
 #'     
 #' # repeatability estimation for weight (body mass) - a lower R than the 
 #' # previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.mcmcLMM(Weight, BirdID, data = BodySize))
+#' (rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID))
 #'       
 #' @keywords models
 #' 
@@ -61,15 +61,24 @@
 # @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
 # HPDinterval
 
-rpt.mcmcLMM <- function(y, groups, data = NULL, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+
+rpt.mcmcLMM <- function(data = NULL, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        
+        rpt.mcmcLMM_(data, lazyeval::lazy(y), lazyeval::lazy(groups), CI, prior, verbose, ...)
+        
+}
+
+#' @export
+#' @rdname rpt.mcmcLMM
+rpt.mcmcLMM_ <- function(data = NULL, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
-    # NSE or SE
-    if (!is.null(data)) {
-                y <- lazyeval::lazy(y)
-                groups <- lazyeval::lazy(groups)
-                y <- lazyeval::lazy_eval(y$expr, data)
-                groups <- lazyeval::lazy_eval(groups$expr, data)
-    }
+    y <- lazyeval::lazy_eval(y, data = data)
+    groups <- lazyeval::lazy_eval(groups, data = data)
         
     # initial checks
     if (length(y) != length(groups)) 

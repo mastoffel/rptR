@@ -17,9 +17,8 @@ Summary of a rpt object
 \examples{
 # repeatability estimation for weight (body mass)
 data(BodySize)
-attach(BodySize)
-summary(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-detach(BodySize)
+rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID)
+summary(rpt.Weight)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

@@ -15,12 +15,6 @@
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
 #' 
-#' @examples  
-#' # repeatability estimation for weight (body mass)
-#' data(BodySize)
-#' attach(BodySize)
-#' print(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-#' detach(BodySize)
 #'       
 #' @keywords models
 #' 
@@ -28,12 +22,10 @@
 #' 
 #' 
 #' @examples  
-#' repeatability estimation for weight (body mass)
+#' # repeatability estimation for weight 
 #' data(BodySize)
-#' attach(BodySize)
-#' rpt.Weight <- rpt.mcmcLMM(Weight, BirdID)
+#' rpt.Weight <- rpt.mcmcLMM(BodySize, Weight, BirdID)
 #' print(rpt.Weight)  # alternative call to print.rpt() through print()
-#' detach(BodySize)
 #' 
 print.rpt <- function(x, ...) {
     # rpt.corr, rpt.mcmcLMM

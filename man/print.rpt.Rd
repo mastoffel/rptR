@@ -15,11 +15,10 @@
 Displays the results a rpt object (i.e. the result of a rpt function call) an a nice form.
 }
 \examples{
-# repeatability estimation for weight (body mass)
+# repeatability estimation for weight
 data(BodySize)
-attach(BodySize)
-print(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-detach(BodySize)
+rpt.Weight <- rpt.mcmcLMM(BodySize, Weight, BirdID)
+print(rpt.Weight)  # alternative call to print.rpt() through print()
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

@@ -18,10 +18,8 @@
 #' @examples  
 #' # repeatability estimation for weight (body mass)
 #' data(BodySize)
-#' attach(BodySize)
-#' summary(rpt.Weight <- rpt.mcmcLMM(Weight, BirdID))
-#' detach(BodySize)
-#'       
+#' rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID) 
+#' summary(rpt.Weight)
 #' @keywords models
 #' 
 #' @export
