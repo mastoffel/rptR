@@ -27,7 +27,7 @@ rpt.poisGLMM.multi_(data = NULL, y, groups, link = c("log", "sqrt"),
 \item{nboot}{Number of parametric bootstraps for interval estimation. Defaults to 1000.
 Larger numbers of permutations give better asymtotic CI, but may be very time-consuming.}
 
-\item{parallel}{If TRUE, bootstraps will be distributed.}
+\item{parallel}{If TRUE, bootstraps and permutations will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
        all cores are used.}

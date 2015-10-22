@@ -2,9 +2,9 @@
 #' 
 #' Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for count data.
 #' 
-#' @param y Vector of a response values
-#' @param groups Vector of group identities.
-#' @param data Data frame containing respnse and groups variable.
+#' @param data \code{data.frame} containing response and groups variable.
+#' @param y Name of response variable in the \code{data.frame}.
+#' @param groups Name of group variable in the d\code{data.frame}.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95).
 #' @param prior List of prior values passed to \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). 
@@ -71,12 +71,11 @@
 #' @examples  
 #' # repeatability for female clutch size over two years.
 #'    data(BroodParasitism)
-#'    (rpt.Host <- rpt.poisGLMM.add('OwnClutches', 'FemaleID', 
-#'                                   data = BroodParasitism))
+#'    (rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
 #'     
 #' # repeatability for male fledgling success
 #'    data(Fledglings)
-#'    (rpt.Fledge <- rpt.poisGLMM.add('Fledge', 'MaleID', data = Fledglings))
+#'    (rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID, ))
 #'       
 #' @keywords models
 #' 
@@ -85,9 +84,28 @@
 # @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
 # HPDinterval
 
-rpt.poisGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, 
+
+rpt.poisGLMM.add <- function(data, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, 
+                              ...) {
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        
+        rpt.poisGLMM.add_(data, lazyeval::lazy(y), lazyeval::lazy(groups), CI, prior, verbose = FALSE, ...)
+}
+
+
+#' @export
+#' @rdname rpt.poisGLMM.add
+rpt.poisGLMM.add_ <- function(data, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, 
     ...) {
     
+        
+    y <- lazyeval::lazy_eval(y, data = data)
+    groups <- lazyeval::lazy_eval(groups, data = data)
+        
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {

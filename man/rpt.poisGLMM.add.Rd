@@ -2,17 +2,21 @@
 % Please edit documentation in R/rpt.poisGLMM.add.R
 \name{rpt.poisGLMM.add}
 \alias{rpt.poisGLMM.add}
+\alias{rpt.poisGLMM.add_}
 \title{GLMM-based Repeatability Using MCMC for Count Data}
 \usage{
-rpt.poisGLMM.add(y, groups, data, CI = 0.95, prior = NULL,
+rpt.poisGLMM.add(data, y, groups, CI = 0.95, prior = NULL,
+  verbose = FALSE, ...)
+
+rpt.poisGLMM.add_(data, y, groups, CI = 0.95, prior = NULL,
   verbose = FALSE, ...)
 }
 \arguments{
-\item{y}{Vector of a response values}
+\item{data}{\code{data.frame} containing response and groups variable.}
 
-\item{groups}{Vector of group identities.}
+\item{y}{Name of response variable in the \code{data.frame}.}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{groups}{Name of group variable in the d\code{data.frame}.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95).}
 
@@ -74,12 +78,11 @@ Models are fitted using the \link{MCMCglmm} function in
 \examples{
 # repeatability for female clutch size over two years.
    data(BroodParasitism)
-   (rpt.Host <- rpt.poisGLMM.add('OwnClutches', 'FemaleID',
-                                  data = BroodParasitism))
+   (rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
 
 # repeatability for male fledgling success
    data(Fledglings)
-   (rpt.Fledge <- rpt.poisGLMM.add('Fledge', 'MaleID', data = Fledglings))
+   (rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID, ))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

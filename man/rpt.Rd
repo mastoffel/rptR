@@ -117,10 +117,9 @@ data(BodySize)
 # for Binary data - additive and multiplicative overdispersion models
 # repeatability estimations for egg dumping (binary data)
 data(BroodParasitism)
-attach(BroodParasitism)
-(rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
-                     datatype='binomial', method='GLMM.multi', link='logit',
-                     nboot=10, npermut=10))
+#(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID,
+ #                    datatype='binomial', method='GLMM.multi', link='logit',
+  #                   nboot=10, npermut=10))
 (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
                      datatype='binomial', method='GLMM.multi', link='probit',
                      nboot=10, npermut=10))
@@ -139,16 +138,16 @@ ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
 (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
                  datatype='proportion', method='GLMM.add'))
 detach(BroodParasitism)
+}
 
 # for count data - additive and multiplicative overdispersion models
 # repeatability for male fledgling success
 data(Fledglings)
-(rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+(rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID,
                    datatype='count', method='GLMM.multi',
                    nboot=10, npermut=10))
-(rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+(rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID,
                    datatype='count', method='GLMM.add'))
-}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

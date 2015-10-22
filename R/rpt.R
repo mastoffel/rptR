@@ -107,9 +107,10 @@
 #'
 #' # for Binary data - additive and multiplicative overdispersion models
 #' # repeatability estimations for egg dumping (binary data)
-#' (rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
-#'                      datatype='binomial', method='GLMM.multi', link='logit',
-#'                      nboot=10, npermut=10))
+#' data(BroodParasitism)
+#' #(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
+#'  #                    datatype='binomial', method='GLMM.multi', link='logit',
+#'   #                   nboot=10, npermut=10))
 #' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
 #'                      datatype='binomial', method='GLMM.multi', link='probit',
 #'                      nboot=10, npermut=10))
@@ -128,16 +129,17 @@
 #' (rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
 #'                  datatype='proportion', method='GLMM.add'))
 #' detach(BroodParasitism)
+#'}
 #'
 #' # for count data - additive and multiplicative overdispersion models
 #' # repeatability for male fledgling success
 #' data(Fledglings)
-#' (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+#' (rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID, 
 #'                    datatype='count', method='GLMM.multi', 
 #'                    nboot=10, npermut=10))
-#' (rpt.Fledge <- rpt('Fledge', 'MaleID', data = Fledglings,
+#' (rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID, 
 #'                    datatype='count', method='GLMM.add'))
-#'}
+#'
 #'
 #' @keywords models
 #' 
@@ -197,6 +199,6 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             return(rpt.poisGLMM.multi(data, y, groups, link, CI = CI, nboot = nboot, 
                 npermut = npermut))
         if (method == "GLMM.add") 
-            return(rpt.poisGLMM.add(y, groups, data, CI = CI))
+            return(rpt.poisGLMM.add( data, y, groups, CI = CI))
     }
 } 
