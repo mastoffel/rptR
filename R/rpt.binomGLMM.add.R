@@ -71,8 +71,8 @@
 #'                             select= c(HostClutches, OwnClutches, FemaleID))
 #'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  
 #'                                   ParasitismOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.add(c('HostClutches', 'parasitised'), 
-#'                                       'FemaleID', data = ParasitismOR))
+#'      (rpt.Host <- rpt.binomGLMM.add(y = list(HostClutches, parasitised), 
+#'                                       groups = FemaleID, data = ParasitismOR))
 #'  
 #' @keywords models
 #' 
@@ -83,21 +83,25 @@
 
 
 
-rpt.binomGLMM.add <- function(y, groups, data, CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+rpt.binomGLMM.add <- function(data = NULL, y, groups,  CI = 0.95, prior = NULL, verbose = FALSE, ...) {
+      
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        rpt.binomGLMM.add_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI, prior, verbose , ...)
+        
+}
+
+rpt.binomGLMM.add_ <- function(data = NULL, y, groups,  CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
-#         # check inputs
-#         if (!is.null(data)) {
-#                 y <- lazyeval::lazy(y)
-#                 groups <- lazyeval::lazy(groups)
-#                 groups <- lazyeval::lazy_eval(groups$expr, data)
-#                 
-#                 if (length(is.character(y$expr)) > 1) {
-#                         y <- lazyeval::lazy_eval(is.character(y$expr)[2:3], data)
-#                 } else {
-#                         y <- lazyeval::lazy_eval(y$expr, data)
-#                 }
-#                 
-#         }
+        if (is.list(lazyeval::lazy_eval(y, data = data))){
+                y <- data.frame(do.call(cbind, lazyeval::lazy_eval(y, data = data)))    
+        } else {
+                y <- lazyeval::lazy_eval(y, data = data)    
+        }
+        groups <- lazyeval::lazy_eval(groups, data = data)
+        
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {
