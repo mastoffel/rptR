@@ -6,10 +6,10 @@
 \title{LMM-based Repeatability Using REML}
 \usage{
 rpt.remlLMM(data = NULL, y, groups, CI = 0.95, nboot = 1000,
-  npermut = 1000, parallel = FALSE, ncores = 0)
+  npermut = 1000, parallel = FALSE, ncores = NULL)
 
 rpt.remlLMM_(data = NULL, y, groups, CI = 0.95, nboot = 1000,
-  npermut = 1000, parallel = FALSE, ncores = 0)
+  npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
 \item{data}{data.frame containing response and groups variable.}

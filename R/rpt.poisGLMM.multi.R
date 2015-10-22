@@ -3,9 +3,9 @@
 #' Calculates repeatability from a generalised linear mixed-effects models 
 #' fitted by PQL (penalized-quasi likelihood)  estimation for count data.
 #' 
-#' @param y Vector of a response values.
-#' @param groups Vector of group identities.
-#' @param data Data frame containing respnse and groups variable.
+#' @param data \code{data.frame} containing response and groups variable.
+#' @param y Name of response variable in the \code{data.frame}.
+#' @param groups Name of group variable in the d\code{data.frame}.
 #' @param link Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation. Defaults to 1000. 
@@ -70,8 +70,9 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt.poisGLMM.add}, \link{rpt}, \link{print.rpt}
 #' 
@@ -79,16 +80,16 @@
 #' 
 #'        # repeatability for female clutch size over two years.
 #'        data(BroodParasitism)
-#'        (rpt.Host <- rpt.poisGLMM.multi('OwnClutches', 'FemaleID', 
-#'                                         data = BroodParasitism, 
-#'                                         nboot=10, npermut=10))  
+#'        (rpt.Host <- rpt.poisGLMM.multi(data = BroodParasitism, 
+#'                                        OwnClutches, FemaleID, 
+#'                                        nboot=10, npermut=10))  
 #'        # reduced number of nboot and npermut iterations
 #'        
 #'        # repeatability for male fledgling success
 #'        data(Fledglings)
-#'        (rpt.Fledge <- rpt.poisGLMM.multi('Fledge', 'MaleID', 
-#'                                           data = Fledglings, nboot=10, 
-#'                                           npermut=10))  
+#'        (rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings,
+#'                                          Fledge, MaleID, 
+#'                                          nboot=10, npermut=10))  
 #'        # reduced number of nboot and npermut iterations
 #'       
 #' @keywords models
@@ -97,8 +98,29 @@
 #' 
 # @importFrom MASS glmmPQL @importFrom lme4 VarCorr
 #' 
-rpt.poisGLMM.multi <- function(y, groups, data = NULL, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
-    npermut = 1000, parallel = FALSE, ncores = 0) {
+rpt.poisGLMM.multi <- function(data = NULL, y, groups, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
+    npermut = 1000, parallel = FALSE, ncores = NULL) {
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        
+        
+        rpt.poisGLMM.multi_(data, lazyeval::lazy(y), lazyeval::lazy(groups), link, CI, nboot,
+                            npermut, parallel, ncores)
+        
+}
+
+#' @export
+#' @rdname rpt.poisGLMM.multi
+rpt.poisGLMM.multi_ <- function(data = NULL, y, groups, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
+                               npermut = 1000, parallel = FALSE, ncores = NULL) {       
+        
+        
+        y <- lazyeval::lazy_eval(y, data = data)
+        groups <- lazyeval::lazy_eval(groups, data = data)
+        
     
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {
@@ -147,7 +169,7 @@ rpt.poisGLMM.multi <- function(y, groups, data = NULL, link = c("log", "sqrt"), 
     }
     # point estimation according to model 17 equations 18-20
     R <- pqlglmm.pois.model(y, groups, link)
-    # confidence interval estimation by parametric bootstrapping nboot is not used in
+    # confidence interval estimation by parametric bootstrapping. nboot is not used in
     # function, but necessary to run parSapply over vector in parallelization
     bootstr <- function(nboot, y, groups, k, N, beta0, var.a, omega, link) {
         groupMeans <- rnorm(k, 0, sqrt(var.a))
@@ -161,9 +183,9 @@ rpt.poisGLMM.multi <- function(y, groups, data = NULL, link = c("log", "sqrt"), 
     }
     if (nboot > 0 & parallel == TRUE) {
         mod.ests <- pqlglmm.pois.model(y, groups, link, returnR = FALSE)
-        if (ncores == 0) {
+        if (is.null(ncores)) {
             ncores <- parallel::detectCores()
-            warning("No core number specified: detectCores() is used to detect the number of \n                        cores on the local machine")
+            warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster
         cl <- parallel::makeCluster(ncores)
@@ -189,12 +211,31 @@ rpt.poisGLMM.multi <- function(y, groups, data = NULL, link = c("log", "sqrt"), 
     se.link <- sd(R.boot$R.link, na.rm = TRUE)
     se.org <- sd(R.boot$R.org, na.rm = TRUE)
     # significance test by randomization
-    permut <- function(y, groups, N, link) {
+    # nperm just needed for parallelization
+    permut <- function(nperm, y, groups, N, link) {
         samp <- sample(1:N, N)
         pqlglmm.pois.model(y, groups[samp], link)
     }
-    if (npermut > 1) {
-        R.permut <- replicate(npermut - 1, permut(y, groups, N, link), simplify = TRUE)
+    
+    if (npermut > 1 & parallel == TRUE) {
+            if (is.null(ncores)) {
+                    ncores <- parallel::detectCores()
+                    warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+            }
+            # start cluster
+            cl <- parallel::makeCluster(ncores)
+            parallel::clusterExport(cl, "pqlglmm.pois.model", envir = environment())
+            R.permut <- (parallel::parSapply(cl, 1:(npermut-1), permut, y = y, groups = groups, 
+                                          N = N, link = link))
+            parallel::stopCluster(cl)
+            # transform to list
+            R.permut <- list(R.link = c(R$R.link, unlist(R.permut["R.link", ])), R.org = c(R$R.org, 
+                             unlist(R.permut["R.org", ])))
+            P.link <- sum(R.permut$R.link >= R$R.link)/npermut
+            P.org <- sum(R.permut$R.org >= R$R.org)/npermut
+    }
+    if (npermut > 1 & parallel == FALSE) {
+        R.permut <- replicate(npermut - 1, permut(nperm, y, groups, N, link), simplify = TRUE)
         R.permut <- list(R.link = c(R$R.link, unlist(R.permut["R.link", ])), R.org = c(R$R.org, 
             unlist(R.permut["R.org", ])))
         P.link <- sum(R.permut$R.link >= R$R.link)/npermut

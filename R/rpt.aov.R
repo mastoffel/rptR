@@ -103,7 +103,7 @@ rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000, parallel
     # significance test from ANOVA
     P.aov <- anova(lm(y ~ groups))[5][1, 1]
     # significance test by permutation
-    permut <- function(y, groups, N, n0) {
+    permut <- function(nperm, y, groups, N, n0, k) {
         sampy <- sample(y, N)
         return(R.pe(sampy, groups, n0))
     }
@@ -116,12 +116,15 @@ rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000, parallel
             }
             # start cluster
             cl <- parallel::makeCluster(ncores)
-            parallel::clusterExport(cl, "R.pe")
+            parallel::clusterExport(cl, list("R.pe"), envir = environment())
             # parallel computing
-            R.permut <- c(R, (parallel::parSapply(cl, 1:(npermut-1), permut, y, groups, N, n0)))
+            R.permut <- c(R, (parallel::parSapply(cl, 1:(npermut-1), permut, y=y, 
+                                                  groups=groups, N=N, n0=n0, k=k))) # k for R.pe
             parallel::stopCluster(cl)
-    } else if (npermut > 1) {
-        R.permut <- c(R, replicate(npermut - 1, permut(y, groups, N, n0), simplify = TRUE))
+            P.permut <- sum(R.permut >= R)/npermut
+            
+    } else if (npermut > 1 & parallel == FALSE) {
+        R.permut <- c(R, replicate(npermut - 1, permut(y = y, groups = groups, N=N, n0=n0), simplify = TRUE))
         P.permut <- sum(R.permut >= R)/npermut
     } else {
         R.permut <- R

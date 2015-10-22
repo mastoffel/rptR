@@ -70,22 +70,22 @@
 
 
 rpt.remlLMM <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
-                         parallel = FALSE, ncores = 0) {
+                         parallel = FALSE, ncores = NULL) {
         
         # data argument should be used
         if (is.null(data)) {
                 stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
         }
         
-        rpt.remlLMM_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI = 0.95,
-                     nboot, npermut, parallel = FALSE, ncores = 0)
+        rpt.remlLMM_(data = data, lazyeval::lazy(y), lazyeval::lazy(groups), CI,
+                     nboot, npermut, parallel, ncores)
         
 }
 
 #' @export 
 #' @rdname rpt.remlLMM
 rpt.remlLMM_ <- function( data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, 
-    parallel = FALSE, ncores = 0) {
+    parallel = FALSE, ncores = NULL) {
    
      y <- lazyeval::lazy_eval(y, data = data)
      groups <- lazyeval::lazy_eval(groups, data = data)
@@ -126,7 +126,7 @@ rpt.remlLMM_ <- function( data = NULL, y, groups, CI = 0.95, nboot = 1000, nperm
         Ysim <- as.matrix(simulate(mod, nsim = nboot))
     }
     if (nboot > 0 & parallel == TRUE) {
-        if (ncores == 0) {
+        if (is.null(ncores)) {
             ncores <- parallel::detectCores()
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }

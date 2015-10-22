@@ -12,11 +12,11 @@ rpt.mcmcLMM_(data = NULL, y, groups, CI = 0.95, prior = NULL,
   verbose = FALSE, ...)
 }
 \arguments{
-\item{data}{data.frame containing response and groups variable.}
+\item{data}{\code{data.frame} containing response and groups variable.}
 
-\item{y}{Name of response variable in the data.frame. Missing values are not allowed.}
+\item{y}{Name of response variable in the \code{data.frame}. Missing values are not allowed.}
 
-\item{groups}{Name of group variable in the data.frame.}
+\item{groups}{Name of group variable in the \code{data.frame}.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95)}
 

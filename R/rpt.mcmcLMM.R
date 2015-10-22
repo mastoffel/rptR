@@ -2,9 +2,9 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by MCMC
 #' 
-#' @param data data.frame containing response and groups variable.
-#' @param y Name of response variable in the data.frame. Missing values are not allowed.
-#' @param groups Name of group variable in the data.frame.
+#' @param data \code{data.frame} containing response and groups variable.
+#' @param y Name of response variable in the \code{data.frame}. Missing values are not allowed.
+#' @param groups Name of group variable in the \code{data.frame}.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). Default priors will 

@@ -107,9 +107,7 @@
 #'
 #' # for Binary data - additive and multiplicative overdispersion models
 #' # repeatability estimations for egg dumping (binary data)
-#' data(BroodParasitism)
-#' attach(BroodParasitism)
-#' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism, 
+#' (rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
 #'                      datatype='binomial', method='GLMM.multi', link='logit',
 #'                      nboot=10, npermut=10))
 #' (rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
@@ -181,7 +179,7 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             method <- "GLMM.multi"
         }
         if (method == "GLMM.multi") 
-            return(rpt.binomGLMM.multi(y, groups, data, link, CI = CI, nboot = nboot, 
+            return(rpt.binomGLMM.multi(y, groups,  data, link, CI = CI, nboot = nboot, 
                 npermut = npermut))
         if (method == "GLMM.add") 
             return(rpt.binomGLMM.add(y, groups, data, CI = CI))
@@ -196,7 +194,7 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             warning("Log link will be used.")
         }
         if (method == "GLMM.multi") 
-            return(rpt.poisGLMM.multi(y, groups, data, link, CI = CI, nboot = nboot, 
+            return(rpt.poisGLMM.multi(data, y, groups, link, CI = CI, nboot = nboot, 
                 npermut = npermut))
         if (method == "GLMM.add") 
             return(rpt.poisGLMM.add(y, groups, data, CI = CI))
