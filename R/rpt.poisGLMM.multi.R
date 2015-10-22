@@ -13,7 +13,7 @@
 #' @param npermut}{Number of permutations for a significance testing. Defaults to 1000.
 #'        Larger numbers of permutations give better asymptotic \emph{P} values,
 #'        but may be very time-consuming.
-#' @param parallel If TRUE, bootstraps will be distributed. 
+#' @param parallel If TRUE, bootstraps and permutations will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores are used. 
 #'        
@@ -212,7 +212,7 @@ rpt.poisGLMM.multi_ <- function(data = NULL, y, groups, link = c("log", "sqrt"),
     se.org <- sd(R.boot$R.org, na.rm = TRUE)
     # significance test by randomization
     # nperm just needed for parallelization
-    permut <- function(nperm, y, groups, N, link) {
+    permut <- function(nperm = NULL, y, groups, N, link) {
         samp <- sample(1:N, N)
         pqlglmm.pois.model(y, groups[samp], link)
     }
@@ -235,7 +235,7 @@ rpt.poisGLMM.multi_ <- function(data = NULL, y, groups, link = c("log", "sqrt"),
             P.org <- sum(R.permut$R.org >= R$R.org)/npermut
     }
     if (npermut > 1 & parallel == FALSE) {
-        R.permut <- replicate(npermut - 1, permut(nperm, y, groups, N, link), simplify = TRUE)
+        R.permut <- replicate(npermut - 1, permut(y=y, groups=groups, N=N, link=link), simplify = TRUE)
         R.permut <- list(R.link = c(R$R.link, unlist(R.permut["R.link", ])), R.org = c(R$R.org, 
             unlist(R.permut["R.org", ])))
         P.link <- sum(R.permut$R.link >= R$R.link)/npermut
