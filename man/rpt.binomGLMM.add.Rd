@@ -4,19 +4,19 @@
 \alias{rpt.binomGLMM.add}
 \title{GLMM-based Repeatability Using MCMC for Binomial Data}
 \usage{
-rpt.binomGLMM.add(y, groups, data, CI = 0.95, prior = NULL,
+rpt.binomGLMM.add(data = NULL, y, groups, CI = 0.95, prior = NULL,
   verbose = FALSE, ...)
 }
 \arguments{
-\item{y}{If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data
-(the first specifying the variable for number of successes and the second the variable for number of trials)
- Alternative: Vector of a response values (for binary data) or a two-column
- matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the
- number of trials.}
+\item{data}{\code{data.frame} containing response and groups variables.}
 
-\item{groups}{String indicating group variable or Vector of group identities.}
+\item{y}{If binary, name of response variable in the \code{data.frame}. For proportion data,
+specify two variables:
+The first is the variable for number of successes \emph{m} and the second
+variable is \emph{n-m}, where
+\emph{m} is the number of successes and \emph{n} is the number of trials.}
 
-\item{data}{Data frame containing response and groups variable.}
+\item{groups}{Name of group variable in the \code{data.frame}.}
 
 \item{CI}{Width of the Bayesian credible interval (defaults to 0.95)}
 
@@ -63,9 +63,8 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
      data(BroodParasitism)
      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1,
                        select = c(HostYN, FemaleID))
-     (rpt.Host <- rpt.binomGLMM.add('HostYN', 'FemaleID', data = EggDump))
-     (rpt.BroodPar <- rpt.binomGLMM.add('cbpYN', 'FemaleID',
-                      data = BroodParasitism))
+     (rpt.Host <- rpt.binomGLMM.add(data = EggDump, HostYN, FemaleID))
+     (rpt.BroodPar <- rpt.binomGLMM.add(data = BroodParasitism, cbpYN, FemaleID))
 
 # repeatability estimations for egg dumping (proportion data)
      data(BroodParasitism)
@@ -73,8 +72,9 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
                             select= c(HostClutches, OwnClutches, FemaleID))
      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -
                                   ParasitismOR$HostClutches
-     (rpt.Host <- rpt.binomGLMM.add(c('HostClutches', 'parasitised'),
-                                      'FemaleID', data = ParasitismOR))
+     (rpt.Host <- rpt.binomGLMM.add(data = ParasitismOR,
+                                    y = list(HostClutches, parasitised),
+                                    groups = FemaleID))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &

@@ -3,13 +3,13 @@
 #' Calculates repeatability from a generalised linear mixed-effects models fitted
 #' by PQL (penalized-quasi likelihood) estimation for binary and proportion data.
 #' 
-#' @param y If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data 
-#'       (the first specifying the variable for number of successes and the second the variable for number of trials)
-#'        Alternative: Vector of a response values (for binary data) or a two-column
-#'        matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
-#'        number of trials.
-#' @param groups String indicating group variable or Vector of group identities.
-#' @param data Data frame containing respnse and groups variable.
+#' @param data \code{data.frame} containing response and groups variables.
+#' @param y If binary, name of response variable in the \code{data.frame}. For proportion data, 
+#'        specify two variables: 
+#'        The first is the variable for number of successes \emph{m} and the second
+#'        variable is \emph{n-m}, where
+#'        \emph{m} is the number of successes and \emph{n} is the number of trials.
+#' @param groups Name of group variable in the \code{data.frame}.
 #' @param link Link function, \code{log} and \code{sqrt} are allowed, defaults 
 #'        to \code{log}.  
 #' @param CI Width of the confidence interval (defaults to 0.95).
@@ -121,9 +121,33 @@
 #'@importFrom VGAM probit rbetabinom
 
 
-rpt.binomGLMM.multi <- function(y, groups, data = NULL, link = c("logit", "probit"), CI = 0.95, 
+rpt.binomGLMM.multi <- function(data = NULL, y, groups, link = c("logit", "probit"), CI = 0.95, 
     nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
     
+        
+        # data argument should be used
+        if (is.null(data)) {
+                stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
+        }
+        rpt.binomGLMM.multi_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  link,
+                             CI, nboot, npermut, parallel, ncores)
+        
+}
+
+#' @export
+#' @rdname rpt.binomGLMM.multi
+#'
+rpt.binomGLMM.multi_ <- function(data = NULL, y, groups,link = c("logit", "probit"), CI = 0.95, 
+                                nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
+
+   
+        if (is.list(lazyeval::lazy_eval(y, data = data))){
+                y <- data.frame(do.call(cbind, lazyeval::lazy_eval(y, data = data)))    
+        } else {
+                y <- lazyeval::lazy_eval(y, data = data)    
+        }
+        groups <- lazyeval::lazy_eval(groups, data = data)
+        
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {

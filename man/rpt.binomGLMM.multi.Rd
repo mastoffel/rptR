@@ -4,20 +4,20 @@
 \alias{rpt.binomGLMM.multi}
 \title{GLMM-based Repeatability Using PQL Estimation for Binomial Data}
 \usage{
-rpt.binomGLMM.multi(y, groups, data = NULL, link = c("logit", "probit"),
+rpt.binomGLMM.multi(data = NULL, y, groups, link = c("logit", "probit"),
   CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
   ncores = 0)
 }
 \arguments{
-\item{y}{If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data
-(the first specifying the variable for number of successes and the second the variable for number of trials)
- Alternative: Vector of a response values (for binary data) or a two-column
- matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the
- number of trials.}
+\item{data}{\code{data.frame} containing response and groups variables.}
 
-\item{groups}{String indicating group variable or Vector of group identities.}
+\item{y}{If binary, name of response variable in the \code{data.frame}. For proportion data,
+specify two variables:
+The first is the variable for number of successes \emph{m} and the second
+variable is \emph{n-m}, where
+\emph{m} is the number of successes and \emph{n} is the number of trials.}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{groups}{Name of group variable in the \code{data.frame}.}
 
 \item{link}{Link function, \code{log} and \code{sqrt} are allowed, defaults
 to \code{log}.}

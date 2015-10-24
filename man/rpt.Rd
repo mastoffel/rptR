@@ -117,13 +117,13 @@ data(BodySize)
 # for Binary data - additive and multiplicative overdispersion models
 # repeatability estimations for egg dumping (binary data)
 data(BroodParasitism)
-#(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID,
- #                    datatype='binomial', method='GLMM.multi', link='logit',
-  #                   nboot=10, npermut=10))
-(rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
+(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID,
+                     datatype='binomial', method='GLMM.multi', link='logit',
+                     nboot=10, npermut=10))
+(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID,
                      datatype='binomial', method='GLMM.multi', link='probit',
                      nboot=10, npermut=10))
-(rpt.BroodPar <- rpt('cbpYN', 'FemaleID', data = BroodParasitism,
+(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID,
                      datatype='binomial', method='GLMM.add'))
 
 

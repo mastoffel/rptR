@@ -2,13 +2,13 @@
 #' 
 #' Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for binary and proportion data.
 #' 
-#' @param y If a data.frame is given to the data argument: String specifying response (binary) or vector with two strings for proportion data 
-#'       (the first specifying the variable for number of successes and the second the variable for number of trials)
-#'        Alternative: Vector of a response values (for binary data) or a two-column
-#'        matrix, array or data.frame with colums code{m, n-m}, where \code{m} is the number of successes and n the 
-#'        number of trials.
-#' @param groups String indicating group variable or Vector of group identities.
-#' @param data Data frame containing response and groups variable.
+#' @param data \code{data.frame} containing response and groups variables.
+#' @param y If binary, name of response variable in the \code{data.frame}. For proportion data, 
+#'        specify two variables: 
+#'        The first is the variable for number of successes \emph{m} and the second
+#'        variable is \emph{n-m}, where
+#'        \emph{m} is the number of successes and \emph{n} is the number of trials.
+#' @param groups Name of group variable in the \code{data.frame}.
 #' @param CI Width of the Bayesian credible interval (defaults to 0.95)
 #' @param prior List of prior values passed to the \link{MCMCglmm} function 
 #'        in \pkg{MCMCglmm} (see there for more details). Default priors will be
@@ -61,9 +61,8 @@
 #'      data(BroodParasitism)
 #'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
 #'                        select = c(HostYN, FemaleID))
-#'      (rpt.Host <- rpt.binomGLMM.add('HostYN', 'FemaleID', data = EggDump))
-#'      (rpt.BroodPar <- rpt.binomGLMM.add('cbpYN', 'FemaleID', 
-#'                       data = BroodParasitism))
+#'      (rpt.Host <- rpt.binomGLMM.add(data = EggDump, HostYN, FemaleID))
+#'      (rpt.BroodPar <- rpt.binomGLMM.add(data = BroodParasitism, cbpYN, FemaleID))
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #'      data(BroodParasitism)
@@ -71,8 +70,9 @@
 #'                             select= c(HostClutches, OwnClutches, FemaleID))
 #'      ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  
 #'                                   ParasitismOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.add(y = list(HostClutches, parasitised), 
-#'                                       groups = FemaleID, data = ParasitismOR))
+#'      (rpt.Host <- rpt.binomGLMM.add(data = ParasitismOR, 
+#'                                     y = list(HostClutches, parasitised), 
+#'                                     groups = FemaleID))
 #'  
 #' @keywords models
 #' 
@@ -93,6 +93,9 @@ rpt.binomGLMM.add <- function(data = NULL, y, groups,  CI = 0.95, prior = NULL, 
         
 }
 
+#' @export
+#' @rdname rpt.binomGLMM.add
+#' 
 rpt.binomGLMM.add_ <- function(data = NULL, y, groups,  CI = 0.95, prior = NULL, verbose = FALSE, ...) {
     
         if (is.list(lazyeval::lazy_eval(y, data = data))){
