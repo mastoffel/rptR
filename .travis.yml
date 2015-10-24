@@ -2,6 +2,7 @@
 
 language: c
 
+sudo: required
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
@@ -19,3 +20,4 @@ notifications:
   email:
     on_success: change
     on_failure: change
+
