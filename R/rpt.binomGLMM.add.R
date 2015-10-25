@@ -1,6 +1,7 @@
 #' GLMM-based Repeatability Using MCMC for Binomial Data
 #' 
-#' Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for binary and proportion data.
+#' Calculates repeatability from a generalised linear mixed-effects models 
+#' fitted by MCMC for binary and proportion data.
 #' 
 #' @param data \code{data.frame} containing response and groups variables.
 #' @param y If binary, name of response variable in the \code{data.frame}. For proportion data, 

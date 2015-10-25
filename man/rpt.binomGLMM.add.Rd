@@ -2,9 +2,13 @@
 % Please edit documentation in R/rpt.binomGLMM.add.R
 \name{rpt.binomGLMM.add}
 \alias{rpt.binomGLMM.add}
+\alias{rpt.binomGLMM.add_}
 \title{GLMM-based Repeatability Using MCMC for Binomial Data}
 \usage{
 rpt.binomGLMM.add(data = NULL, y, groups, CI = 0.95, prior = NULL,
+  verbose = FALSE, ...)
+
+rpt.binomGLMM.add_(data = NULL, y, groups, CI = 0.95, prior = NULL,
   verbose = FALSE, ...)
 }
 \arguments{
@@ -50,7 +54,8 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{mod}{Fitted model.}
 }
 \description{
-Calculates repeatability from a generalised linear mixed-effects models fitted by MCMC for binary and proportion data.
+Calculates repeatability from a generalised linear mixed-effects models
+fitted by MCMC for binary and proportion data.
 }
 \details{
 Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.

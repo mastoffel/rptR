@@ -1,6 +1,6 @@
 #' GLMM-based Repeatability Using PQL Estimation for Binomial Data
 #' 
-#' Calculates repeatability from a generalised linear mixed-effects models fitted
+#' Calculates repeatability from a generalised linear mixed-effects model fitted
 #' by PQL (penalized-quasi likelihood) estimation for binary and proportion data.
 #' 
 #' @param data \code{data.frame} containing response and groups variables.
@@ -80,26 +80,28 @@
 #' @examples  
 #' 
 #' # repeatability estimations for egg dumping (binary data)
-#'      data(BroodParasitism)
-#'      EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
-#'                        select = c(HostYN, FemaleID))
-#'      (rpt.Host <- rpt.binomGLMM.multi('HostYN', 'FemaleID', data = EggDump,  
-#'                                        nboot=10, npermut=10))  
-#'      # low number of nboot and npermut to speed up error checking
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi('cbpYN', 'FemaleID', 
-#'                                            data = BroodParasitism, nboot=10, 
-#'                                            npermut=10))
-#'      # low number of nboot and npermut to speed up error checking
+#' data(BroodParasitism)
+#' EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+#' (rpt.Host <- rpt.binomGLMM.multi(data = EggDump, HostYN, FemaleID, nboot=10, npermut=10))  
+#' # low number of nboot and npermut to speed up error checking
+#' 
+#' (rpt.BroodPar <- rpt.binomGLMM.multi(data = BroodParasitism, cbpYN, FemaleID, 
+#'                                      nboot=10, npermut=10))
+#' # low number of nboot and npermut to speed up error checking
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
-#'      data(BroodParasitism)
-#'      ParasitisedOR <- subset(BroodParasitism,  
-#'                              select= c(HostClutches, OwnClutches, FemaleID))
-#'      ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - 
-#'                                    ParasitisedOR$HostClutches 
-#'      (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'), 'FemaleID', 
-#'      data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ], 
-#'      nboot=10, npermut=10))
+#' data(BroodParasitism)
+#' ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, FemaleID))
+#' ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches 
+#' (rpt.Host <- rpt.binomGLMM.multi(
+#'                              data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
+#'                              list(HostClutches, parasitised),
+#'                              groups = FemaleID, 
+#'                              nboot=10, npermut=10))
+#'                              
+#' 
+#'       
+#'      
 #'      # reduced number of npermut iterations
 #'                                       
 #'      ParasitismOR <- subset(BroodParasitism,  
@@ -140,14 +142,15 @@ rpt.binomGLMM.multi <- function(data = NULL, y, groups, link = c("logit", "probi
 rpt.binomGLMM.multi_ <- function(data = NULL, y, groups,link = c("logit", "probit"), CI = 0.95, 
                                 nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
 
-   
+       
         if (is.list(lazyeval::lazy_eval(y, data = data))){
-                y <- data.frame(do.call(cbind, lazyeval::lazy_eval(y, data = data)))    
+                y <- as.matrix(data.frame(do.call(cbind, lazyeval::lazy_eval(y, data = data))))    
         } else {
                 y <- lazyeval::lazy_eval(y, data = data)    
         }
         groups <- lazyeval::lazy_eval(groups, data = data)
-        
+
+    
     # data argument check
     if (is.character(y) & ((length(y) == 1) || (length(y) == 2)) & is.character(groups) & 
         (length(groups) == 1)) {
@@ -176,6 +179,7 @@ rpt.binomGLMM.multi_ <- function(data = NULL, y, groups,link = c("logit", "probi
     n <- rowSums(y)
     N <- nrow(y)
     k <- length(levels(groups))
+
     # functions
     pqlglmm.binom.model <- function(y, groups, n, link, returnR = TRUE) {
         if (all(n == 1)) {

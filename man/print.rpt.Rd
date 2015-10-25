@@ -12,7 +12,7 @@
 \item{\dots}{Additional arguments; none are used in this method.}
 }
 \description{
-Displays the results a rpt object (i.e. the result of a rpt function call) an a nice form.
+Displays the results a rpt object (i.e. the result of a rpt function call) in a nice form.
 }
 \examples{
 # repeatability estimation for weight

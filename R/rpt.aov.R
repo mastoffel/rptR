@@ -2,9 +2,9 @@
 #' 
 #' Repeatability calculations based on Analysis of Variance (ANOVA).
 #' 
-#' @param data data.frame containing response and groups variable.
-#' @param y Name of the response variable in the data.frame
-#' @param groups Name of the variable containing the group identities in the data.frame (will be converted to a factor).
+#' @param data \code{data.frame} containing response and groups variable.
+#' @param y Name of the response variable in the \code{data.frame}
+#' @param groups Name of the variable containing the group identities in the \code{data.frame} (will be converted to a factor).
 #' @param CI Width of the confidence interval between 0 and 1 (defaults to 0.95).
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000). 
 #' @param parallel If TRUE, permutations will be distributed. 

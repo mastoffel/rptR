@@ -1,6 +1,6 @@
 #' Print a rpt object
 #' 
-#' Displays the results a rpt object (i.e. the result of a rpt function call) an a nice form.
+#' Displays the results a rpt object (i.e. the result of a rpt function call) in a nice form.
 #' 
 #' @param x An rpt object returned from one of the rpt functions
 #' @param \dots Additional arguments; none are used in this method.

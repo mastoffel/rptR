@@ -2,9 +2,14 @@
 % Please edit documentation in R/rpt.binomGLMM.multi.R
 \name{rpt.binomGLMM.multi}
 \alias{rpt.binomGLMM.multi}
+\alias{rpt.binomGLMM.multi_}
 \title{GLMM-based Repeatability Using PQL Estimation for Binomial Data}
 \usage{
 rpt.binomGLMM.multi(data = NULL, y, groups, link = c("logit", "probit"),
+  CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
+  ncores = 0)
+
+rpt.binomGLMM.multi_(data = NULL, y, groups, link = c("logit", "probit"),
   CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
   ncores = 0)
 }
@@ -72,7 +77,7 @@ Returns an object of class rpt that is a a list with the following elements:
 \item{nobs}{Number of observations.}
 }
 \description{
-Calculates repeatability from a generalised linear mixed-effects models fitted
+Calculates repeatability from a generalised linear mixed-effects model fitted
 by PQL (penalized-quasi likelihood) estimation for binary and proportion data.
 }
 \details{
@@ -85,26 +90,28 @@ Models are fitted using the \link{glmmPQL} function in \pkg{MASS}
 }
 \examples{
 # repeatability estimations for egg dumping (binary data)
-     data(BroodParasitism)
-     EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1,
-                       select = c(HostYN, FemaleID))
-     (rpt.Host <- rpt.binomGLMM.multi('HostYN', 'FemaleID', data = EggDump,
-                                       nboot=10, npermut=10))
-     # low number of nboot and npermut to speed up error checking
-     (rpt.BroodPar <- rpt.binomGLMM.multi('cbpYN', 'FemaleID',
-                                           data = BroodParasitism, nboot=10,
-                                           npermut=10))
-     # low number of nboot and npermut to speed up error checking
+data(BroodParasitism)
+EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
+(rpt.Host <- rpt.binomGLMM.multi(data = EggDump, HostYN, FemaleID, nboot=10, npermut=10))
+# low number of nboot and npermut to speed up error checking
+
+(rpt.BroodPar <- rpt.binomGLMM.multi(data = BroodParasitism, cbpYN, FemaleID,
+                                     nboot=10, npermut=10))
+# low number of nboot and npermut to speed up error checking
 
 # repeatability estimations for egg dumping (proportion data)
-     data(BroodParasitism)
-     ParasitisedOR <- subset(BroodParasitism,
-                             select= c(HostClutches, OwnClutches, FemaleID))
-     ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches -
-                                   ParasitisedOR$HostClutches
-     (rpt.Host <- rpt.binomGLMM.multi(c('HostClutches', 'parasitised'), 'FemaleID',
-     data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
-     nboot=10, npermut=10))
+data(BroodParasitism)
+ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, FemaleID))
+ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches
+(rpt.Host <- rpt.binomGLMM.multi(
+                             data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
+                             list(HostClutches, parasitised),
+                             groups = FemaleID,
+                             nboot=10, npermut=10))
+
+
+
+
      # reduced number of npermut iterations
 
      ParasitismOR <- subset(BroodParasitism,

@@ -12,11 +12,11 @@ rpt.aov_(data = NULL, y, groups, CI = 0.95, npermut = 1000,
   parallel = FALSE, ncores = NULL)
 }
 \arguments{
-\item{data}{data.frame containing response and groups variable.}
+\item{data}{\code{data.frame} containing response and groups variable.}
 
-\item{y}{Name of the response variable in the data.frame}
+\item{y}{Name of the response variable in the \code{data.frame}}
 
-\item{groups}{Name of the variable containing the group identities in the data.frame (will be converted to a factor).}
+\item{groups}{Name of the variable containing the group identities in the \code{data.frame} (will be converted to a factor).}
 
 \item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}
 

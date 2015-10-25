@@ -12,21 +12,23 @@
 \item{\dots}{Additional arguments; none are used in this method.}
 }
 \description{
-Displays the summary of an rpt object (i.e. the result of a rpt function call) in a nice form.
+Displays the summary of an rpt object (i.e. the result of a rpt function call) in an
+extended form.
 }
 \examples{
 # repeatability estimation for weight (body mass)
 data(BodySize)
 rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID)
-print(rpt.Weight)  # alternative call to print.rpt() through print()
+summary(rpt.Weight)
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
-             non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
 \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},

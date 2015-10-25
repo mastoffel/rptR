@@ -15,8 +15,9 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) 
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se), 
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com) 
 #'      
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
@@ -24,7 +25,7 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, nboot=100, npermut=100))   
+#' (rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID, nboot=100, npermut=100))   
 #' # reduced number of nboot and npermut iterations
 #' plot(rpt.BS)
 #'       
@@ -38,23 +39,21 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
     breaks = "FD", xlab = "Repeatability estimates", ...) {
     
     # initialising
-    if (length(type) != 1) 
-        type <- type[1]
-    if (length(scale) != 1) 
-        scale <- scale[1]
+    if (length(type) != 1) type <- type[1]
+    if (length(scale) != 1) scale <- scale[1]
     
     if (x$datatype != "Gaussian" & x$method == "PQL") {
         if (is.null(main)) {
             if (type == "boot") {
                 if (scale == "link") 
-                  main <- "Link scale distribution of repeatability estimates from bootstrap"
+                  main <- "Link scale distribution of repeatability \nestimates from bootstrap"
                 if (scale == "original") 
-                  main <- "Original scale distribution of repeatability estimates from bootstrap"
+                  main <- "Original scale distribution of repeatability \nestimates from bootstrap"
             } else if (type == "permut") {
                 if (scale == "link") 
-                  main <- "Link scale distribution of repeatability estimates from permutation"
+                  main <- "Link scale distribution of repeatability \nestimates from permutation"
                 if (scale == "original") 
-                  main <- "Original scale distribution of repeatability estimates from permutation"
+                  main <- "Original scale distribution of repeatability \nestimates from permutation"
                 
             }
         }
@@ -63,9 +62,9 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
         (x$method == "ANOVA"))) {
         if (is.null(main)) {
             if (type == "boot") 
-                main <- "Distribution of repeatability estimates from bootstrap"
+                main <- "Distribution of repeatability estimates \nfrom bootstrap"
             if (type == "permut") 
-                main <- "Distribution of repeatability estimates from permutation"
+                main <- "Distribution of repeatability estimates \nfrom permutation"
         }
     }
     

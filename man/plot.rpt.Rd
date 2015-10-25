@@ -30,13 +30,14 @@ For MCMC methods
 \examples{
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, nboot=100, npermut=100))
+(rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID, nboot=100, npermut=100))
 # reduced number of nboot and npermut iterations
 plot(rpt.BS)
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and

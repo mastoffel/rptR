@@ -109,11 +109,11 @@ rpt.adj <- function(formula, grname, data, datatype = c("Gaussian", "binomial", 
         if (method == "REML") 
             return(rpt.remlLMM.adj(formula, grname, data, CI = CI, nboot = nboot, npermut = npermut))
         if (method == "MCMC") 
-            warning("Not jet implemented")  # return(rpt.mcmcLMM.adj(formula, grname, data, CI=CI))
+            warning("Not yet implemented")  # return(rpt.mcmcLMM.adj(formula, grname, data, CI=CI))
         if (method == "ANOVA") 
-            warning("Not jet implemented")  # return(rpt.aov(y, groups, CI=CI, npermut=npermut))\t
+            warning("Not yet implemented")  # return(rpt.aov(y, groups, CI=CI, npermut=npermut))\t
         if (method == "corr") 
-            warning("Not jet implemented")  # return(rpt.corr(y, groups, CI=CI, nboot=nboot, npermut=npermut)) 
+            warning("Not yet implemented")  # return(rpt.corr(y, groups, CI=CI, nboot=nboot, npermut=npermut)) 
     }
     if (datatype == "binomial" | datatype == "proportion") {
         if (length(method) > 1) {
@@ -121,9 +121,9 @@ rpt.adj <- function(formula, grname, data, datatype = c("Gaussian", "binomial", 
             method <- "GLMM.multi"
         }
         if (method == "GLMM.multi") 
-            warning("Not jet implemented")  # return(rpt.binomGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut))
+            warning("Not yet implemented")  # return(rpt.binomGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut))
         if (method == "GLMM.add") 
-            warning("Not jet implemented")  # return(rpt.binomGLMM.add(y, groups, CI=CI))
+            warning("Not yet implemented")  # return(rpt.binomGLMM.add(y, groups, CI=CI))
     }
     if (datatype == "count") {
         if (length(method) > 1) {
@@ -133,8 +133,8 @@ rpt.adj <- function(formula, grname, data, datatype = c("Gaussian", "binomial", 
         if (length(link) > 1) 
             link <- "log"
         if (method == "GLMM.multi") 
-            warning("Not jet implemented")  # return(rpt.poisGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut)) 
+            warning("Not yet implemented")  # return(rpt.poisGLMM.multi(y, groups, link, CI=CI, nboot=nboot, npermut=npermut)) 
         if (method == "GLMM.add") 
-            warning("Not jet implemented")  # return(rpt.poisGLMM.add.adj(formula, grname, data, CI=CI)) 
+            warning("Not yet implemented")  # return(rpt.poisGLMM.add.adj(formula, grname, data, CI=CI)) 
     }
 } 
