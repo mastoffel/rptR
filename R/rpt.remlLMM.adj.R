@@ -74,6 +74,7 @@
 
 rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = NULL) {
+        
     mod <- lme4::lmer(formula, data = data)
     if (nboot < 0) nboot <- 0
     if (npermut < 1) npermut <- 1
@@ -146,7 +147,8 @@ rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, nper
     }
     
     # significance test by permutation of residuals
-    permut <- function(formula, mod_red, dep_var, grname, i) {
+    # nperm argument just used for parallisation
+    permut <- function(nperm, formula, mod_red, dep_var, grname, i) {
         y_perm <- fitted(mod_red) + sample(resid(mod_red))
         data_perm <- data
         data_perm[dep_var] <- y_perm
@@ -156,12 +158,26 @@ rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, nper
     dep_var <- as.character(formula)[2]
     # one random effect, uses lm()
     if (length(randterms) == 1) {
+            
         formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
         mod_red <- lm(formula_red, data = data)
         # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-        R.permut <- c(R, replicate(npermut - 1, permut(formula, mod_red, dep_var, grname), 
+        if (parallel == TRUE){
+                if (is.null(ncores)) {
+                        ncores <- parallel::detectCores()
+                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                }
+                # start cluster
+                cl <- parallel::makeCluster(ncores)
+                R.permut <- c(R, parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname))
+                parallel::stopCluster(cl)
+                P.permut <- sum(R.permut >= R)/npermut
+                
+        } else if (parallel == FALSE) {
+        R.permut <- c(R, replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname), 
             simplify = TRUE))
         P.permut <- sum(R.permut >= R)/npermut
+        }
     }
     # multiple random effects, uses lmer()
     if (length(randterms) > 1) {
@@ -171,9 +187,21 @@ rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, nper
             formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                 ")"))))
             mod_red <- lme4::lmer(formula_red, data = data)
-            R.permut[i, ] <- c(R[i], replicate(npermut - 1, permut(formula, mod_red, 
-                dep_var, grname, i), simplify = TRUE))
-            P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
+            
+            if(parallel == TRUE) {
+                    if (is.null(ncores)) {
+                            ncores <- parallel::detectCores()
+                            warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                    }
+                    # start cluster
+                    cl <- parallel::makeCluster(ncores)
+                    R.permut[i, ] <- c(R[i], parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname, i))
+                    parallel::stopCluster(cl)
+                    P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
+            } else if (parallel == FALSE) {
+                    R.permut[i, ] <- c(R[i], replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))
+                    P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
+            }
         }
     }
     
