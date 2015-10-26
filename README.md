@@ -12,6 +12,6 @@ rptR
     if (packageVersion("devtools") < 1.6) {
       install.packages("devtools")
     }
-    devtools::install_github("mastoffel/rptR", build_vignettes = TRUE)
+    devtools::install_github("mastoffel/rptR")
     ```
 ```

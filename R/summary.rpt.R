@@ -43,7 +43,7 @@ summary.rpt <- function(object, ...) {
                                                c(median(object$R.boot), median(object$R.permut)),
                                                c(unname(object$CI.R[1]), unname(CI.perm[1])),
                                                c(unname(object$CI.R[2]), unname(CI.perm[2]))),
-                                    names = c("N", "Mean", "Median", 
+                                       names = c("N", "Mean", "Median", 
                                               attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
                                     row.names = c("boot", "permut"))
                 object$boot   <-  bootperm[1, ]
