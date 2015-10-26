@@ -59,16 +59,10 @@ rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 
         if (is.null(data)) {
                 stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
         }
-        
-        if (is.character(substitute(y)) & is.character(substitute(groups))){
-                warning("use of quoted expressions is deprecated. Pass an unquoted expression instead.")
-                rpt.corr_(data, y, groups, CI, nboot, 
-                          npermut, parallel = FALSE, ncores = 0)
-        } else {
-                
-        rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI = 0.95, 
-                  npermut, parallel = FALSE, ncores = 0)
-        }
+           
+        rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI, nboot,
+                  npermut, parallel, ncores)
+     
         
 }
 

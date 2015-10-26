@@ -12,10 +12,15 @@ epsilon = rnorm(n, mean=0, sd=1)
 resp = alpha + group.dev[as.numeric(pred)] + epsilon
 md = data.frame(resp, pred)
 
-test_that("all input formats work and point estimates for repeatability correct", {
-        
-        expect_equal(rpt.corr(resp, pred, data = md)$R, 0.141, tolerance = 0.01) 
-        expect_equal(rpt.corr_("resp", "pred", data = md)$R, 0.141, tolerance = 0.01) 
-        
+test_that("NSE works", {
+        expect_equal(rpt.corr(data = md, resp, pred)$R, 0.141, tolerance = 0.01) 
+})
+
+test_that("SE works", {
+        expect_equal(rpt.corr_( data = md, "resp", "pred")$R, 0.141, tolerance = 0.01) 
+})
+
+test_that("Permutations work", {
+        expect_equal(length(rpt.corr(data = md, y = resp, group = pred, npermut = 10)$R.permut), 10)
 })
 

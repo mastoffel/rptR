@@ -67,8 +67,9 @@ data(BodySize)
 # reduced number of nboot and npermut iterations
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized

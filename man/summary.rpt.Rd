@@ -21,8 +21,9 @@ rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID)
 summary(rpt.Weight)
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and

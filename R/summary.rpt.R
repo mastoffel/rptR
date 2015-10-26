@@ -9,8 +9,9 @@
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}

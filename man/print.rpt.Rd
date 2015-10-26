@@ -21,8 +21,9 @@ rpt.Weight <- rpt.mcmcLMM(BodySize, Weight, BirdID)
 print(rpt.Weight)  # alternative call to print.rpt() through print()
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) &
-        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and

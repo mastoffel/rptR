@@ -12,11 +12,12 @@ epsilon = rnorm(n, mean=0, sd=1)
 resp = alpha + group.dev[as.numeric(pred)] + epsilon
 md = data.frame(resp, pred)
 
-# test_that("all input formats work and point estimates for repeatability correct", {
-        # non-standard eval
+test_that("NSE works", {
         expect_equal(is.numeric(rpt.mcmcLMM(data = md, y = resp, groups = pred)$R), TRUE)
 
-        # standard eval
-        expect_equal(is.numeric(rpt.mcmcLMM_(data = md, y = "resp", groups = "pred")$R), TRUE)
+})
 
-# })
+test_that("SE works", {
+        expect_equal(is.numeric(rpt.mcmcLMM_(data = md, y = "resp", groups = "pred")$R), TRUE)
+})
+
