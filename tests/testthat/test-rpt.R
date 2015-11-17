@@ -1,5 +1,6 @@
-# rpt tests
 
+# rpt tests
+context("rpt")
 
 ## calling rpt.remlLMM
 

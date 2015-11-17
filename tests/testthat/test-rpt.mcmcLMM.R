@@ -1,5 +1,6 @@
-# rpt.mcmcLMM tests
 
+# rpt.mcmcLMM tests
+context("rpt.mcmcLMM")
 # Set a seed for reproducibility of the randomization 
 set.seed(23)
 # simulation of a 3-level factor
