@@ -38,6 +38,9 @@
 plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"), main = NULL, 
     breaks = "FD", xlab = "Repeatability estimates", ...) {
     
+    # save ellipsis args
+    dots <- list(...)
+        
     # initialising
     if (length(type) != 1) type <- type[1]
     if (length(scale) != 1) scale <- scale[1]
@@ -71,10 +74,12 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
     # make bootstrap histogram
     boot_hist <- function(R, R.boot, CI.l, CI.u, xlab. = xlab, breaks. = breaks, main. = main, 
         ...) {
+        dots <- list(...)
+        
         # y position of confidence band
         v.pos <- max((hist(R.boot, breaks = breaks., plot = FALSE))$counts)
         # plot
-        hist(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.)
+        do.call(hist, args = c(list(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
         lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
         arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.3, angle = 90, code = 3, 
             lwd = 2.5, col = "black")
@@ -85,13 +90,14 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
     
     permut_hist <- function(R, R.permut, xlab. = xlab, CI = x$CI, breaks. = breaks, main. = main, 
         ...) {
+        dots <- list(...)
         # get CI for permutation
         CI.perm <- quantile(R.permut, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
         Median.R <- median(R.permut)
         # y position of confidence band
         v.pos <- max((hist(R.permut, breaks = breaks., plot = FALSE))$counts)
         # plot
-        hist(R.permut, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.)
+        do.call(hist, args = c(list(R.permut, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
         lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", 
             lty = 5)
         lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
@@ -123,14 +129,13 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
     if (x$datatype == "Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML")) & 
         length(x$R) == 1) {
         if (type == "boot") {
-            boot_hist(R = x$R, R.boot = x$R.boot, CI.l = unname(x$CI.R[1]), CI.u = unname(x$CI.R[2]), 
-                ...)
+            do.call(boot_hist, args = c(list(R = x$R, R.boot = x$R.boot, CI.l = unname(x$CI.R[1]), CI.u = unname(x$CI.R[2])), dots))
         } else if (type == "permut") {
             if (x$method == "corr") {
-                permut_hist(R = x$R, R.permut = x$R.permut, ...)  # x$P??
+            do.call(permut_hist, args = c(list(R = x$R, R.permut = x$R.permut), dots)) # x$P??
             } else if (x$method == "LMM.REML") {
                 # no red point. unclear which p to plot
-                permut_hist(R = x$R, R.permut = x$R.permut, ...)
+            do.call(permut_hist, args = c(list(R = x$R, R.permut = x$R.permut), dots))
             }
         }
     }
@@ -141,7 +146,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
             warning("type = 'boot' not available. Use type = 'permut'.")
         }
         if (type == "permut") {
-            permut_hist(R = x$R, R.permut = x$R.permut, ...)
+            do.call(permut_hist, c(list(R = x$R, R.permut = x$R.permut), dots))
         }
     }
     
@@ -150,25 +155,25 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
         # respective plot')
         if (scale == "link") {
             if (type == "boot") {
-                boot_hist(R = x$R.link, R.boot = x$R.boot$R.link, CI.l = unname(x$CI.link[1]), 
-                  CI.u = unname(x$CI.link[2]), ...)
+                do.call(boot_hist, c(list(R = x$R.link, R.boot = x$R.boot$R.link, CI.l = unname(x$CI.link[1]), 
+                  CI.u = unname(x$CI.link[2])), dots))
             } else if (type == "permut") {
-                permut_hist(R = x$R.link, R.permut = x$R.permut$R.link, ...)
+                do.call(permut_hist, c(list(R = x$R.link, R.permut = x$R.permut$R.link), dots))
             }
         }
         if (scale == "original") {
             if (type == "boot") {
-                boot_hist(R = x$R.org, R.boot = x$R.boot$R.org, CI.l = unname(x$CI.link[1]), 
-                  CI.u = unname(x$CI.link[2]), ...)
+                do.call(boot_hist, c(list(R = x$R.org, R.boot = x$R.boot$R.org, CI.l = unname(x$CI.link[1]), 
+                  CI.u = unname(x$CI.link[2])), dots))
             } else if (type == "permut") {
-                permut_hist(R = x$R.org, R.permut = x$R.permut$R.org, ...)
+                do.call(permut_hist, c(list(R = x$R.org, R.permut = x$R.permut$R.org), dots))
             }
         }
         
     }
     
     if (x$method == "LMM.MCMC" | x$method == "MCMC") {
-        plot(x$mod)
+        do.call(plot, c(list(x$mod), dots))
     }
     
 }
