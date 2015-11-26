@@ -233,9 +233,16 @@ rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, nper
     
     
     # preparing results
-    P <- matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)
-    colnames(P) <- c("P.LRT", "P.permut")
-    rownames(P) <- grname
+    # if more than one random term make matrix
+    if (nrow(matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)) > 1) {
+            P <- matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)
+            colnames(P) <- c("P.LRT", "P.permut")
+            rownames(P) <- grname
+    # else make vector in congruency with rpt.remlLMM
+    } else {
+            P = c(P.LRT = LRT.P, P.permut = P.permut)
+    }
+    
     res <- list(call = match.call(), datatype = "Gaussian", method = "LMM.REML", CI = CI, 
         R = R, se = se, CI.R = CI.R, P = P, P.permut = P.permut, R.boot = R.boot, R.permut = R.permut, 
         LRT = list(LRT.mod = LRT.mod, LRT.red = LRT.red, LRT.D = LRT.D, LRT.df = LRT.df, 

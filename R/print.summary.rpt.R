@@ -56,6 +56,7 @@ print.summary.rpt <- function(x, ...) {
         print(format(x$anovatab, digits = 3, width = 6))
     }
     
+    # also rpt.remlLMM.adj with one random effect
     if (x$datatype == "Gaussian" & x$method == "LMM.REML" & length(x$R) == 1) {
         cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
             "Call = ", deparse(x$call), "\n", "Data: ", x$nobs, " observations in ", 
@@ -64,7 +65,11 @@ print.summary.rpt <- function(x, ...) {
         print(format(x$rpt, digits = 3, width = 6), row.names = FALSE)
         cat("\n")
         cat("Bootstrapping and Permutation test:", "\n")
+        # also not working for adj
         print(format(rbind(x$boot, x$permut), digits = 3, width = 6))
+        
+        # summary doesn´t work
+        
         cat("\n", "Likelihood ratio test: ", "\n", "logLik full model = ", x$LRT["LRT.mod"], 
             "\n", "logLik red. model = ", x$LRT["LRT.red"], "\n", "D  = ", signif(x$LRT["LRT.D"], 
                 3), ", ", "df = ", x$LRT["LRT.df"], ", ", "P  = ", signif(x$LRT["LRT.P"], 
