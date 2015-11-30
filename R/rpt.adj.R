@@ -31,7 +31,7 @@
 #'   
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rpt.remlLMM.adj}
-#'   or rpt.mcmcLMM.adj (methods 'REML' and 'MCMC', respecitvely) (Note that
+#'   or rpt.mcmcLMM.adj (methods 'REML' and 'MCMC', respectively) (Note that
 #'   rpt.mcmcLMM.adj is not yet implemented).
 #'   
 #' 
@@ -107,7 +107,7 @@ rpt.adj <- function(formula, grname, data, datatype = c("Gaussian", "binomial", 
             method <- "REML"
         }
         if (method == "REML") 
-            return(rpt.remlLMM.adj(formula, grname, data, CI = CI, nboot = nboot, npermut = npermut))
+            return(rpt.remlLMM.adj(formula, grname, data, CI, nboot = nboot, npermut = npermut))
         if (method == "MCMC") 
             warning("Not yet implemented")  # return(rpt.mcmcLMM.adj(formula, grname, data, CI=CI))
         if (method == "ANOVA") 

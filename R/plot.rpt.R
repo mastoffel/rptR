@@ -1,7 +1,7 @@
 #' Plot a rpt object
 #' 
 #' Plots the distribution of repeatability estimates from bootstrapping and permutation tests.
-#' For MCMC methods
+#' For MCMC methods (to fill in)
 #' 
 #' @param x An rpt object returned from one of the rpt functions.
 #' @param type Showing either the bootstap or permutation test results.
@@ -13,7 +13,7 @@
 #'
 #' @references 
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
-#'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+#' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se), 
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
@@ -28,6 +28,7 @@
 #' (rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID, nboot=100, npermut=100))   
 #' # reduced number of nboot and npermut iterations
 #' plot(rpt.BS)
+#' 
 #'       
 #' @keywords models
 #' 

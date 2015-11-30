@@ -5,8 +5,8 @@ Depends:
     R (>= 3.2.1)
 Date: 2011-11-24
 Author: Martin Stoffel <martin.adam.stoffel@gmail.com>,
-       Holger Schielzeth <holger.schielzeth@ebc.uu.se>, 
-       Shinichi Nakagawa <shinichi.nakagawa@otago.ac.nz>
+    Holger Schielzeth <holger.schielzeth@ebc.uu.se>,
+    Shinichi Nakagawa <shinichi.nakagawa@otago.ac.nz>
 Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: R functions for calculating repeatability (intra-class
     correlation) from normal, binary, proportion and count data.
@@ -23,3 +23,4 @@ Imports:
     lazyeval (>= 0.1.10)
 Suggests:
     testthat
+RoxygenNote: 5.0.1
