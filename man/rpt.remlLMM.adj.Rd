@@ -30,7 +30,7 @@ asymptotic \emph{P} values (defaults to 1000). Currently not in use!}
 \item{parallel}{If TRUE, bootstraps will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 
@@ -81,10 +81,9 @@ concordance correlation coefficient through variance components}. Biometrics 59:
 Faraway, J. J. (2006). \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
 
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
-             non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
 \link{rpt.mcmcLMM}, \link{print.rpt}, \link{rpt}, \link{rpt.adj}
 }
-\keyword{models}
 

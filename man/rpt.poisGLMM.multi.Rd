@@ -30,7 +30,7 @@ Larger numbers of permutations give better asymtotic CI, but may be very time-co
 \item{parallel}{If TRUE, bootstraps and permutations will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 
 \item{npermut}{Number}{of permutations for a significance testing. Defaults to 1000.
 Larger numbers of permutations give better asymptotic \emph{P} values,

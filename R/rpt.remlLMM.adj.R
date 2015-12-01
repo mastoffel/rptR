@@ -17,7 +17,7 @@
 #'        asymptotic \emph{P} values (defaults to 1000). Currently not in use!
 #' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used.
+#'        all cores but one are used.
 #' 
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
@@ -43,7 +43,7 @@
 #' Faraway, J. J. (2006). \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
 #' 
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
-#'              non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+#' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
@@ -66,11 +66,8 @@
 #'                                data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 #' 
-#' @keywords models
-#' 
 #' @export
 #' 
-# @importFrom lme4 lmer @importFrom lme4 VarCorr @importFrom arm sim
 
 rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
     parallel = FALSE, ncores = NULL) {
@@ -104,7 +101,7 @@ rpt.remlLMM.adj <- function(formula, grname, data, CI = 0.95, nboot = 1000, nper
     }
     if (nboot > 0 & parallel == TRUE) {
         if (is.null(ncores)) {
-            ncores <- parallel::detectCores()
+            ncores <- parallel::detectCores() - 1
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster

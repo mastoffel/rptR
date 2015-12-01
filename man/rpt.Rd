@@ -7,7 +7,8 @@
 rpt(y, groups, data = NULL, datatype = c("Gaussian", "binomial",
   "proportion", "count"), method = c("corr", "ANOVA", "REML", "MCMC",
   "GLMM.add", "GLMM.multi"), link = c("logit", "probit", "log", "sqrt"),
-  CI = 0.95, nboot = 1000, npermut = 1000)
+  CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
+  ncores = NULL)
 }
 \arguments{
 \item{y}{String specifying response variable  (or two-column matrix or dataframe in case of 
@@ -37,6 +38,11 @@ confidence interval (defaults to 1000). Ignored for the 'GLMM.add',
 
 \item{npermut}{Number of permutations used when calculating asymtotic
 \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.}
+
+\item{parallel}{If TRUE, bootstraps will be distributed for non-bayesian functions.}
+
+\item{ncores}{Specify number of cores to use for parallelization. On default,
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt. See details for specific functions.

@@ -21,7 +21,7 @@
 #'        asymtotic \emph{P} values, but may be very time-consuming.      
 #' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used.  
+#'        all cores but one are used.  
 #'       
 #' @details Models are fitted using the \link{glmmPQL} function in \pkg{MASS} 
 #'          with the \code{quasibinomial} family (proportion data) or the
@@ -124,7 +124,7 @@
 
 
 rpt.binomGLMM.multi <- function(data = NULL, y, groups, link = c("logit", "probit"), CI = 0.95, 
-    nboot = 1000, npermut = 1000, parallel = FALSE, ncores = 0) {
+    nboot = 1000, npermut = 1000, parallel = FALSE, ncores = NULL) {
     
         
         # data argument should be used
@@ -241,8 +241,8 @@ rpt.binomGLMM.multi_ <- function(data = NULL, y, groups,link = c("logit", "probi
     }
     if (nboot > 0 & parallel == TRUE) {
         mod.ests <- pqlglmm.binom.model(y, groups, n, link, returnR = FALSE)
-        if (ncores == 0) {
-            ncores <- parallel::detectCores()
+        if (is.null(ncores)) {
+            ncores <- parallel::detectCores() - 1
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster

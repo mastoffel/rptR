@@ -106,7 +106,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
             angle = 90, code = 3, lwd = 2.5, col = "black")
         points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
         points(R, v.pos * 1.3, cex = 1.2, pch = 19, col = "red")
-        legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), c("Median of simulated repeatabilities with CI", 
+        legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), c("Median of repeatabilities from permuted datasets with CI", 
             "Observed repeatability"), box.lty = 0)
     }
     
@@ -133,7 +133,7 @@ plot.rpt <- function(x, type = c("boot", "permut"), scale = c("link", "original"
             do.call(boot_hist, args = c(list(R = x$R, R.boot = x$R.boot, CI.l = unname(x$CI.R[1]), CI.u = unname(x$CI.R[2])), dots))
         } else if (type == "permut") {
             if (x$method == "corr") {
-            do.call(permut_hist, args = c(list(R = x$R, R.permut = x$R.permut), dots)) # x$P??
+            do.call(permut_hist, args = c(list(R = x$R, R.permut = x$R.permut), dots)) 
             } else if (x$method == "LMM.REML") {
                 # no red point. unclear which p to plot
             do.call(permut_hist, args = c(list(R = x$R, R.permut = x$R.permut), dots))

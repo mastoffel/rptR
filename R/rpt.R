@@ -22,6 +22,9 @@
 #'        'corr' and 'ANOVA' methods.
 #' @param npermut Number of permutations used when calculating asymtotic
 #'        \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.
+#' @param parallel If TRUE, bootstraps will be distributed for non-bayesian functions.
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores but one are used.
 #' 
 #' @details For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov}, 
 #'          \link{rpt.remlLMM} or \link{rpt.mcmcLMM} (methods 'corr', 'ANOVA', 
@@ -147,7 +150,8 @@
 #' 
 rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "proportion", "count"), 
     method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"), link = c("logit", 
-        "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000) {
+        "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
+    ncores = NULL) {
         
 #         # non-standard evaluation if non-string plus data argument provided
 #         if (is.null(data)) {
@@ -166,7 +170,8 @@ rpt <- function(y, groups, data = NULL, datatype = c("Gaussian", "binomial", "pr
             method <- "REML"
         }
         if (method == "REML") {
-            return(rpt.remlLMM(data, y, groups,  CI = CI, nboot = nboot, npermut = npermut))
+            return(rpt.remlLMM(data, y, groups,  CI = CI, nboot = nboot, npermut = npermut,
+                               parallel = FALSE, ncores = NULL))
         }
         if (method == "MCMC") 
             return(rpt.mcmcLMM(data, y, groups, CI = CI))

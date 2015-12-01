@@ -28,7 +28,8 @@
 #'   and 'ANOVA' methods.
 #' @param npermut Number of permutations used when calculating asymtotic 
 #'   \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.
-#'   
+#' @param ncores Specify number of cores to use for parallelization. On default,
+#'        all cores but one are used.
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rpt.remlLMM.adj}
 #'   or rpt.mcmcLMM.adj (methods 'REML' and 'MCMC', respectively) (Note that
@@ -100,14 +101,16 @@
 #' 
 rpt.adj <- function(formula, grname, data, datatype = c("Gaussian", "binomial", "proportion", 
     "count"), method = c("corr", "ANOVA", "REML", "MCMC", "GLMM.add", "GLMM.multi"), 
-    link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000) {
+    link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000,
+    parallel = FALSE, ncores = NULL) {
     if (datatype == "Gaussian") {
         if (length(method) > 1) {
             warning("Linear mixed model fitted by REML used by default. Change using argument 'method', if required ('corr', 'ANOVA', 'REML' and 'MCMC' allowed for Gaussian data).")
             method <- "REML"
         }
         if (method == "REML") 
-            return(rpt.remlLMM.adj(formula, grname, data, CI, nboot = nboot, npermut = npermut))
+            return(rpt.remlLMM.adj(formula, grname, data, CI, nboot = nboot, npermut = npermut, 
+                                   parallel = parallel, ncores = ncores))
         if (method == "MCMC") 
             warning("Not yet implemented")  # return(rpt.mcmcLMM.adj(formula, grname, data, CI=CI))
         if (method == "ANOVA") 

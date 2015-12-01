@@ -15,7 +15,7 @@
 #'        but may be very time-consuming.
 #' @param parallel If TRUE, bootstraps and permutations will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used. 
+#'        all cores but one are used. 
 #'        
 #' @details Models are fitted using the \link{glmmPQL} function in \pkg{MASS} 
 #' with quasipoisson family. }\note{ Confidence intervals and standard errors 
@@ -219,7 +219,7 @@ rpt.poisGLMM.multi_ <- function(data = NULL, y, groups, link = c("log", "sqrt"),
     
     if (npermut > 1 & parallel == TRUE) {
             if (is.null(ncores)) {
-                    ncores <- parallel::detectCores()
+                    ncores <- parallel::detectCores() - 1
                     warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
             }
             # start cluster

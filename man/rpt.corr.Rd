@@ -9,7 +9,7 @@ rpt.corr(data = NULL, y, groups, CI = 0.95, nboot = 1000,
   npermut = 1000, parallel = FALSE, ncores = NULL)
 
 rpt.corr_(data = NULL, y, groups, CI = 0.95, nboot = 1000,
-  npermut = 1000, parallel = FALSE, ncores = 0)
+  npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
 \item{data}{data.frame containing response and groups variable.}
@@ -30,7 +30,7 @@ confidence interval (defaults to 1000).}
 \item{parallel}{If TRUE, bootstraps and permutations will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 

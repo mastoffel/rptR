@@ -68,7 +68,7 @@ print.summary.rpt <- function(x, ...) {
         # also not working for adj
         print(format(rbind(x$boot, x$permut), digits = 3, width = 6))
         
-        # summary doesn´t work
+        # summary doesn't work
         
         cat("\n", "Likelihood ratio test: ", "\n", "logLik full model = ", x$LRT["LRT.mod"], 
             "\n", "logLik red. model = ", x$LRT["LRT.red"], "\n", "D  = ", signif(x$LRT["LRT.D"], 

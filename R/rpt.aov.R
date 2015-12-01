@@ -9,7 +9,7 @@
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} values (defaults to 1000). 
 #' @param parallel If TRUE, permutations will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used.  
+#'        all cores but one are used.  
 #' 
 #' @return Returns an object of class rpt that is a a list with the following elements: 
 #' \item{datatype}{Response distribution (here: 'Gaussian').}
@@ -110,7 +110,7 @@ rpt.aov_ <- function(data = NULL, y, groups, CI = 0.95, npermut = 1000, parallel
     
     if (npermut > 1 & parallel == TRUE) {
             if (is.null(ncores)) {
-                    ncores <- parallel::detectCores()
+                    ncores <- parallel::detectCores() - 1
                     warning("No core number specified: detectCores() is used to 
                             detect the number of \n cores on the local machine")
             }

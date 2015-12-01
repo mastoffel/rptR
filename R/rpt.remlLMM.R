@@ -13,7 +13,7 @@
 #'        asymptotic \emph{P} values (defaults to 1000).
 #' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used.
+#'        all cores but one are used.
 #' 
 #' @return 
 #' 
@@ -52,14 +52,14 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, 
+#' (rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID,  
 #'                        nboot=10, npermut=10))   
 #' # reduced number of nboot and npermut iterations
 #'
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM(Weight, BirdID, data = BodySize, 
+#' (rpt.Weight <- rpt.remlLMM( data = BodySize, Weight, BirdID,
 #'                             nboot=10, npermut=10)) 
 #' # reduced number of nboot and npermut iterations
 #'       
@@ -127,7 +127,7 @@ rpt.remlLMM_ <- function( data = NULL, y, groups, CI = 0.95, nboot = 1000, nperm
     }
     if (nboot > 0 & parallel == TRUE) {
         if (is.null(ncores)) {
-            ncores <- parallel::detectCores()
+            ncores <- parallel::detectCores() - 1
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster

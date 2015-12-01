@@ -30,7 +30,7 @@ asymptotic \emph{P} values (defaults to 1000).}
 \item{parallel}{If TRUE, bootstraps will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 
@@ -57,14 +57,14 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM(Tarsus, BirdID, data = BodySize, 
+(rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID,  
                        nboot=10, npermut=10))   
 # reduced number of nboot and npermut iterations
 
 # repeatability estimation for weight (body mass) - a lower R 
 # than the previous one
 data(BodySize)
-(rpt.Weight <- rpt.remlLMM(Weight, BirdID, data = BodySize, 
+(rpt.Weight <- rpt.remlLMM( data = BodySize, Weight, BirdID,
                             nboot=10, npermut=10)) 
 # reduced number of nboot and npermut iterations
       

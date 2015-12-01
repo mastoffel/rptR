@@ -13,7 +13,7 @@
 #'        \emph{P} values (defaults to 1000).
 #' @param parallel If TRUE, bootstraps and permutations will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores are used.  
+#'        all cores but one are used.  
 #' 
 #' @return Returns an object of class rpt that is a a list with the following elements: 
 #' \item{datatype}{Response distribution (here: 'Gaussian').}
@@ -63,14 +63,13 @@ rpt.corr <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 
         rpt.corr_(data, lazyeval::lazy(y), lazyeval::lazy(groups),  CI, nboot,
                   npermut, parallel, ncores)
      
-        
 }
 
 #' @export
 #' @rdname rpt.corr
 # Standard evaluation
 rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE, 
-    ncores = 0) {
+    ncores = NULL) {
     
     y <- lazyeval::lazy_eval(y, data = data)
     groups <- lazyeval::lazy_eval(groups, data = data)
@@ -103,7 +102,7 @@ rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut =
     }
     if (nboot > 0 & parallel == TRUE) {
         if (is.null(ncores)) {
-            ncores <- parallel::detectCores()
+            ncores <- parallel::detectCores() - 1
             warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
         }
         # start cluster
@@ -129,7 +128,7 @@ rpt.corr_ <- function(data = NULL, y, groups, CI = 0.95, nboot = 1000, npermut =
     
     if (npermut > 1 & parallel == TRUE) {
             if (is.null(ncores))  {
-                    ncores <- parallel::detectCores()
+                    ncores <- parallel::detectCores() - 1
                     warning("No core number specified: detectCores() is used to 
                             detect the number of \n cores on the local machine")
             }

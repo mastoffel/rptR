@@ -7,7 +7,7 @@
 \usage{
 rpt.binomGLMM.multi(data = NULL, y, groups, link = c("logit", "probit"),
   CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
-  ncores = 0)
+  ncores = NULL)
 
 rpt.binomGLMM.multi_(data = NULL, y, groups, link = c("logit", "probit"),
   CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
@@ -40,7 +40,7 @@ asymtotic \emph{P} values, but may be very time-consuming.}
 \item{parallel}{If TRUE, bootstraps will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 

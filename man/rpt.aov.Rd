@@ -25,7 +25,7 @@ rpt.aov_(data = NULL, y, groups, CI = 0.95, npermut = 1000,
 \item{parallel}{If TRUE, permutations will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores are used.}
+all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 
