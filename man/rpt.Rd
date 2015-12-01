@@ -104,7 +104,7 @@ For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov},
 # repeatability for male breeding success on a transformed scale
   data(Fledglings)
   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-  (rpt.Fledge <- rpt( data = Fledglings, y = sqrtFledge, groups = MaleID,
+  (rpt.Fledge <- rpt(data = Fledglings, y = sqrtFledge, groups = MaleID,
                      datatype='Gaussian', method='corr', nboot=10, 
                      npermut=10))  # reduced number of iterations
 
@@ -161,11 +161,11 @@ data(Fledglings)
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) & 
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
-             non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
 \link{rpt.adj}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},

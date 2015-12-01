@@ -28,6 +28,7 @@
 #'   and 'ANOVA' methods.
 #' @param npermut Number of permutations used when calculating asymtotic 
 #'   \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.
+#' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores but one are used.
 #'   

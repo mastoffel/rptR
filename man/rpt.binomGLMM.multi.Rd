@@ -105,8 +105,7 @@ ParasitisedOR <- subset(BroodParasitism,  select= c(HostClutches, OwnClutches, F
 ParasitisedOR$parasitised <-  ParasitisedOR$OwnClutches - ParasitisedOR$HostClutches 
 (rpt.Host <- rpt.binomGLMM.multi(
                              data = ParasitisedOR[BroodParasitism$OwnClutchesBothSeasons == 1, ],
-                             list(HostClutches, parasitised),
-                             groups = FemaleID, 
+                             list(HostClutches, parasitised), groups = FemaleID, 
                              nboot=10, npermut=10))
                              
 ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))

@@ -45,6 +45,8 @@ and 'ANOVA' methods.}
 \item{npermut}{Number of permutations used when calculating asymtotic 
 \emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.}
 
+\item{parallel}{If TRUE, bootstraps will be distributed.}
+
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
 }
@@ -101,13 +103,13 @@ data(Fledglings)
 Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
 # reduced number of nboot and npermut iterations
 rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID), 
-                   'MaleID', data=Fledglings, datatype='Gaussian', 
-                   method='REML', nboot=10, npermut=10)   
+              'MaleID', data=Fledglings, datatype='Gaussian', 
+              method='REML', nboot=10, npermut=10)   
                   
 data(BodySize)
 (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), 'BirdID', 
-                            data=BodySize, datatype='Gaussian', 
-                             method='MCMC'))
+                       data=BodySize, datatype='Gaussian', 
+                       method='MCMC'))
 }
 }
 \author{

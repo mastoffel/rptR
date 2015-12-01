@@ -67,7 +67,8 @@ Sokal, R. R. and F. J. Rohlf (1995). \emph{Biometry: The principles and practice
 Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt}
+\link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, 
+         \link{plot.rpt}
 }
 \keyword{models}
 
