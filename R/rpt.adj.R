@@ -87,13 +87,13 @@
 #' Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
 #' # reduced number of nboot and npermut iterations
 #' rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID), 
-#'                    'MaleID', data=Fledglings, datatype='Gaussian', 
-#'                    method='REML', nboot=10, npermut=10)   
+#'               'MaleID', data=Fledglings, datatype='Gaussian', 
+#'               method='REML', nboot=10, npermut=10)   
 #'                   
 #' data(BodySize)
 #' (rpt.Weight <- rpt.adj(Weight ~ Sex + (1|BirdID), 'BirdID', 
-#'                             data=BodySize, datatype='Gaussian', 
-#'                              method='MCMC'))
+#'                        data=BodySize, datatype='Gaussian', 
+#'                        method='MCMC'))
 #' }
 #' @keywords models
 #' 

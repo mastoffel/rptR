@@ -39,13 +39,13 @@
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
 #' # reduced number of npermut iterations
-#'      data(BodySize)
-#'      (rpt.BS <- rpt.aov(Tarsus, BirdID, data = BodySize, npermut=10))    
+#' data(BodySize)
+#' (rpt.BS <- rpt.aov(Tarsus, BirdID, data = BodySize, npermut=10))    
 #'      
 #' # repeatability estimation for weight (body mass) - a lower R 
 #' # than the previous one
-#'      data(BodySize)
-#'      (rpt.Weight <- rpt.aov(data = BodySize, y = Weight, groups = BirdID, CI = 0.95, npermut=10))  
+#' data(BodySize)
+#' (rpt.Weight <- rpt.aov(data = BodySize, y = Weight, groups = BirdID, CI = 0.95, npermut=10))  
 #' 
 #' @keywords models
 #' 

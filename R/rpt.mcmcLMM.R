@@ -50,16 +50,14 @@
 #' data(BodySize)
 #' (rpt.BS <- rpt.mcmcLMM(data = BodySize, Tarsus, BirdID))  
 #'     
-#' # repeatability estimation for weight (body mass) - a lower R than the 
-#' # previous one
+#' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #' data(BodySize)
 #' (rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID))
 #'       
 #' @keywords models
 #' 
 #' @export
-# @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
-# HPDinterval
+
 
 
 rpt.mcmcLMM <- function(data = NULL, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, ...) {

@@ -101,8 +101,6 @@ rpt.poisGLMM.multi <- function(data = NULL, y, groups, link = c("log", "sqrt"), 
         if (is.null(data)) {
                 stop("The data argument needs a data.frame that contains the response (y) and group (groups)")
         }
-        
-        
         rpt.poisGLMM.multi_(data, lazyeval::lazy(y), lazyeval::lazy(groups), link, CI, nboot,
                             npermut, parallel, ncores)
         

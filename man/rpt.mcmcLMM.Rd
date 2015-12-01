@@ -59,8 +59,7 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 data(BodySize)
 (rpt.BS <- rpt.mcmcLMM(data = BodySize, Tarsus, BirdID))  
     
-# repeatability estimation for weight (body mass) - a lower R than the 
-# previous one
+# repeatability estimation for weight (body mass) - a lower R than the previous one
 data(BodySize)
 (rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID))
       

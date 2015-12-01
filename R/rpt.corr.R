@@ -36,7 +36,8 @@
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'         
-#' @seealso \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, \link{plot.rpt} 
+#' @seealso \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM}, \link{rpt}, \link{summary.rpt}, 
+#'          \link{plot.rpt} 
 #' 
 #' @examples  
 #' # repeatability for male breeding success on a transformed scale
