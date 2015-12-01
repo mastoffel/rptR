@@ -85,19 +85,16 @@ parametric bootstrapping allows only \emph{omega} greater than or equal to  1.
 \examples{
  
 
-       # repeatability for female clutch size over two years.
-       data(BroodParasitism)
-       (rpt.Host <- rpt.poisGLMM.multi(data = BroodParasitism, 
-                                       OwnClutches, FemaleID, 
-                                       nboot=10, npermut=10))  
-       # reduced number of nboot and npermut iterations
+# repeatability for female clutch size over two years.
+data(BroodParasitism)
+(rpt.Host <- rpt.poisGLMM.multi(data = BroodParasitism, OwnClutches, FemaleID, 
+                                nboot=10, npermut=10))  
+# reduced number of nboot and npermut iterations
        
-       # repeatability for male fledgling success
-       data(Fledglings)
-       (rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings,
-                                         Fledge, MaleID, 
-                                         nboot=10, npermut=10))  
-       # reduced number of nboot and npermut iterations
+# repeatability for male fledgling success
+data(Fledglings)
+(rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings, Fledge, MaleID, nboot=10, npermut=10))  
+# reduced number of nboot and npermut iterations
       
 }
 \author{

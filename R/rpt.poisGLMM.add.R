@@ -63,26 +63,25 @@
 #' 
 #' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se) & 
-#'      Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz)
+#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
+#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
+#'         Martin A. Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt.poisGLMM.multi}, \link{rpt}, \link{print.rpt}
 #' 
 #' @examples  
 #' # repeatability for female clutch size over two years.
-#'    data(BroodParasitism)
-#'    (rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
+#' data(BroodParasitism)
+#' (rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
 #'     
 #' # repeatability for male fledgling success
-#'    data(Fledglings)
-#'    (rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID, ))
+#' data(Fledglings)
+#' (rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID))
 #'       
 #' @keywords models
 #' 
 #' @export
 #' 
-# @importFrom MCMCglmm MCMCglmm @importFrom MCMCglmm posterior.mode @importFrom coda
-# HPDinterval
 
 
 rpt.poisGLMM.add <- function(data, y, groups, CI = 0.95, prior = NULL, verbose = FALSE, 

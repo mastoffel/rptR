@@ -40,10 +40,10 @@
 #' 
 #' @examples  
 #' # repeatability for male breeding success on a transformed scale
-#'   data(Fledglings)
-#'   Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-#'   (rpt.Fledge <- rpt.corr(sqrtFledge, MaleID, data = Fledglings, 
-#'   nboot=10, npermut=10))  # reduced number of iterations
+#' data(Fledglings)
+#' Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
+#' (rpt.Fledge <- rpt.corr(sqrtFledge, MaleID, data = Fledglings, 
+#' nboot=10, npermut=10))  # reduced number of iterations
 #'   
 #' @keywords models
 #' 

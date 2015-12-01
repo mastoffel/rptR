@@ -15,10 +15,9 @@ rpt.binomGLMM.add_(data = NULL, y, groups, CI = 0.95, prior = NULL,
 \item{data}{\code{data.frame} containing response and groups variables.}
 
 \item{y}{If binary, name of response variable in the \code{data.frame}. For proportion data, 
-specify two variables: 
-The first is the variable for number of successes \emph{m} and the second
-variable is \emph{n-m}, where
-\emph{m} is the number of successes and \emph{n} is the number of trials.}
+specify two variables: The first is the variable for number of successes \emph{m} and the 
+second variable is \emph{n-m}, where \emph{m} is the number of successes and \emph{n} is 
+the number of trials. E.g. y = list(varname1, varname2)}
 
 \item{groups}{Name of group variable in the \code{data.frame}.}
 
@@ -66,21 +65,20 @@ Models are fitted using the \link{MCMCglmm} function in \pkg{MCMCglmm}.
 \examples{
  
 # repeatability estimations for egg dumping (binary data)
-     data(BroodParasitism)
-     EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
-                       select = c(HostYN, FemaleID))
-     (rpt.Host <- rpt.binomGLMM.add(data = EggDump, HostYN, FemaleID))
-     (rpt.BroodPar <- rpt.binomGLMM.add(data = BroodParasitism, cbpYN, FemaleID))
+data(BroodParasitism)
+EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
+                  select = c(HostYN, FemaleID))
+(rpt.Host <- rpt.binomGLMM.add(data = EggDump, HostYN, FemaleID))
+(rpt.BroodPar <- rpt.binomGLMM.add(data = BroodParasitism, cbpYN, FemaleID))
      
 # repeatability estimations for egg dumping (proportion data)
-     data(BroodParasitism)
-     ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
-                            select= c(HostClutches, OwnClutches, FemaleID))
-     ParasitismOR$parasitised <-  ParasitismOR$OwnClutches -  
-                                  ParasitismOR$HostClutches 
-     (rpt.Host <- rpt.binomGLMM.add(data = ParasitismOR, 
-                                    y = list(HostClutches, parasitised), 
-                                    groups = FemaleID))
+data(BroodParasitism)
+ParasitismOR <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, 
+                       select= c(HostClutches, OwnClutches, FemaleID))
+ParasitismOR$parasitised <- ParasitismOR$OwnClutches - ParasitismOR$HostClutches 
+(rpt.Host <- rpt.binomGLMM.add(data = ParasitismOR, 
+                               y = list(HostClutches, parasitised), 
+                               groups = FemaleID))
  
 }
 \author{

@@ -5,10 +5,9 @@
 #' 
 #' @param data \code{data.frame} containing response and groups variables.
 #' @param y If binary, name of response variable in the \code{data.frame}. For proportion data, 
-#'        specify two variables: 
-#'        The first is the variable for number of successes \emph{m} and the second
-#'        variable is \emph{n-m}, where
-#'        \emph{m} is the number of successes and \emph{n} is the number of trials.
+#'        specify two variables: The first is the variable for number of successes \emph{m} and the 
+#'        second variable is \emph{n-m}, where \emph{m} is the number of successes and \emph{n} is 
+#'        the number of trials. E.g. y = list(varname1, varname2)
 #' @param groups Name of group variable in the \code{data.frame}.
 #' @param link Link function, \code{log} and \code{sqrt} are allowed, defaults 
 #'        to \code{log}.  
@@ -83,11 +82,10 @@
 #' data(BroodParasitism)
 #' EggDump <- subset(BroodParasitism, OwnClutchesBothSeasons == 1, select = c(HostYN, FemaleID))
 #' (rpt.Host <- rpt.binomGLMM.multi(data = EggDump, HostYN, FemaleID, nboot=10, npermut=10))  
-#' # low number of nboot and npermut to speed up error checking
+#' # low number of nboot and npermut for speed reasons
 #' 
 #' (rpt.BroodPar <- rpt.binomGLMM.multi(data = BroodParasitism, cbpYN, FemaleID, 
 #'                                      nboot=10, npermut=10))
-#' # low number of nboot and npermut to speed up error checking
 #'      
 #' # repeatability estimations for egg dumping (proportion data)
 #' data(BroodParasitism)
@@ -99,21 +97,13 @@
 #'                              groups = FemaleID, 
 #'                              nboot=10, npermut=10))
 #'                              
-#' 
-#'       
-#'      
-#'      # reduced number of npermut iterations
-#'                                       
-#'      ParasitismOR <- subset(BroodParasitism,  
-#'                             select= c(cbpEggs, nEggs, FemaleID))
-#'      ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
-#'      # some rows have entries 0,0 and need to be removed
-#'      zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
-#'      (rpt.BroodPar <- rpt.binomGLMM.multi(c('cbpEggs', 'parasitised'), 
-#'                                             'FemaleID', 
-#'                                              data = ParasitismOR[-zz, ],
-#'                                              nboot=10, npermut=10))   
-#' 
+#' ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
+#' ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
+#' # some rows have entries 0,0 and need to be removed
+#' zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
+#' (rpt.BroodPar <- rpt.binomGLMM.multi( data = ParasitismOR[-zz, ],
+#'                                      y = list(cbpEggs, parasitised), groups = FemaleID,
+#'                                      nboot = 10, npermut = 10))
 #' 
 #' @keywords models
 #' 

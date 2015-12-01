@@ -78,25 +78,21 @@
 #' 
 #' @examples  
 #' 
-#'        # repeatability for female clutch size over two years.
-#'        data(BroodParasitism)
-#'        (rpt.Host <- rpt.poisGLMM.multi(data = BroodParasitism, 
-#'                                        OwnClutches, FemaleID, 
-#'                                        nboot=10, npermut=10))  
-#'        # reduced number of nboot and npermut iterations
+#' # repeatability for female clutch size over two years.
+#' data(BroodParasitism)
+#' (rpt.Host <- rpt.poisGLMM.multi(data = BroodParasitism, OwnClutches, FemaleID, 
+#'                                 nboot=10, npermut=10))  
+#' # reduced number of nboot and npermut iterations
 #'        
-#'        # repeatability for male fledgling success
-#'        data(Fledglings)
-#'        (rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings,
-#'                                          Fledge, MaleID, 
-#'                                          nboot=10, npermut=10))  
-#'        # reduced number of nboot and npermut iterations
+#' # repeatability for male fledgling success
+#' data(Fledglings)
+#' (rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings, Fledge, MaleID, nboot=10, npermut=10))  
+#' # reduced number of nboot and npermut iterations
 #'       
 #' @keywords models
 #' 
 #' @export
 #' 
-# @importFrom MASS glmmPQL @importFrom lme4 VarCorr
 #' 
 rpt.poisGLMM.multi <- function(data = NULL, y, groups, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
     npermut = 1000, parallel = FALSE, ncores = NULL) {

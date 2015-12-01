@@ -78,17 +78,18 @@ Models are fitted using the \link{MCMCglmm} function in
 \examples{
  
 # repeatability for female clutch size over two years.
-   data(BroodParasitism)
-   (rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
+data(BroodParasitism)
+(rpt.Host <- rpt.poisGLMM.add(data = BroodParasitism, OwnClutches, FemaleID))
     
 # repeatability for male fledgling success
-   data(Fledglings)
-   (rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID, ))
+data(Fledglings)
+(rpt.Fledge <- rpt.poisGLMM.add(data = Fledglings, Fledge, MaleID))
       
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) & 
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+        Martin A. Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Carrasco, J. L. (2010). \emph{A generalized concordance correlation coefficient based on the variance components generalized linear mixed models with application to overdispersed count data}. Biometrics 66: 897-904.
