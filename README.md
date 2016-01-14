@@ -4,6 +4,14 @@ rptR
 
 ![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
 
+
+`rptR` is under heavy construction and re-development at the moment. We thus advice against using
+the `GitHub` version at the moment.
+
+
+
+
+
 `rptR` provides a collection of functions for caluculating point estimates, interval estimates and significance tests of the repeatability (intra-class correlation coefficient) of measurements. The function `rpt` is a the core functions that calls more specialised functions as required. Specialised functions can also be called directly (see `?rpt` for details). All functions return lists of values. The function `?summary.rpt` produces summaries in a detailed format.
 
 -   the latest development version from github with
