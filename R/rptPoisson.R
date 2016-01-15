@@ -97,7 +97,7 @@
 #' md = data.frame(obsvals, indid, obsid, groid)
 #'
 #' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), data = md, nboot = 10,
-#'                      npermut = 10)
+#'                      npermut = 10, parallel = FALSE)
 #' 
 #' @export
 #' 
@@ -105,18 +105,14 @@
 rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
         parallel = FALSE, ncores = NULL) {
         
-        # obeservational level random effect
+        # observational level random effect
         obsid <- factor(1:nrow(data))
         formula <- update(formula,  ~ . + (1|obsid))
         
         mod <- lme4::glmer(formula, data = data, family = "poisson")
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
-        e1 <- environment()
-        
-#         mod     <-  glmmPQL(OwnClutches ~ 1,random=~1|FemaleID,  data = BroodParasitism, family=quasipoisson, verbose=FALSE) 
-#         VarComp <- nlme::VarCorr(mod)
-        
+
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
@@ -135,14 +131,16 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
                 # varComps shouldn´t contain obsind here
-                if (peYN & any(VarComps == 0) & nboot > 0) {
-                        assign("nboot", 0, envir = e1)
-                        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-                }
+                VarCompsDf <- as.data.frame(VarComps)
+                VarCompsGr <- VarCompsDf[which(VarCompsDf[["grp"]] %in% grname), ]
+                 if (peYN & any(VarCompsGr$vcov == 0) & nboot > 0) {
+                         assign("nboot", 0, envir = e1)
+                         warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+                 }
                 
                 estdv = log(1/exp(beta0)+1)
                 
-                R_link = var_a /(var_a + var_e + estdv)
+                R_link = var_a /(var_a + var_e +  estdv)
                 
                 EY <- exp(beta0 + (var_e + var_a)/2)
                 R_org <- EY * (exp(var_a) - 1)/(EY * (exp(var_e + var_a) - 1) + 1)
@@ -167,6 +165,7 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
+                parallel::clusterExport(cl, "R_pe")
                 R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
@@ -219,67 +218,55 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
         
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
-        permut <- function(nperm, formula, mod_red, dep_var, grname, i) {
+        permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- rpois(nrow(data), exp(log(fitted(mod_red)) + sample(resid(mod_red))))
+                y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                out <- R_pe(formula, data_perm, grname)[i]
+                out <- R_pe(formula, data_perm, grname)
+                out
         }
         # response variable
         dep_var <- as.character(formula)[2]
-        # one random effect, uses lm()
-        if (length(randterms) == 1) {
+
+        # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
+        P_permut <- data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
+                row.names = c("P_permut_org", "P_permut_link")) 
+        
+        if(parallel == TRUE) {
+                if (is.null(ncores)) {
+                        ncores <- parallel::detectCores()
+                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                }
+                # start cluster
+                cl <- parallel::makeCluster(ncores)
+                parallel::clusterExport(cl, "R_pe")
+                R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
+                        mod=mod, dep_var=dep_var, grname=grname, data = data)
+                parallel::stopCluster(cl)
                 
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                # glm or glmer ???
-                mod_red <- lme4::glmer(formula_red, data = data, family = poisson)
-                # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-                if (parallel == TRUE){
-                        if (is.null(ncores)) {
-                                ncores <- parallel::detectCores()
-                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                        }
-                        # start cluster
-                        cl <- parallel::makeCluster(ncores)
-                        R.permut <- c(R, parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname))
-                        parallel::stopCluster(cl)
-                        P.permut <- sum(R.permut >= R)/npermut
-                        
-                } else if (parallel == FALSE) {
-                        R.permut <- c(R, replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname), 
-                                simplify = TRUE))
-                        P.permut <- sum(R.permut >= R)/npermut
-                }
-        }
-        # multiple random effects, uses glmer()
-        if (length(randterms) > 1) {
-                R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-                P_permut <- rep(NA, length(grname))
-                for (i in 1:length(grname)) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                        mod_red <- lme4::glmer(formula_red, data = data, family = poisson)
-                        
-                        if(parallel == TRUE) {
-                                if (is.null(ncores)) {
-                                        ncores <- parallel::detectCores()
-                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                                }
-                                # start cluster
-                                cl <- parallel::makeCluster(ncores)
-                                R.permut[i, ] <- c(R[i], parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname, i))
-                                parallel::stopCluster(cl)
-                                P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
-                        } else if (parallel == FALSE) {
-                                R_permut[i, ] <- c(R[i], replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))
-                                P_permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
-                        }
-                }
+        } else if (parallel == FALSE) {
+                R_permut <- lapply(1:(npermut - 1), permut, formula, mod, dep_var, grname, data)
+                
         }
         
+        # adding empirical rpt 
+        R_permut <- c(list(R), R_permut)
+        # reshaping and calculating P_permut
+        R_permut_org <- lapply(R_permut, function(x) x["R_org",])
+        R_permut_link <- lapply(R_permut, function(x) x["R_link",])
+        R_permut_org <- do.call(rbind, R_permut_org)
+        R_permut_link <- do.call(rbind, R_permut_link)
+        
+        P_permut["P_permut_org", ] <- (apply(R_permut_org,2,function(x) sum(x >= x[1])))/npermut
+        P_permut["P_permut_link", ] <- (apply(R_permut_link,2,function(x) sum(x >= x[1])))/npermut
+        names(P_permut) <- names(R_permut_link)
+        P_permut
+        
+                
         ## likelihood-ratio-test
-        LRT.mod <- as.numeric(logLik(mod))
-        LRT.df <- 1
+        LRT_mod <- as.numeric(logLik(mod))
+        LRT_df <- 1
         if (length(randterms) == 1) {
                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
                 LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
@@ -289,36 +276,29 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
                 # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
                 # pchisq(LR,1,lower.tail=FALSE)/2)
         }
-        if (length(randterms) > 1) {
-                for (i in c("LRT.P", "LRT.D", "LRT.red")) assign(i, rep(NA, length(grname)))
-                for (i in 1:length(grname)) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                ")"))))
-                        LRT.red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, family = poisson)))
-                        LRT.D[i] <- as.numeric(-2 * (LRT.red[i] - LRT.mod))
-                        LRT.P[i] <- ifelse(LRT.D[i] <= 0, 1, pchisq(LRT.D[i], 1, lower.tail = FALSE)/2)
-                        # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
-                        # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                        # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
-                }
+        
+        
+     
+        for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
+        
+        for (i in 1:length(grname)) {
+                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                        ")"))))
+                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, family = poisson)))
+                LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
+                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
+                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
         }
-        
-        
-        # preparing results
-        # if more than one random term make matrix
-        if (nrow(matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)) > 1) {
-                P <- matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)
-                colnames(P) <- c("P.LRT", "P.permut")
-                rownames(P) <- grname
-                # else make vector in congruency with rpt.remlLMM
-        } else {
-                P = c(P.LRT = LRT.P, P.permut = P.permut)
-        }
-        
-        res <- list(call = match.call(), datatype = "Gaussian", method = "LMM.REML", CI = CI, 
-                R = R, se = se, CI.R = CI.R, P = P, P.permut = P.permut, R.boot = R.boot, R.permut = R.permut, 
-                LRT = list(LRT.mod = LRT.mod, LRT.red = LRT.red, LRT.D = LRT.D, LRT.df = LRT.df, 
-                        LRT.P = LRT.P), ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+  
+        P <- cbind(LRT_P, t(P_permut))
+     
+        res <- list(call = match.call(), datatype = "Poisson", CI = CI, 
+                R = R, se_org = se_org,se_link = se_link, CI_org = CI_org, CI_link = CI_link, P = P,
+                R_boot = R_boot, R_permut = R_permut, 
+                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
+                LRT_P = LRT_P), ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod)
         class(res) <- "rpt"
         return(res)
