@@ -239,6 +239,9 @@ rpt.poisGLMM.multi_ <- function(data = NULL, y, groups, link = c("log", "sqrt"),
         P.link <- NA
         P.org <- NA
     }
+    
+
+    
     # return of results
     if (mod.ests$omega < 1) 
         warning("omega < 1, therefore CI limits are unreliable")

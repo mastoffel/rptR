@@ -68,15 +68,6 @@
 #' # reduced number of nboot and npermut iterations
 #' 
 #' 
-#' nind = 100
-#' nrep = 10
-#' latmu = 0
-#' latbv = 0.3
-#' latrv = 0.2
-#' indid = factor(rep(1:nind, each=nrep))
-#' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-#' latvals = latmu + latim + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals1 = exp(latvals)
 #' 
 #' nind = 50
 #' nrep = 50
@@ -96,27 +87,31 @@
 #' beta0 = log(mean(obsvals))
 #' md = data.frame(obsvals, indid, obsid, groid)
 #'
-#' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), data = md, nboot = 10,
-#'                      npermut = 10, parallel = FALSE)
-#' 
+#' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+#'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
+#' R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
+#'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
 #' @export
 #' 
 
-rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
-        parallel = FALSE, ncores = NULL) {
+rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
+        npermut = 1000, parallel = FALSE, ncores = NULL) {
         
+        # link
+        if (length(link) > 1) link <- link[1]
+        if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
         # observational level random effect
         obsid <- factor(1:nrow(data))
         formula <- update(formula,  ~ . + (1|obsid))
         
-        mod <- lme4::glmer(formula, data = data, family = "poisson")
+        mod <- lme4::glmer(formula, data = data, family = poisson(link = link))
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
 
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = poisson)
+                mod <- lme4::glmer(formula = formula, data = data, family = poisson(link = link))
                 
                 VarComps <- lme4::VarCorr(mod)
                 # find groups
@@ -133,10 +128,15 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
                 # varComps shouldn´t contain obsind here
                 VarCompsDf <- as.data.frame(VarComps)
                 VarCompsGr <- VarCompsDf[which(VarCompsDf[["grp"]] %in% grname), ]
-                 if (peYN & any(VarCompsGr$vcov == 0) & nboot > 0) {
+                
+                 if (peYN & any(VarCompsGr$vcov == 0)) {
+                         if (nboot > 0){
                          assign("nboot", 0, envir = e1)
-                         warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+                         warning("(One of) the point estimate(s) for the repeatability was exactly 
+                                 zero; parametric bootstrapping has been skipped.")
+                         }
                  }
+        
                 
                 estdv = log(1/exp(beta0)+1)
                 
@@ -175,32 +175,33 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
                         grname = grname))
         }
         if (nboot == 0) {
-                R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+                R_boot <- NA
         }
         
         # transform bootstrapping repeatabilities into vectors
-        boot_vecs_org <- list()
-        boot_vecs_link <- list()
+        boot_org <- list()
+        boot_link <- list()
         for (i in 1:length(grname)) {
-                boot_vecs_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
-                boot_vecs_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
+                boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
+                boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
         }
-        names(boot_vecs_org) <- grname
-        names(boot_vecs_link) <- grname
+        names(boot_org) <- grname
+        names(boot_link) <- grname
         
         calc_CI <- function(x) {
                 out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
         }
         
         # CI into data.frame and transpose to have grname in rows
-        CI_org <- as.data.frame(t(as.data.frame(lapply(boot_vecs_org, calc_CI))))
-        CI_link <- as.data.frame(t(as.data.frame(lapply(boot_vecs_link, calc_CI))))
+        CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
+        CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
         
         # se
-        se_org <- as.data.frame(t(as.data.frame(lapply(boot_vecs_org, sd))))
-        se_link <- as.data.frame(t(as.data.frame(lapply(boot_vecs_link, sd))))
-        names(se_org) <- "se"
-        names(se_link) <- "link"
+        se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
+        se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
+        names(se_org) <- "se_org"
+        names(se_link) <- "se_link"
         
 
         # significance test by permutation of residuals
@@ -252,39 +253,51 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
         
         # adding empirical rpt 
         R_permut <- c(list(R), R_permut)
-        # reshaping and calculating P_permut
-        R_permut_org <- lapply(R_permut, function(x) x["R_org",])
-        R_permut_link <- lapply(R_permut, function(x) x["R_link",])
-        R_permut_org <- do.call(rbind, R_permut_org)
-        R_permut_link <- do.call(rbind, R_permut_link)
         
-        P_permut["P_permut_org", ] <- (apply(R_permut_org,2,function(x) sum(x >= x[1])))/npermut
-        P_permut["P_permut_link", ] <- (apply(R_permut_link,2,function(x) sum(x >= x[1])))/npermut
-        names(P_permut) <- names(R_permut_link)
+        # equal to boot
+        permut_org <- list()
+        permut_link <- list()
+        for (i in 1:length(grname)) {
+                permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
+                permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+        }
+        names(permut_org) <- grname
+        names(permut_link) <- grname
+        
+        
+#         # reshaping and calculating P_permut
+#         R_permut_org <- lapply(R_permut, function(x) x["R_org",])
+#         R_permut_link <- lapply(R_permut, function(x) x["R_link",])
+#         R_permut_org <- do.call(rbind, R_permut_org)
+#         R_permut_link <- do.call(rbind, R_permut_link)
+        
+        P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
+        P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
+        names(P_permut) <- names(permut_link)
         P_permut
         
                 
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(logLik(mod))
         LRT_df <- 1
-        if (length(randterms) == 1) {
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
-                LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
-                LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lm(update(formula, eval(paste('. ~ . ', paste('- (',
-                # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
-                # pchisq(LR,1,lower.tail=FALSE)/2)
-        }
+#         if (length(randterms) == 1) {
+#                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+#                 LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
+#                 LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
+#                 LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
+#                 # LR <- as.numeric(-2*(logLik(lm(update(formula, eval(paste('. ~ . ', paste('- (',
+#                 # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
+#                 # pchisq(LR,1,lower.tail=FALSE)/2)
+#         }
         
         
-     
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))
-                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, family = poisson)))
+                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, 
+                        family = poisson(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
                 # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
@@ -293,12 +306,31 @@ rptPoisson <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut =
         }
   
         P <- cbind(LRT_P, t(P_permut))
+        
+        #Function to calculate a point estimate of overdispersion from a mixed model object
+        # from Harrison (2014): Using observation-level random effects to
+        # model overdispersion in count data in ecology and evolution, PeerJ
+        #     od.point<-function(modelobject){
+        #             x<-sum(resid(modelobject,type="pearson")^2)
+        #             rdf<-summary(modelobject)$AICtab[5]
+        #             return(x/rdf)
+        #     }
      
-        res <- list(call = match.call(), datatype = "Poisson", CI = CI, 
-                R = R, se_org = se_org,se_link = se_link, CI_org = CI_org, CI_link = CI_link, P = P,
-                R_boot = R_boot, R_permut = R_permut, 
+        res <- list(call = match.call(), 
+                datatype = "Poisson", 
+                link = link,
+                CI = CI, 
+                R = R, 
+                se = cbind(se_org,se_link), 
+                CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
+                P = P,
+                R_boot_link = boot_link, 
+                R_boot_org = boot_org,
+                R_permut_link = permut_link, 
+                R_permut_org = permut_org,
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
-                LRT_P = LRT_P), ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+                LRT_P = LRT_P), 
+                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod)
         class(res) <- "rpt"
         return(res)

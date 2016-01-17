@@ -30,32 +30,6 @@
 #' 
 print.rpt <- function(x, ...) {
     # rpt.corr, rpt.mcmcLMM
-    if (x$datatype == "Gaussian" & length(x$P) == 1 & length(x$R) == 1) {
-        cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-            "R  = ", round(x$R, 3), "\n", "SE = ", round(x$se, 3), "\n", "CI = [", round(x$CI.R[1], 
-                3), ", ", round(x$CI.R[2], 3), "]", "\n", "P  = ", signif(x$P, 3), "\n\n", 
-            sep = "")
-    }
-        
-        # rpt.remlLMM, rpt.aov, rpt.remlLMM.adj with one group factor
-        if (x$datatype == "Gaussian" & length(x$P) > 1 & length(x$R) == 1) {
-                # if not rpt.remlLMM.adj 
-                if(!(is.null(attr(x$P, "names")))) {
-                    cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-                    "R  = ", round(x$R, 3), "\n", "SE = ", round(x$se, 3), "\n", "CI = [", round(x$CI.R[1], 
-                    3), ", ", round(x$CI.R[2], 3), "]", "\n", "P  = ", signif(x$P[1], 3), 
-                    " [", attr(x$P, "names")[1], "]", "\n", "     ", signif(x$P[2], 3), " [", 
-                    attr(x$P, "names")[2], "]", "\n\n", sep = "")
-                } else {
-                #  rpt.remlLMM.adj with one group factor
-                cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-                    "R  = ", round(x$R, 3), "\n", "SE = ", round(x$se, 3), "\n", "CI = [", round(x$CI.R[1], 
-                    3), ", ", round(x$CI.R[2], 3), "]", "\n", "P  = ", signif(x$P[1], 3), 
-                    " [", attr(x$P, "dimnames")[[2]][1], "]", "\n", "     ", signif(x$P[2], 3), " [", 
-                    attr(x$P, "dimnames")[[2]][2], "]", "\n\n", sep = "")     
-                }
-        }
-
 
     # rpt.remlLMM.adj   
     if (x$datatype == "Gaussian" & length(x$P) > 1 & length(x$R) > 1) {
@@ -68,26 +42,25 @@ print.rpt <- function(x, ...) {
                   2], 3), " [", attr(x$P, "dimnames")[[2]][2], "]", "\n\n", sep = "")
         }
     }
-    # binomGLMM.multi, poisGLMM.multi
-    if (x$datatype != "Gaussian" & x$method == "PQL") {
-        cat("\n", "Repeatability calculation using the ", x$method, " method and ", x$link, 
-            "link", "\n\n", "Estimated overdispersion (omega) = ", x$omega, "\n\n", "Link scale repeatabilities:", 
-            "\n", "R  = ", round(x$R.link, 3), "\n", "SE = ", round(x$se.link, 3), "\n", 
-            "CI = [", round(x$CI.link[1], 3), ", ", round(x$CI.link[2], 3), "]", "\n", 
-            "P  = ", signif(x$P.link, 3), "\n\n", "Original scale repeatabilities:", 
-            "\n", "R  = ", round(x$R.org, 3), "\n", "SE = ", round(x$se.org, 3), "\n", 
-            "CI = [", round(x$CI.org[1], 3), ", ", round(x$CI.org[2], 3), "]", "\n", 
-            "P  = ", signif(x$P.org, 3), "\n\n", sep = "")
+        
+    if (x$datatype == "Poisson") {
+            cat("\n", "Repeatability calculation using the glmm method and", x$link, 
+                    "link",  "\n\n",  "Estimated overdispersion (omega) = ", "\n\n") 
+            # grnames <- names(x$R)
+            for (i in 1:ncol(x$R)) {
+                    grname <- names(x$R)[i]
+                    cat("Repeatability for ", grname, "\n",
+                         "--------------------------------", "\n",
+                         "Link scale repeatabilities:", 
+                         "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se[grname, "se_link"], 3),
+                          "\n", "CI = [", round(x$CI_emp$CI_link[grname, 1], 3), ", ",  round(x$CI_emp$CI_link[grname, 2], 3), "]", "\n", 
+                          "P  = ", signif(x$P[grname,  "P_permut_link"], 3), "\n\n",
+                        "Original scale repeatabilities:",
+                        "\n", "R  = ", round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se[grname, "se_org"], 3), "\n", 
+                        "CI = [", round(x$CI_emp$CI_org[grname, 1], 3), ", ", round(x$CI_emp$CI_org[grname, 2], 3), "]", "\n", 
+                        "P  = ", signif(x$P[grname,  "P_permut_org"], 3), "\n\n", sep = "")
+            }
     }
-    # binomGLMM.add, poisGLMM.add
-    if (x$datatype != "Gaussian" & x$method == "MCMC") {
-        cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-            "Link scale repeatabilities:", "\n", "R  = ", round(x$R.link, 3), "\n", "SE = ", 
-            round(x$se.link, 3), "\n", "CI = [", round(x$CI.link[1], 3), ", ", round(x$CI.link[2], 
-                3), "]", "\n", "P  = ", signif(x$P.link, 3), "\n\n", "Original scale repeatabilities:", 
-            "\n", "R  = ", round(x$R.org, 3), "\n", "SE = ", round(x$se.org, 3), "\n", 
-            "CI = [", round(x$CI.org[1], 3), ", ", round(x$CI.org[2], 3), "]", "\n", 
-            "P  = ", signif(x$P.org, 3), "\n\n", sep = "")
-    }
+
 }
  
