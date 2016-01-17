@@ -137,14 +137,17 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                          }
                  }
         
+                if (link == "sqrt") {
+                        R_link <- var_a/(var_a + var_e * 0.25)
+                        R_org <- NA
+                }
                 
-                estdv = log(1/exp(beta0)+1)
-                
-                R_link = var_a /(var_a + var_e +  estdv)
-                
-                EY <- exp(beta0 + (var_e + var_a)/2)
-                R_org <- EY * (exp(var_a) - 1)/(EY * (exp(var_e + var_a) - 1) + 1)
-                
+                if (link = "log") {
+                        estdv = log(1/exp(beta0)+1)
+                        R_link = var_a /(var_a + var_e +  estdv)
+                        EY <- exp(beta0 + (var_e + var_a)/2)
+                        R_org <- EY * (exp(var_a) - 1)/(EY * (exp(var_e + var_a) - 1) + 1)
+                }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
                 return(R)
