@@ -43,9 +43,9 @@ print.rpt <- function(x, ...) {
         }
     }
         
-    if (x$datatype == "Poisson") {
+    if (x$datatype == "Poisson" | x$datatype == "Binary") {
             cat("\n", "Repeatability calculation using the glmm method and", x$link, 
-                    "link",  "\n\n",  "Estimated overdispersion (omega) = ", "\n\n") 
+                    "link",  "\n\n",  "Estimated overdispersion = ", x$overdisp, "\n\n") 
             # grnames <- names(x$R)
             for (i in 1:ncol(x$R)) {
                     grname <- names(x$R)[i]
@@ -61,6 +61,7 @@ print.rpt <- function(x, ...) {
                         "P  = ", signif(x$P[grname,  "P_permut_org"], 3), "\n\n", sep = "")
             }
     }
+        
 
 }
  

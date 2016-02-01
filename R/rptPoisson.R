@@ -1,39 +1,46 @@
-#' LMM-based Repeatability Using REML
+#' GLMM-based Repeatability Using REML
 #' 
-#' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
-#' 
-#' @param formula Formula as used e.g. by \link{glmer}. The grouping factor of
+#' Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
+#' @param formula Formula as used e.g. by \link{glmer}. The grouping factor(s) of
 #'        interest needs to be included as a random effect, e.g. '(1|groups)'.
 #'        Covariates and additional random effects can be included to estimate adjusted repeatabilities.
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula}.
-#' @param data A dataframe that contains the variables included in the formula argument.
+#' @param data A dataframe that contains the variables included in the \code{formula}
+#'        and \code{grname} arguments.
+#' @param link Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation.
 #'        Defaults to 1000. Larger numbers of permutations give a better
 #'        asymtotic CI, but may be very time-consuming.
 #' @param npermut Number of permutations used when calculating 
-#'        asymptotic \emph{P} values (defaults to 1000). Currently not in use!
+#'        asymptotic \emph{P} values (defaults to 1000). 
 #' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores but one are used.
 #' 
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
-#' \item{datatype}{Response distribution (here: 'Gaussian').}
+#' \item{call}{function call}
+#' \item{datatype}{Response distribution (here: 'Poisson').}
 #' \item{method}{Method used to calculate repeatability (here: 'REML').}
 #' \item{CI}{Width of the confidence interval.}
-#' \item{R}{Point estimate for repeatability.}
-#' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
-#' \item{CI.R}{Confidence interval for  repeatability.}
-#' \item{P}{Approximate \emph{P} value from a significance test based on likelihood-ratio.}
-#' \item{P.permut}{Approximate \emph{P} value from a significance test based on permutation of residuals.}
-#' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
-#' \item{R.permut}{Permutation samples for \emph{R}.}
-#' \item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
+#' \item{R}{Point estimates for repeatabilities on the link and original scale.}
+#' \item{se}{Approximate standard errors (\emph{se}) for repeatabilitieson the link and original scale.
+#'            Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+#' \item{CI_emp}{Confidence intervals for repeatabilities on the link and original scale.}
+#' \item{P}{Approximate \emph{P} data frame with p-values from a significance test based on likelihood-ratio
+#' and significance test based on permutation of residuals for both the original and link scale.}
+#' \item{R_boot_link}{Parametric bootstrap samples for \emph{R} on the link scale.}
+#' \item{R_boot_org}{Parametric bootstrap samples for \emph{R} on the original scale.}
+#' \item{R_permut_link}{Permutation samples for \emph{R} on the link scale.}
+#' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale.}
+#' \item{LRT}{List of Likelihood-ratios for the model(s) and the reduced model(s), 
+#' and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
+#' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
 #'
 #' @references 
@@ -52,25 +59,20 @@
 #' @seealso \link{rpt}
 #' 
 #' @examples  
-#' #' # repeatability for female clutch size over two years.
+#' # repeatability for female clutch size over two years.
 #' data(BroodParasitism)
-#' (rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID) + (1|Season), grname =c('FemaleID', "Season"), 
-#'                         data = BroodParasitism, nboot=10, npermut=10))
-#'                         
+#' (rpt.Host <- rptPoisson(formula = OwnClutches~(1|FemaleID), grname = "FemaleID", data = BroodParasitism,
+#'                                 nboot=10, npermut=10))  
 #' # reduced number of nboot and npermut iterations
-#' 
-#'        rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
-#'  data=BodySize, nboot=10, npermut=10))
-#'  
+#'        
 #' # repeatability for male fledgling success
 #' data(Fledglings)
-#' (rpt.Fledge <- rpt.poisGLMM.multi(data = Fledglings, Fledge, MaleID, nboot=10, npermut=10))  
+#' (rpt.Fledge <- rptPoisson(formula = Fledge~(1|MaleID), grname = "MaleID", data = Fledglings, nboot=10, npermut=10))  
 #' # reduced number of nboot and npermut iterations
 #' 
 #' 
-#' 
-#' nind = 50
-#' nrep = 50
+#' nind = 200
+#' nrep = 5
 #' latmu = 0
 #' latbv = 0.3
 #' latgv = 0.1
@@ -97,17 +99,31 @@
 rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
         npermut = 1000, parallel = FALSE, ncores = NULL) {
         
+        # to do: missing values
+        # no bootstrapping case
+        
         # link
         if (length(link) > 1) link <- link[1]
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
         # observational level random effect
         obsid <- factor(1:nrow(data))
+        # check if obsid is non-zero
         formula <- update(formula,  ~ . + (1|obsid))
-        
         mod <- lme4::glmer(formula, data = data, family = poisson(link = link))
+        VarComps <- lme4::VarCorr(mod)
+        obsind_id <- which(as.data.frame(VarComps)[["grp"]] == "obsid")
+        overdisp <- as.numeric(lme4::VarCorr(mod)$obsid)^2
+        
+#         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
+#                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
+#                 mod <-  lme4::glmer(formula, data = data, family = poisson(link = link))
+#                 VarComps <- lme4::VarCorr(mod)
+#                 overdisp <- 0
+#         }
+        
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
-
+        e1 <- environment()
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
@@ -138,11 +154,11 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                  }
         
                 if (link == "sqrt") {
-                        R_link <- var_a/(var_a + var_e * 0.25)
+                        R_link <- var_a/(var_a + var_e + 0.25)
                         R_org <- NA
                 }
                 
-                if (link = "log") {
+                if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
                         R_link = var_a /(var_a + var_e +  estdv)
                         EY <- exp(beta0 + (var_e + var_a)/2)
@@ -156,7 +172,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         R <- R_pe(formula, data, grname, peYN = TRUE)
         
         # confidence interval estimation by parametric bootstrapping
-        Ysim <- as.matrix(simulate(mod, nsim = nboot))
+        if (nboot > 0)  Ysim <- as.matrix(simulate(mod, nsim = nboot))
+       
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, names(model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
@@ -222,14 +239,29 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
-        permut <- function(nperm, formula, mod, dep_var, grname, data) {
-                # for binom it will be logit 
-                y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
-                data_perm <- data
-                data_perm[dep_var] <- y_perm
-                out <- R_pe(formula, data_perm, grname)
-                out
+        
+        if (link == "sqrt") {
+                permut <- function(nperm, formula, mod, dep_var, grname, data) {
+                        # for binom it will be logit 
+                        #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
+                        y_perm <- rpois(nrow(data), (sqrt(fitted(mod)) + sample(resid(mod)))^2)
+                        data_perm <- data
+                        data_perm[dep_var] <- y_perm
+                        out <- R_pe(formula, data_perm, grname)
+                        out
+                }
+        } else if (link == "log") {
+                permut <- function(nperm, formula, mod, dep_var, grname, data) {
+                        # for binom it will be logit 
+                       #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
+                        y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
+                        data_perm <- data
+                        data_perm[dep_var] <- y_perm
+                        out <- R_pe(formula, data_perm, grname)
+                        out
+                }
         }
+        
         # response variable
         dep_var <- as.character(formula)[2]
 
@@ -277,7 +309,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
         P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
         names(P_permut) <- names(permut_link)
-        P_permut
         
                 
         ## likelihood-ratio-test
@@ -334,7 +365,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                 LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod)
+                nobs = nrow(data), overdisp = overdisp, mod = mod)
         class(res) <- "rpt"
         return(res)
 } 

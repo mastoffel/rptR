@@ -61,39 +61,24 @@
 #' 
 #' @examples  
 #' # repeatability estimations for egg dumping (binary data)
+#' 
 #' data(BroodParasitism)
-#' (rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), data = BroodParasitism))
 #' 
-#' 
-#' 
-#' 
-#' nind = 80
-#' nrep = 30 # a bit higher
-#' latmu = 0
-#' latbv = 0.3
-#' latgv = 0.1
-#' latrv = 0.2
-#' indid = factor(rep(1:nind, each=nrep))
-#' groid = factor(rep(1:nrep, nind))
-#' obsid = factor(rep(1:I(nind*nrep)))
-#' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-#' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-#' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals = VGAM::logit(latvals, inverse = TRUE)
-#' obsvals = rbinom(nind*nrep, 1, expvals)
-#' beta0 = latmu
-#' beta0 = VGAM::logit(mean(obsvals))
-#' md = data.frame(obsvals, indid, obsid, groid)
-#'
-#' R_est <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
-#' R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
-#'                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-#'                     
+#' ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
+#' ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
+#' # some rows have entries 0,0 and need to be removed
+#' zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
+#' (rpt.BroodPar <- rpt.binomGLMM.multi( data = ParasitismOR[-zz, ],
+#'                                      y = list(cbpEggs, parasitised), groups = FemaleID,
+#'                                      nboot = 10, npermut = 10))  
+#'                                      
+#'  rpt.BroodPar <- rptProportion(formula = list(cbpEggs, parasitised) ~ (1|FemaleID), 
+#'                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
+#'                                npermut = 10)                 
 #' @export
 #' 
 
-rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
+rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 1000, parallel = FALSE, ncores = NULL) {
         
         # to do: missing values
@@ -111,13 +96,13 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         obsind_id <- which(as.data.frame(VarComps)[["grp"]] == "obsid")
         overdisp <- as.numeric(lme4::VarCorr(mod)$obsid)^2
         
-#         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
-#                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
-#                 mod <-  lme4::glmer(formula, data = data, family = binomial(link = link))
-#                 VarComps <- lme4::VarCorr(mod)
-#                 overdisp <- 0
-#         }
-   
+        #         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
+        #                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
+        #                 mod <-  lme4::glmer(formula, data = data, family = binomial(link = link))
+        #                 VarComps <- lme4::VarCorr(mod)
+        #                 overdisp <- 0
+        #         }
+        
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
@@ -148,7 +133,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                                 warning("(One of) the point estimate(s) for the repeatability was exactly 
                                         zero; parametric bootstrapping has been skipped.")
                         }
-                }
+                        }
                 
                 if (link == "logit") {
                         R_link <- var_a/(var_a + var_e + (pi^2)/3)
@@ -159,12 +144,12 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 if (link == "probit") {
                         R_link <- var_a/(var_a + var_e + 1)
                         R_org <- NA
-                
+                        
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
                 return(R)
-        }
+                }
         
         R <- R_pe(formula, data, grname, peYN = TRUE)
         
@@ -203,29 +188,29 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         boot_link <- list()
         if (length(R_boot) == 1) {
                 if (is.na(R_boot)) {
-                for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
+                        for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
                 }
         } else {
-        for (i in 1:length(grname)) {
-                boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
-                boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
-        }
-        names(boot_org) <- grname
-        names(boot_link) <- grname
-        
-        calc_CI <- function(x) {
-                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-        }
-        
-        # CI into data.frame and transpose to have grname in rows
-        CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
-        CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
-        
-        # se
-        se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
-        se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
-        names(se_org) <- "se_org"
-        names(se_link) <- "se_link"
+                for (i in 1:length(grname)) {
+                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
+                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
+                }
+                names(boot_org) <- grname
+                names(boot_link) <- grname
+                
+                calc_CI <- function(x) {
+                        out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                }
+                
+                # CI into data.frame and transpose to have grname in rows
+                CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
+                CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
+                
+                # se
+                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
+                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
+                names(se_org) <- "se_org"
+                names(se_link) <- "se_link"
         }
         
         # significance test by permutation of residuals
