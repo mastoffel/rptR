@@ -31,59 +31,23 @@
 #' 
 
 summary.rpt <- function(object, ...) {
-        #rpt.corr and  rpt.remlLMM and rpt.aov, rpt.remlLMM.adj with one groups
-        if(object$datatype =="Gaussian" & ((object$method == "corr") | (object$method == "LMM.REML")) & length(object$R)==1) {
-                # bootstrap and permutation table 
-                CI.perm  <- quantile(object$R.permut, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)
-                
-                # unlist for outputs of rpt.remlLMM.adj as saved as list instead of vector
-                object$LRT <- unlist(object$LRT)
-                object$rpt    <- structure(data.frame(object$R, object$se ,unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
-                                      names = c("R", "SE", attr(object$P, "names")[1], 
-                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
-                                      row.names = "rpt")
-                bootperm <- structure(data.frame(c(length(object$R.boot), length(object$R.permut)),
-                                               c(mean(object$R.boot), mean(object$R.permut)),
-                                               c(median(object$R.boot), median(object$R.permut)),
-                                               c(unname(object$CI.R[1]), unname(CI.perm[1])),
-                                               c(unname(object$CI.R[2]), unname(CI.perm[2]))),
-                                       names = c("N", "Mean", "Median", 
-                                              attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
-                                    row.names = c("boot", "permut"))
-                object$boot   <-  bootperm[1, ]
-                object$permut <-  bootperm[2, ]
-                class(object) <- "summary.rpt"
-                return(object) 		
-        } 
+
+        # helper functions for 
+        CI <- R_est$CI
+        calc_CI <- function(x) {
+                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                out
+        }
         
-        if(object$datatype=="Gaussian" & object$method == "ANOVA") {
-                # anova repeatability and permutation table 
-                CI.perm  <- quantile(object$R.permut, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)
-                object$rpt    <- structure(data.frame(object$R, object$se, unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
-                                      names = c("R", "SE", attr(object$P, "names")[1], 
-                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]))
-                object$permut <- structure(data.frame(length(object$R.permut), mean(object$R.permut),
-                                                 median(object$R.permut), unname(object$P[2]),
-                                                 unname(CI.perm[1]), unname(CI.perm[2])),
-                                      names = c("N", "Mean", "Median",
-                                                attr(object$P, "names")[2], 
-                                                attr(CI.perm, "names")[1],
-                                                attr(CI.perm, "names")[2]))
-                object$anovatab <- structure(as.data.frame(object$mod), row.names = c(as.character(object$call)[3], "Residuals"))
-                class(object) <- "summary.rpt"
-                return(object)         	
-        } 
+        extr_comps <- function(x) {
+                CI <- calc_CI(x)
+                out <- data.frame("N" = length(x), "Mean" = mean(x), "Median" = median(x),
+                        calc_CI(x)[[1]], calc_CI(x)[[2]])
+                names(out)[4:5] <- names(calc_CI(x))
+                out
+        }
         
-        if(object$datatype=="Gaussian" & object$method == "LMM.MCMC") { 
-                # Rpt table
-                object$rpt    <- structure(data.frame(object$R, object$se, unname(object$P[1]), object$CI.R[1], object$CI.R[2]), 
-                                      names = c("R", "SE", "P", 
-                                                attr(object$CI.R, "names")[1], attr(object$CI.R, "names")[2]))
-                class(object) <- "summary.rpt"
-                return(object)  
-        } 
-        
-        if(object$datatype=="Gaussian" & length(object$P)>1 & length(object$R)>1) {
+        if(object$datatype=="Gaussian") {
                 # warning("Not yet implemented")
 #                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
         for(i in 1:length(object$R)) {
@@ -107,52 +71,29 @@ summary.rpt <- function(object, ...) {
                 return(object)
         }
         
-     
-        if(object$datatype!="Gaussian" & object$method=="PQL") {
-                # CI for permutation and bootstrap
-                CI.perm       <- as.data.frame(rbind(quantile(object$R.permut$R.link, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE),
-                                         quantile(object$R.permut$R.org, c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE)))
-                CI.boot       <- as.data.frame(rbind(object$CI.link, object$CI.org))
-                # Rpt table with link and original scale
-                object$rpt    <- structure(data.frame(c(object$R.link,  object$R.org), 
-                                                 c(object$se.link, object$se.org),
-                                                 c(object$P.link, object$P.org),
-                                                 c(object$CI.link[1], object$CI.org[1]),
-                                                 c(object$CI.link[2], object$CI.org[2])),
-                                      names = c("R", "SE", "P", 
-                                                attr(CI.perm, "names")[1], attr(CI.perm, "names")[2]),
-                                      row.names = c("link", "original"))
-                # CI for bootstrap and permutation
-                   
-                # bootstrap table
-                object$boot <- structure(data.frame(c(length(object$R.boot$R.link), length(object$R.boot$R.org)),
-                                             c(mean(object$R.boot$R.link), mean(object$R.boot$R.org)), 
-                                             c(median(object$R.boot$R.link), median(object$R.boot$R.org)),
-                                             CI.boot[1], CI.boot[2]),
-                                             row.names = c("link", "original"),
-                                             names = c("N", "Mean", "Median", names(CI.boot)[1], names(CI.boot)[2]))
-                # permutation table
-                object$permut  <- structure(data.frame(c(length(object$R.permut$R.link), length(object$R.permut$R.org)),
-                                                      c(mean(object$R.permut$R.link), mean(object$R.permut$R.org)), 
-                                                      c(median(object$R.permut$R.link), median(object$R.permut$R.org)),
-                                                      CI.perm[1], CI.perm[2]),
-                                           row.names = c("link", "original"),
-                                           names = c("N", "Mean", "Median", names(CI.perm)[1], names(CI.perm)[2]))
-                class(object) <- "summary.rpt"
-                return(object) 
-        }
         
-        if(object$datatype!="Gaussian" & object$method=="MCMC") { #object$datatype!="Gaussian" & 
-                object$rpt    <- structure(data.frame(c(object$R.link,  object$R.org), 
-                                                 c(object$se.link, object$se.org),
-                                                 c(object$P.link, object$P.org),
-                                                 c(object$CI.link[1], object$CI.org[1]),
-                                                 c(object$CI.link[2], object$CI.org[2])),
-                                      names = c("R", "SE", "P", 
-                                                attr(object$CI.link, "names")[1], attr(object$CI.link, "names")[2]),
-                                      row.names = c("link", "original"))
+        
+        if(object$datatype=="Poisson" | object$datatype=="Binary") {
+                # warning("Not yet implemented")
+                #                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
+                boot <- list(object$R_boot_org, object$R_boot_link)
+                perm <- list(object$R_permut_org, object$R_permut_link)
+                for(i in 1:ncol(object$R)) {
+                        object$rpt[[i]] <- structure(data.frame(R = object$R[[i]], as.data.frame(t(object$se))[[i]], 
+                                          do.call(rbind, lapply(object$CI_emp, function(x) x[i, ]))),
+                                           names = c("R", "SE", names(object$CI_emp[[i]])),
+                                          row.names = c("Org", "Link"))
+                        object$boot[[i]] <- structure(do.call(rbind, 
+                                            lapply(boot, function(x) extr_comps(x[[i]]))),
+                                            row.names = c("Org", "Link"))
+                        object$permut[[i]] <- structure(cbind(object$P[i, c("P_permut_org", "P_permut_link")],
+                                              do.call(rbind, lapply(perm, function(x) extr_comps(x[[i]])))),
+                                              row.names = c("Org", "Link"))
+                        names(object$permut[[i]])[1] <- "P_val"
+                        
+                }
                 class(object) <- "summary.rpt"
-                return(object) 
+                return(object)
         }
         	
 }

@@ -75,21 +75,29 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut 
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
+        
+        # check if all variance components are 0
+        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+                nboot <- 0
+                npermut <- 0
+                warning("all variance components are 0, bootstrapping and permutation skipped")
+        }
+        
         # point estimates of R
         R.pe <- function(formula, data, grname, peYN = FALSE) {
                 mod.fnc <- lme4::glmer(formula, data)
                 varComps <- lme4::VarCorr(mod.fnc)
-                if (peYN & any(varComps == 0) & nboot > 0) {
-                        assign("nboot", 0, envir = e1)
-                        warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-                }
+#                 if (peYN & any(varComps == 0) & nboot > 0) {
+#                         assign("nboot", 0, envir = e1)
+#                         warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
+#                 }
                 var.a <- as.numeric(varComps[grname])
                 var.p <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
                 # var.e <- as.numeric(attr(varComps, 'sc')^2)
                 R <- var.a/var.p
                 return(R)
         }
-        R <- R.pe(formula, data, grname, peYN = TRUE)
+        R <- R.pe(formula, data, grname, peYN = FALSE)
         names(R) <- grname
         
         # confidence interval estimation by parametric bootstrapping

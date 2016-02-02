@@ -65,7 +65,7 @@ Calculates repeatability from a general linear mixed-effects models fitted by RE
  
 # repeatability for female clutch size over two years.
 data(BroodParasitism)
-(rpt.Host <- rptPoisson(formula = OwnClutches~(1|FemaleID), grname = "FemaleID", data = BroodParasitism,
+(rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", data = BroodParasitism, link = "log",
                                 nboot=10, npermut=10))  
 # reduced number of nboot and npermut iterations
        
@@ -75,11 +75,11 @@ data(Fledglings)
 # reduced number of nboot and npermut iterations
 
 
-nind = 200
-nrep = 5
+nind = 40
+nrep = 10
 latmu = 0
 latbv = 0.3
-latgv = 0.1
+latgv = 0.3
 latrv = 0.2
 indid = factor(rep(1:nind, each=nrep))
 groid = factor(rep(1:nrep, nind))

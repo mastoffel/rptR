@@ -61,7 +61,7 @@
 #' @examples  
 #' # repeatability for female clutch size over two years.
 #' data(BroodParasitism)
-#' (rpt.Host <- rptPoisson(formula = OwnClutches~(1|FemaleID), grname = "FemaleID", data = BroodParasitism,
+#' (rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", data = BroodParasitism, link = "log",
 #'                                 nboot=10, npermut=10))  
 #' # reduced number of nboot and npermut iterations
 #'        
@@ -71,11 +71,11 @@
 #' # reduced number of nboot and npermut iterations
 #' 
 #' 
-#' nind = 200
-#' nrep = 5
+#' nind = 40
+#' nrep = 10
 #' latmu = 0
 #' latbv = 0.3
-#' latgv = 0.1
+#' latgv = 0.3
 #' latrv = 0.2
 #' indid = factor(rep(1:nind, each=nrep))
 #' groid = factor(rep(1:nrep, nind))
@@ -107,20 +107,21 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
         # observational level random effect
         obsid <- factor(1:nrow(data))
-        # check if obsid is non-zero
+        # check overdispersion
         formula <- update(formula,  ~ . + (1|obsid))
         mod <- lme4::glmer(formula, data = data, family = poisson(link = link))
-        VarComps <- lme4::VarCorr(mod)
-        obsind_id <- which(as.data.frame(VarComps)[["grp"]] == "obsid")
-        overdisp <- as.numeric(lme4::VarCorr(mod)$obsid)^2
+        VarComps <- as.data.frame(lme4::VarCorr(mod))
+        obsind_id <- which(VarComps[["grp"]] == "obsid")
+        overdisp <- VarComps$vcov[obsind_id]
         
-#         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
-#                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
-#                 mod <-  lme4::glmer(formula, data = data, family = poisson(link = link))
-#                 VarComps <- lme4::VarCorr(mod)
-#                 overdisp <- 0
-#         }
+        # check if all variance components are 0
+        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+                nboot <- 0
+                npermut <- 0
+                warning("all variance components are 0, bootstrapping and permutation skipped")
+        }
         
+                
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
@@ -128,36 +129,28 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = poisson(link = link))
-                
-                VarComps <- lme4::VarCorr(mod)
-                # find groups
-                row_group <- which(as.data.frame(VarComps)[["grp"]] %in% grname)
-                # 
-                var_a <- as.data.frame(VarComps)[["vcov"]][row_group]
-                names(var_a) <- as.data.frame(VarComps)[["grp"]][row_group]
-                
-                var_e = as.numeric(VarComps$obsid)^2
-                
+                # random effect variance data.frame
+                VarComps <- as.data.frame(lme4::VarCorr(mod))
+                # find groups and obsid
+                row_group <- which(VarComps[["grp"]] %in% grname)
+                row_obsid <- which(VarComps[["grp"]] %in% "obsid")
+                # random effect variances
+                var_a <- VarComps[["vcov"]][row_group]
+                names(var_a) <- VarComps[["grp"]][row_group]
+                var_e = VarComps[["vcov"]][row_obsid]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
-                
-                # varComps shouldn´t contain obsind here
-                VarCompsDf <- as.data.frame(VarComps)
-                VarCompsGr <- VarCompsDf[which(VarCompsDf[["grp"]] %in% grname), ]
-                
-                 if (peYN & any(VarCompsGr$vcov == 0)) {
-                         if (nboot > 0){
-                         assign("nboot", 0, envir = e1)
-                         warning("(One of) the point estimate(s) for the repeatability was exactly 
-                                 zero; parametric bootstrapping has been skipped.")
-                         }
-                 }
-        
+#                  if (peYN & any(VarCompsGr$vcov == 0)) {
+#                          if (nboot > 0){
+#                          assign("nboot", 0, envir = e1)
+#                          warning("(One of) the point estimate(s) for the repeatability was exactly 
+#                                  zero; parametric bootstrapping has been skipped.")
+#                          }
+#                  }
                 if (link == "sqrt") {
                         R_link <- var_a/(var_a + var_e + 0.25)
                         R_org <- NA
                 }
-                
                 if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
                         R_link = var_a /(var_a + var_e +  estdv)
@@ -169,7 +162,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 return(R)
         }
         
-        R <- R_pe(formula, data, grname, peYN = TRUE)
+        R <- R_pe(formula, data, grname, peYN = FALSE) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
         if (nboot > 0)  Ysim <- as.matrix(simulate(mod, nsim = nboot))
@@ -202,27 +195,32 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # transform bootstrapping repeatabilities into vectors
         boot_org <- list()
         boot_link <- list()
-        for (i in 1:length(grname)) {
-                boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
-                boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
-        }
-        names(boot_org) <- grname
-        names(boot_link) <- grname
+        if (length(R_boot) == 1) {
+                if (is.na(R_boot)) {
+                        for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
+                }
+        } else {
+                for (i in 1:length(grname)) {
+                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
+                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
+                }
+                names(boot_org) <- grname
+                names(boot_link) <- grname
         
-        calc_CI <- function(x) {
-                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-        }
+                calc_CI <- function(x) {
+                        out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                }
         
         # CI into data.frame and transpose to have grname in rows
-        CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
-        CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
+                CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
+                CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
         
         # se
-        se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
-        se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
-        names(se_org) <- "se_org"
-        names(se_link) <- "se_link"
-        
+                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
+                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
+                names(se_org) <- "se_org"
+                names(se_link) <- "se_link"
+        }
 
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))

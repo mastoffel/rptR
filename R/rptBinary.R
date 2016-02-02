@@ -107,16 +107,16 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         formula <- update(formula,  ~ . + (1|obsid))
         mod <- lme4::glmer(formula, data = data, family = binomial(link = link))
-        VarComps <- lme4::VarCorr(mod)
-        obsind_id <- which(as.data.frame(VarComps)[["grp"]] == "obsid")
-        overdisp <- as.numeric(lme4::VarCorr(mod)$obsid)^2
+        VarComps <- as.data.frame(lme4::VarCorr(mod))
+        obsind_id <- which(VarComps[["grp"]] == "obsid")
+        overdisp <- VarComps$vcov[obsind_id]
         
-#         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
-#                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
-#                 mod <-  lme4::glmer(formula, data = data, family = binomial(link = link))
-#                 VarComps <- lme4::VarCorr(mod)
-#                 overdisp <- 0
-#         }
+        # check if all variance components are 0
+        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+                nboot <- 0
+                npermut <- 0
+                warning("all variance components are 0, bootstrapping and permutation skipped")
+        }
    
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
@@ -125,30 +125,25 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = binomial(link = link))
-                
-                VarComps <- lme4::VarCorr(mod)
-                # find groups
-                row_group <- which(as.data.frame(VarComps)[["grp"]] %in% grname)
-                # 
-                var_a <- as.data.frame(VarComps)[["vcov"]][row_group]
-                names(var_a) <- as.data.frame(VarComps)[["grp"]][row_group]
-                
-                var_e = as.numeric(VarComps$obsid)^2
-                # if(length(var_e) == 0) var_e <- 0
+                # random effect variance data.frame
+                VarComps <- as.data.frame(lme4::VarCorr(mod))
+                # find groups and obsid
+                row_group <- which(VarComps[["grp"]] %in% grname)
+                row_obsid <- which(VarComps[["grp"]] %in% "obsid")
+                # random effect variances
+                var_a <- VarComps[["vcov"]][row_group]
+                names(var_a) <- VarComps[["grp"]][row_group]
+                var_e = VarComps[["vcov"]][row_obsid]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
-                # varComps shouldn´t contain obsind here
-                VarCompsDf <- as.data.frame(VarComps)
-                VarCompsGr <- VarCompsDf[which(VarCompsDf[["grp"]] %in% grname), ]
-                
-                if (peYN & any(VarCompsGr$vcov == 0)) {
-                        if (nboot > 0){
-                                assign("nboot", 0, envir = e1)
-                                warning("(One of) the point estimate(s) for the repeatability was exactly 
-                                        zero; parametric bootstrapping has been skipped.")
-                        }
-                }
+#                 if (peYN & any(VarCompsGr$vcov == 0)) {
+#                         if (nboot > 0){
+#                                 assign("nboot", 0, envir = e1)
+#                                 warning("(One of) the point estimate(s) for the repeatability was exactly 
+#                                         zero; parametric bootstrapping has been skipped.")
+#                         }
+#                 }
                 
                 if (link == "logit") {
                         R_link <- var_a/(var_a + var_e + (pi^2)/3)
@@ -166,7 +161,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 return(R)
         }
         
-        R <- R_pe(formula, data, grname, peYN = TRUE)
+        R <- R_pe(formula, data, grname, peYN = FALSE) # no parametric bootstrap skipping atm
         
         # confidence interval estimation by parametric bootstrapping
         if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))

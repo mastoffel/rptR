@@ -17,10 +17,6 @@ extended form.
 }
 \examples{
  
-# repeatability estimation for weight (body mass)
-data(BodySize)
-rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID) 
-summary(rpt.Weight)
 
 }
 \author{

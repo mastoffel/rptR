@@ -65,8 +65,34 @@ Calculates repeatability from a general linear mixed-effects models fitted by RE
  
 # repeatability estimations for egg dumping (binary data)
 data(BroodParasitism)
-(rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID) + (1|Season), grname = c("FemaleID", "Season"), data = BroodParasitism))
-rpt.BroodPar <- rptBinary
+(rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), data = BroodParasitism))
+
+
+
+
+nind = 80
+nrep = 30 # a bit higher
+latmu = 0
+latbv = 0.3
+latgv = 0.1
+latrv = 0.2
+indid = factor(rep(1:nind, each=nrep))
+groid = factor(rep(1:nrep, nind))
+obsid = factor(rep(1:I(nind*nrep)))
+latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
+latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
+latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
+expvals = VGAM::logit(latvals, inverse = TRUE)
+obsvals = rbinom(nind*nrep, 1, expvals)
+beta0 = latmu
+beta0 = VGAM::logit(mean(obsvals))
+md = data.frame(obsvals, indid, obsid, groid)
+
+R_est <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+                    data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
+R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
+                    data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
+                    
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

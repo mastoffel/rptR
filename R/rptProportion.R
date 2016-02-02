@@ -72,9 +72,31 @@
 #'                                      y = list(cbpEggs, parasitised), groups = FemaleID,
 #'                                      nboot = 10, npermut = 10))  
 #'                                      
-#'  rpt.BroodPar <- rptProportion(formula = list(cbpEggs, parasitised) ~ (1|FemaleID), 
+#'  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
 #'                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
-#'                                npermut = 10)                 
+#'                                npermut = 10)      
+#'                                
+#' nind = 80
+#' nrep = 10 # a bit higher
+#' latmu = 0
+#' latbv = 0.5
+#' latgv = 0.3
+#' latrv = 0.2
+#' indid = factor(rep(1:nind, each=nrep))
+#' groid = factor(rep(1:nrep, nind))
+#' obsid = factor(rep(1:I(nind*nrep)))
+#' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
+#' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
+#' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
+#' expvals = VGAM::logit(latvals, inverse = TRUE)
+#' obs_success = rbinom(nind*nrep, 10, expvals)
+#' obs_failure = 10-obs_success
+#' beta0 = latmu
+#' md = data.frame(obs_success, obs_failure, indid, obsid, groid)
+#'
+#' R_est <- rptBinary(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+#'                     data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
+#'                                
 #' @export
 #' 
 
@@ -92,16 +114,16 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         formula <- update(formula,  ~ . + (1|obsid))
         mod <- lme4::glmer(formula, data = data, family = binomial(link = link))
-        VarComps <- lme4::VarCorr(mod)
-        obsind_id <- which(as.data.frame(VarComps)[["grp"]] == "obsid")
-        overdisp <- as.numeric(lme4::VarCorr(mod)$obsid)^2
+        VarComps <- as.data.frame(lme4::VarCorr(mod))
+        obsind_id <- which(VarComps[["grp"]] == "obsid")
+        overdisp <- VarComps$vcov[obsind_id]
         
-        #         if((as.data.frame(VarComps)[obsind_id, "sdcor"] == 0)) {
-        #                 formula <- update(formula, eval(paste(". ~ . ", "- (1 | obsid)")))
-        #                 mod <-  lme4::glmer(formula, data = data, family = binomial(link = link))
-        #                 VarComps <- lme4::VarCorr(mod)
-        #                 overdisp <- 0
-        #         }
+        # check if all variance components are 0
+        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+                nboot <- 0
+                npermut <- 0
+                warning("all variance components are 0, bootstrapping and permutation skipped")
+        }
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
@@ -110,37 +132,31 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = binomial(link = link))
-                
-                VarComps <- lme4::VarCorr(mod)
-                # find groups
-                row_group <- which(as.data.frame(VarComps)[["grp"]] %in% grname)
-                # 
-                var_a <- as.data.frame(VarComps)[["vcov"]][row_group]
-                names(var_a) <- as.data.frame(VarComps)[["grp"]][row_group]
-                
-                var_e = as.numeric(VarComps$obsid)^2
-                # if(length(var_e) == 0) var_e <- 0
+                # random effect variance data.frame
+                VarComps <- as.data.frame(lme4::VarCorr(mod))
+                # find groups and obsid
+                row_group <- which(VarComps[["grp"]] %in% grname)
+                row_obsid <- which(VarComps[["grp"]] %in% "obsid")
+                # random effect variances
+                var_a <- VarComps[["vcov"]][row_group]
+                names(var_a) <- VarComps[["grp"]][row_group]
+                var_e = VarComps[["vcov"]][row_obsid]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
-                
-                # varComps shouldn´t contain obsind here
-                VarCompsDf <- as.data.frame(VarComps)
-                VarCompsGr <- VarCompsDf[which(VarCompsDf[["grp"]] %in% grname), ]
-                
-                if (peYN & any(VarCompsGr$vcov == 0)) {
-                        if (nboot > 0){
-                                assign("nboot", 0, envir = e1)
-                                warning("(One of) the point estimate(s) for the repeatability was exactly 
-                                        zero; parametric bootstrapping has been skipped.")
-                        }
-                        }
-                
+  
+                #VarCompsGr <- VarComps[row_group, ]
+#                 if (peYN & any(VarCompsGr$vcov == 0)) {
+#                         if (nboot > 0){
+#                                 assign("nboot", 0, envir = e1)
+#                                 warning("(One of) the point estimate(s) for the repeatability was exactly 
+#                                         zero; parametric bootstrapping has been skipped.")
+#                         }
+#                 }
                 if (link == "logit") {
                         R_link <- var_a/(var_a + var_e + (pi^2)/3)
                         P <- exp(beta0) / (1 + exp(beta0))
                         R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / (((var_a + var_e) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
                 }
-                
                 if (link == "probit") {
                         R_link <- var_a/(var_a + var_e + 1)
                         R_org <- NA
@@ -226,6 +242,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 P_permut <- NA
         }
         
+        # response matrix for permutation test
+        dep_var_expr <- as.character(formula)[2]
+        dep_var <- as.data.frame(with(data, eval(parse(text=dep_var_expr))))
+        
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
         
@@ -234,15 +254,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- rbinom(nrow(data), 1, prob = VGAM::logit((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
+                y_perm <- rbinom(nrow(data), rowSums(dep_var), prob = VGAM::logit((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
                 # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
-                data_perm[dep_var] <- y_perm
+                data_perm[names(dep_var)] <- cbind(y_perm, rowSums(dep_var) - y_perm)
                 out <- R_pe(formula, data_perm, grname)
                 out
         }
-        # response variable
-        dep_var <- as.character(formula)[2]
         
         # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
         P_permut <- data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
@@ -330,7 +348,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         #     }
         
         res <- list(call = match.call(), 
-                datatype = "Binary", 
+                datatype = "Proportion", 
                 link = link,
                 CI = CI, 
                 R = R, 

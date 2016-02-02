@@ -4,14 +4,14 @@
 \alias{plot.rpt}
 \title{Plot a rpt object}
 \usage{
-\method{plot}{rpt}(x, type = c("boot", "permut"), scale = c("link",
+\method{plot}{rpt}(x, grname = names(x$ngroups), scale = c("link",
   "original"), main = NULL, breaks = "FD",
   xlab = "Repeatability estimates", ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions.}
 
-\item{type}{Showing either the bootstap or permutation test results.}
+\item{grname}{The name of the grouping factor to plot.}
 
 \item{scale}{Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.}
 
