@@ -198,7 +198,18 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         boot_link <- list()
         if (length(R_boot) == 1) {
                 if (is.na(R_boot)) {
-                for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
+                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
+                        for(i in c("se_org", "se_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname))), row.names = grname, names = i), 
+                                        envir = e1)   
+                        }
+                        for(i in c("CI_org", "CI_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname), ncol = 2)), row.names = grname), 
+                                        envir = e1)   
+                        }
+                        
                 }
         } else {
         for (i in 1:length(grname)) {

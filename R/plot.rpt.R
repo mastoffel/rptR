@@ -120,7 +120,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                             boot_hist(R = x$R[2, grname], R.boot = unname(unlist(x$R_boot_link[grname])), 
                                     CI.l = unname(x$CI_emp$CI_link[grname, 1]), 
                                     CI.u = unname(x$CI_emp$CI_link[grname, 2]), 
-                                    main. = paste("Link scal bootstrap repeatabilities for", grname), ...)   
+                                    main. = paste("Link scale bootstrap repeatabilities for", grname), ...)   
                     } else if (scale == "original") {
                             boot_hist(R = x$R[2, grname], R.boot = unname(unlist(x$R_boot_org[grname])), 
                                     CI.l = unname(x$CI_emp$CI_org[grname, 1]), 

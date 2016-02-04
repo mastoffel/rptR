@@ -90,7 +90,7 @@
 #' md = data.frame(obsvals, indid, obsid, groid)
 #'
 #' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
+#'                     data = md, nboot = 2, link = "log", npermut = 0, parallel = FALSE)
 #' R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
 #'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
 #' @export
@@ -123,7 +123,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
                 
         if (nboot < 0) nboot <- 0
-        if (npermut < 1) npermut <- 1
+        # if (npermut < 1) npermut <- 1
         e1 <- environment()
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
@@ -189,17 +189,31 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         }
         if (nboot == 0) {
                 # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+#                 R_boot <- list(structure(as.data.frame(matrix(rep(NA, 2*length(grname)), nrow = 2)),
+#                           names = grname, row.names = c("R_org", "R_link")))
                 R_boot <- NA
         }
         
         # transform bootstrapping repeatabilities into vectors
-        boot_org <- list()
-        boot_link <- list()
+        boot_org <- as.list(rep(NA, length(grname)))
+        boot_link <- as.list(rep(NA, length(grname)))
         if (length(R_boot) == 1) {
+                # creating tables when R_boot = NA
                 if (is.na(R_boot)) {
-                        for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
+                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
+                        for(i in c("se_org", "se_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname))), row.names = grname, names = i), 
+                                        envir = e1)   
+                        }
+                        for(i in c("CI_org", "CI_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname), ncol = 2)), row.names = grname), 
+                                        envir = e1)   
+                        }
+                        
                 }
-        } else {
+        } else  {
                 for (i in 1:length(grname)) {
                         boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
                         boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
@@ -264,13 +278,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         dep_var <- as.character(formula)[2]
 
         # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-        P_permut <- data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
-                row.names = c("P_permut_org", "P_permut_link")) 
+        P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
+                row.names = c("P_permut_org", "P_permut_link")), names = grname)
         
-        if(parallel == TRUE) {
-                if (is.null(ncores)) {
-                        ncores <- parallel::detectCores()
-                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+         if (npermut == 0) {
+                 R_permut <- NA
+         } else {
+                 if(parallel == TRUE) {
+                         if (is.null(ncores)) {
+                                 ncores <- parallel::detectCores()
+                                 warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
@@ -279,30 +296,27 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         mod=mod, dep_var=dep_var, grname=grname, data = data)
                 parallel::stopCluster(cl)
                 
-        } else if (parallel == FALSE) {
-                R_permut <- lapply(1:(npermut - 1), permut, formula, mod, dep_var, grname, data)
-                
-        }
+                } else if (parallel == FALSE) {
+                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod, dep_var, grname, data)
+                }
+                 
+                 # adding empirical rpt 
+                 R_permut <- c(list(R), R_permut)
+         }
         
-        # adding empirical rpt 
-        R_permut <- c(list(R), R_permut)
-        
+    
         # equal to boot
-        permut_org <- list()
-        permut_link <- list()
-        for (i in 1:length(grname)) {
-                permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+        permut_org <- as.list(rep(NA, length(grname)))
+        permut_link <- as.list(rep(NA, length(grname)))
+        
+        if (!(length(R_permut) == 1) & (is.na(R_permut))){
+                for (i in 1:length(grname)) {
+                        permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
+                        permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+                }
         }
-        names(permut_org) <- grname
-        names(permut_link) <- grname
-        
-        
-#         # reshaping and calculating P_permut
-#         R_permut_org <- lapply(R_permut, function(x) x["R_org",])
-#         R_permut_link <- lapply(R_permut, function(x) x["R_link",])
-#         R_permut_org <- do.call(rbind, R_permut_org)
-#         R_permut_link <- do.call(rbind, R_permut_link)
+       # names(permut_org) <- grname
+       # names(permut_link) <- grname
         
         P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
         P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
@@ -312,16 +326,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(logLik(mod))
         LRT_df <- 1
-#         if (length(randterms) == 1) {
-#                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-#                 LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
-#                 LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
-#                 LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
-#                 # LR <- as.numeric(-2*(logLik(lm(update(formula, eval(paste('. ~ . ', paste('- (',
-#                 # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
-#                 # pchisq(LR,1,lower.tail=FALSE)/2)
-#         }
-        
         
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
@@ -338,6 +342,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         }
   
         P <- cbind(LRT_P, t(P_permut))
+        row.names(P) <- grname
         
         #Function to calculate a point estimate of overdispersion from a mixed model object
         # from Harrison (2014): Using observation-level random effects to
@@ -353,7 +358,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 link = link,
                 CI = CI, 
                 R = R, 
-                se = cbind(se_org,se_link), 
+                se = cbind(se_org,se_link),
                 CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
                 P = P,
                 R_boot_link = boot_link, 

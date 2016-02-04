@@ -49,7 +49,7 @@ print.rpt <- function(x, ...) {
             # grnames <- names(x$R)
             for (i in 1:ncol(x$R)) {
                     grname <- names(x$R)[i]
-                    cat("Repeatability for ", grname, "\n",
+                    cat("Repeatability for ", names(x$R)[i], "\n",
                          "--------------------------------", "\n",
                          "Link scale repeatabilities:", 
                          "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se[grname, "se_link"], 3),

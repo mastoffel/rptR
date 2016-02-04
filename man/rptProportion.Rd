@@ -97,8 +97,8 @@ obs_failure = 10-obs_success
 beta0 = latmu
 md = data.frame(obs_success, obs_failure, indid, obsid, groid)
 
-R_est <- rptBinary(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
+R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+                    data = md, nboot = 100, link = "logit", npermut = 100, parallel = FALSE)
                                
 }
 \author{

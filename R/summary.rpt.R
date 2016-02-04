@@ -81,7 +81,7 @@ summary.rpt <- function(object, ...) {
                 for(i in 1:ncol(object$R)) {
                         object$rpt[[i]] <- structure(data.frame(R = object$R[[i]], as.data.frame(t(object$se))[[i]], 
                                           do.call(rbind, lapply(object$CI_emp, function(x) x[i, ]))),
-                                           names = c("R", "SE", names(object$CI_emp[[i]])),
+                                           names = c("R", "SE", names(calc_CI(object$R_boot_org[[1]]))),
                                           row.names = c("Org", "Link"))
                         object$boot[[i]] <- structure(do.call(rbind, 
                                             lapply(boot, function(x) extr_comps(x[[i]]))),

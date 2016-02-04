@@ -2,44 +2,42 @@
 % Please edit documentation in R/rpt.R
 \name{rpt}
 \alias{rpt}
-\title{Repeatability Calculation for Gaussian and Non-Gaussian Data}
+\title{(Adjusted) Repeatability Calculation for Gaussian and Non-Gaussian Data}
 \usage{
-rpt(y, groups, data = NULL, datatype = c("Gaussian", "binomial",
-  "proportion", "count"), method = c("corr", "ANOVA", "REML", "MCMC",
-  "GLMM.add", "GLMM.multi"), link = c("logit", "probit", "log", "sqrt"),
-  CI = 0.95, nboot = 1000, npermut = 1000, parallel = FALSE,
-  ncores = NULL)
+rpt(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion",
+  "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95,
+  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
-\item{y}{String specifying response variable  (or two-column matrix or dataframe in case of 
-proprotion data, see \link{rpt.binomGLMM.add} and
- \link{rpt.binomGLMM.multi} for details.}
+\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor of 
+interest needs to be included as a random effect, e.g. '(1|groups)'. 
+Covariates and additional random effects can be included to estimate 
+adjusted repeatabilities.}
 
-\item{groups}{String specifying groups variable or vector of group identities (will be converted to a factor).}
+\item{grname}{A character string or vector of character strings giving the 
+name(s) of the grouping factor(s), for which the repeatability should be 
+estimated. Spelling needs to match the random effect names as given in 
+\code{formula}.}
 
-\item{data}{Data frame containing respnse and groups variable.}
+\item{data}{A dataframe that contains the variables included in the formula 
+argument.}
 
-\item{datatype}{Character string specifying the data type
-('Gaussian', 'binomial', 'proportion', 'count'). 'binomial' and 
-'proportion' are interchangable and call the same functions.}
+\item{datatype}{Character string specifying the data type ('Gaussian', 
+'Binary', 'Proportion', 'Poisson').}
 
-\item{method}{character string specifying the method of calculation. 
-Defaults to 'REML' for Gaussian data and to 'GLMM.multi' for binomial
-and count data.}
+\item{link}{Character string specifying the link function. Ignored for 
+'Gaussian' datatype.}
 
-\item{link}{Character string specifying the link function. Ignored for 'Gaussian' 
-datatype and for the 'GLMM.add' method.}
+\item{CI}{Width of the confidence interval between 0 and 1 (defaults to 
+0.95).}
 
-\item{CI}{Width of the confidence interval between 0 and 1 (defaults to 0.95).}
+\item{nboot}{Number of bootstrapping runs used when calculating the asymtotic
+confidence interval (defaults to 1000).}
 
-\item{nboot}{Number of bootstrapping runs used when calculating the asymtotic 
-confidence interval (defaults to 1000). Ignored for the 'GLMM.add',
-'corr' and 'ANOVA' methods.}
+\item{npermut}{Number of permutations used when calculating asymtotic 
+\emph{P} values (defaults to 1000).}
 
-\item{npermut}{Number of permutations used when calculating asymtotic
-\emph{P} values (defaults to 1000). Ignored for the 'GLMM.add' method.}
-
-\item{parallel}{If TRUE, bootstraps will be distributed for non-bayesian functions.}
+\item{parallel}{If TRUE, bootstraps will be distributed.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
@@ -47,130 +45,61 @@ all cores but one are used.}
 \value{
 Returns an object of class rpt. See details for specific functions.
 \item{datatype}{Type of repsonse ('Gaussian', 'binomial' or 'count').}
-\item{method}{Method used to calculate repeatability ('REML', 'MCMC', 'ANOVA', 
-     'corr', 'GLMM.add' or 'GLMM.multi').}
+\item{method}{Method used to calculate repeatability ('REML', 'MCMC', 'ANOVA',
+      'corr', 'GLMM.add' or 'GLMM.multi').}
 \item{link}{Link functions used (GLMMs only).}
 \item{CI}{Width of the confidence interval or Bayesian credibility interval.}
 \item{R}{Point estimate for repeatability.}
 \item{R.link}{Point estimate for repeatability on link scale (GLMM only).}
 \item{R.org}{Point estimate for repeatability on original scale (GLMM only).}
 \item{se}{Standard error (\emph{se}) for repeatability. Note that the 
-      distribution might not be symmetrical, in which case the se is less
-      informative.}
-\item{se.link}{Standard error (\emph{se}) for repeatability on link scale
-      (GLMM only).}
-\item{se.org}{Standard error (\emph{se}) for repeatability on original scale
-      (GLMM only).}
-\item{CI.R}{Confidence interval or Bayesian credibility interval for the
-      repeatability.}
-\item{CI.link}{Confidence interval or Bayesian credibility interval for
-      repeatability on link scale (GLMM only).}
-\item{CI.org}{Confidence interval or Bayesian credibility interval for
-      repeatability on original scale (GLMM only).}
-\item{P}{Significace test, returned as \emph{NA} for the Bayesian approach
-      conflicts with the null hypothesis testing.}
-\item{P.link}{Significace test for repeatability on link scale, returned as
-      \emph{NA} for the Bayesian approach conflicts with the null hypothesis
-      testing.}
+     distribution might not be symmetrical, in which case the se is less 
+     informative.}
+\item{se.link}{Standard error (\emph{se}) for repeatability on link scale 
+     (GLMM only).}
+\item{se.org}{Standard error (\emph{se}) for repeatability on original scale 
+     (GLMM only).}
+\item{CI.R}{Confidence interval or Bayesian credibility interval for the 
+     repeatability.}
+\item{CI.link}{Confidence interval or Bayesian credibility interval for 
+     repeatability on link scale (GLMM only).}
+\item{CI.org}{Confidence interval or Bayesian credibility interval for 
+     repeatability on original scale (GLMM only).}
+\item{P}{Significace test, returned as \emph{NA} for the Bayesian approach 
+     conflicts with the null hypothesis testing.}
+\item{P.link}{Significace test for repeatability on link scale, returned 
+     as \emph{NA} for the Bayesian approach conflicts with the null 
+     hypothesis testing.}
 \item{P.org}{Significace test for repeatability on original scale, returned 
-     as \emph{NA} for the Bayesian approach conflicts with the null hypothesis
-     testing.}
+     as \emph{NA} for the Bayesian approach conflicts with the null 
+     hypothesis testing.}
 \item{R.post}{MCMC samples form the posterior distributions of \emph{R}.} 
 \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
 \item{R.permut}{Permutation samples for \emph{R}.}
 }
 \description{
-A wrapper function for repeatability calculations. Calls specialised functions 
-depending of the choice of datatype and method.
+A wrapper function for (adjusted) repeatability calculations. Calls 
+specialised functions depending of the choice of datatype and method.
 }
 \details{
-For \code{datatype='Gaussian'} calls function \link{rpt.corr}, \link{rpt.aov}, 
-         \link{rpt.remlLMM} or \link{rpt.mcmcLMM} (methods 'corr', 'ANOVA', 
-         'REML' and 'MCMC', respectively).
-         
-         For \code{datatype='binomial'} or \code{datatype='proportion'} calls function
-         \link{rpt.binomGLMM.multi} or \link{rpt.binomGLMM.add} (methods 'GLMM.multi' 
-         and 'GLMM.add', respectively).
-         
-         For \code{datatype='count'} calls function \link{rpt.poisGLMM.multi} 
-         or \link{rpt.poisGLMM.add} (methods 'GLMM.multi' and 'GLMM.add', respectively).
+For \code{datatype='Gaussian'} calls function \link{rptGaussian},
+         for \code{datatype='Poisson'} calls function \link{rptPoisson}, etc.
 }
 \examples{
  
 
-# all examples use a reduced number of npermut and nboot iterations!
-       
-# for Gaussian data - correlation-based repeatability
-# repeatability for male breeding success on a transformed scale
-  data(Fledglings)
-  Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-  (rpt.Fledge <- rpt(data = Fledglings, y = sqrtFledge, groups = MaleID,
-                     datatype='Gaussian', method='corr', nboot=10, 
-                     npermut=10))  # reduced number of iterations
-
-
-# for Gaussian data - ANOVA-based and LMM-based repeatabilities
-# repeatability estimation for tarsus length - a very high R
-data(BodySize)
-# ANOVA based
-(rpt.BS <- rpt(data = BodySize, y = Tarsus, groups = BirdID,  datatype='Gaussian', 
-               method='ANOVA', npermut=10))
-# LMM based
-(rpt.Weight <- rpt(data = BodySize, y = Weight, groups = BirdID, datatype='Gaussian', 
-                   method='REML', nboot=10, npermut=10))
-# LMM based with MCMC (results to check)
-(rpt.Weight <- rpt( data = BodySize, Weight, BirdID, datatype='Gaussian', 
-                    method='MCMC'))
-
-# for Binary data - additive and multiplicative overdispersion models
-# repeatability estimations for egg dumping (binary data)
-data(BroodParasitism)
-(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
-                     datatype='binomial', method='GLMM.multi', link='logit',
-                     nboot=10, npermut=10))
-(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
-                     datatype='binomial', method='GLMM.multi', link='probit',
-                     nboot=10, npermut=10))
-(rpt.BroodPar <- rpt(data = BroodParasitism, cbpYN, FemaleID, 
-                     datatype='binomial', method='GLMM.add'))
-  
-
-# for proportion data - additive and multiplicative overdispersion models
-# repeatability estimations for egg dumping (proportion data)
-\dontrun{
-data(BroodParasitism)
-attach(BroodParasitism)
-ParasitisedOR <- cbind(HostClutches, OwnClutches-HostClutches)
-(rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
-                 datatype='proportion', method='GLMM.multi', nboot=10, npermut=10))
-(rpt.Host <- rpt(ParasitisedOR[OwnClutchesBothSeasons==1,], FemaleID[OwnClutchesBothSeasons==1],
-                 datatype='proportion', method='GLMM.add'))
-detach(BroodParasitism)
-}
-
-# for count data - additive and multiplicative overdispersion models
-# repeatability for male fledgling success
-data(Fledglings)
-(rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID, 
-                   datatype='count', method='GLMM.multi', 
-                   nboot=10, npermut=10))
-(rpt.Fledge <- rpt(data = Fledglings, Fledge, MaleID, 
-                   datatype='count', method='GLMM.add'))
-
-
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se) & 
-        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
 }
 \references{
-Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
-non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
+Nakagawa, S. and Schielzeth, H. (2011) \emph{Repeatability for 
+     Gaussian and non-Gaussian data: a practical guide for biologists}. 
+     Biological Reviews 85: 935-956.
 }
 \seealso{
-\link{rpt.adj}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
-         \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, 
-         \link{rpt.poisGLMM.multi}
+\link{rpt}
 }
 \keyword{models}
 

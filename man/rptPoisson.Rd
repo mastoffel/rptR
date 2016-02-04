@@ -94,7 +94,7 @@ beta0 = log(mean(obsvals))
 md = data.frame(obsvals, indid, obsid, groid)
 
 R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
+                    data = md, nboot = 2, link = "log", npermut = 0, parallel = FALSE)
 R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
 }

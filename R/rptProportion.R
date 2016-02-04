@@ -94,8 +94,8 @@
 #' beta0 = latmu
 #' md = data.frame(obs_success, obs_failure, indid, obsid, groid)
 #'
-#' R_est <- rptBinary(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
+#' R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+#'                     data = md, nboot = 100, link = "logit", npermut = 100, parallel = FALSE)
 #'                                
 #' @export
 #' 
@@ -167,13 +167,15 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 return(R)
                 }
         
-        R <- R_pe(formula, data, grname, peYN = TRUE)
+        R <- R_pe(formula, data, grname, peYN = FALSE)
         
         # confidence interval estimation by parametric bootstrapping
-        if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
+        if (nboot > 0){
+                Ysim <- stats::simulate(mod, nsim = nboot) # every column contains a list with successes and failures
+        }  
         
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(model.frame(mod))[1]] <- as.vector(y)
+                data[, colnames(y)] <- y
                 R_pe(formula, data, grname)
         }
         
@@ -186,12 +188,12 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
                 parallel::clusterExport(cl, "R_pe")
-                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
+                R_boot <- unname(parallel::parLapply(cl, Ysim, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
         }
         if (nboot > 0 & parallel == FALSE) {
-                R_boot <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
+                R_boot <- unname(lapply(Ysim, bootstr, mod = mod, formula = formula, data = data, 
                         grname = grname))
         }
         if (nboot == 0) {
@@ -204,7 +206,18 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         boot_link <- list()
         if (length(R_boot) == 1) {
                 if (is.na(R_boot)) {
-                        for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA)
+                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
+                        for(i in c("se_org", "se_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname))), row.names = grname, names = i), 
+                                        envir = e1)   
+                        }
+                        for(i in c("CI_org", "CI_link")){
+                                assign(i, structure(data.frame(matrix(NA, 
+                                        nrow = length(grname), ncol = 2)), row.names = grname), 
+                                        envir = e1)   
+                        }
+                        
                 }
         } else {
                 for (i in 1:length(grname)) {
@@ -254,10 +267,11 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- rbinom(nrow(data), rowSums(dep_var), prob = VGAM::logit((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
+                y_perm <- rbinom(nrow(data), rowSums(dep_var), prob = trans_fun((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
                 # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
-                data_perm[names(dep_var)] <- cbind(y_perm, rowSums(dep_var) - y_perm)
+                data_perm[names(dep_var)[1]] <- y_perm
+                data_perm[names(dep_var)[2]] <- rowSums(dep_var) - y_perm
                 out <- R_pe(formula, data_perm, grname)
                 out
         }
