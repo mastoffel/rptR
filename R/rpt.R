@@ -85,15 +85,15 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Pro
     parallel = FALSE, ncores = NULL) {
         
     if (datatype == "Gaussian") {
-            return(rptGaussian(formula, gname, data, CI, nboot, npermut, parallel, ncores))
+            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores))
     }
     if (datatype == "Binary") {
-            return(rptBinary(formula, gname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
     }
     if (datatype == "Proportion") {
-            return(rptProportion(formula, gname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
     }
     if (datatype == "Poisson") {
-            return(rptPoisson(formula, gname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
     }
 } 
