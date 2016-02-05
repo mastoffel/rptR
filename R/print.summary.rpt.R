@@ -34,9 +34,9 @@ print.summary.rpt <- function(x, ...) {
             for (i in 1:ncol(x$R)) {
                     cat("\n\n")
                     cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
-                    cat("Repeatability:", "\n")
+                    cat("Repeatability overview:", "\n")
                     print(format(x$rpt[[i]], digits = 3, width = 6))
-                    cat("\n")
+                    cat("\n\n")
                     cat("Bootstrapping:", "\n")
                     print(format(x$boot[[i]], digits = 3, width = 6))
                     cat("\n")

@@ -45,7 +45,7 @@ print.rpt <- function(x, ...) {
         
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion") {
             cat("\n", "Repeatability calculation using the glmm method and", x$link, 
-                    "link",  "\n\n",  "Estimated overdispersion = ", x$overdisp, "\n\n") 
+                    "link", "\n\n") 
             # grnames <- names(x$R)
             for (i in 1:ncol(x$R)) {
                     grname <- names(x$R)[i]
