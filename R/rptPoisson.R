@@ -90,7 +90,8 @@
 #' md = data.frame(obsvals, indid, obsid, groid)
 #'
 #' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 2, link = "log", npermut = 0, parallel = FALSE)
+#'                     data = md, nboot = 2, link = "log", npermut = 2, parallel = FALSE)
+#'                     
 #' R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
 #'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
 #' @export
@@ -123,7 +124,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
                 
         if (nboot < 0) nboot <- 0
-        # if (npermut < 1) npermut <- 1
+        if (npermut < 1) npermut <- 1
         e1 <- environment()
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
@@ -281,7 +282,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
                 row.names = c("P_permut_org", "P_permut_link")), names = grname)
         
-         if (npermut == 0) {
+         if (npermut == 1) {
                  R_permut <- NA
          } else {
                  if(parallel == TRUE) {
@@ -309,7 +310,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         permut_org <- as.list(rep(NA, length(grname)))
         permut_link <- as.list(rep(NA, length(grname)))
         
-        if (!(length(R_permut) == 1) & (is.na(R_permut))){
+        if (!(length(R_permut) == 1)){
                 for (i in 1:length(grname)) {
                         permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
                         permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))

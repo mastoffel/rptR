@@ -98,7 +98,7 @@ beta0 = latmu
 md = data.frame(obs_success, obs_failure, indid, obsid, groid)
 
 R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 100, link = "logit", npermut = 100, parallel = FALSE)
+                    data = md, nboot = 0, link = "logit", npermut = 2, parallel = FALSE)
                                
 }
 \author{

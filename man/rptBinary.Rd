@@ -89,7 +89,7 @@ beta0 = VGAM::logit(mean(obsvals))
 md = data.frame(obsvals, indid, obsid, groid)
 
 R_est <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 3, link = "logit", npermut = 3, parallel = FALSE)
+                    data = md, nboot = 3, link = "logit", npermut = 20, parallel = FALSE)
 R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
                     
