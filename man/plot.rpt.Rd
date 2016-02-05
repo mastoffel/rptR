@@ -5,7 +5,7 @@
 \title{Plot a rpt object}
 \usage{
 \method{plot}{rpt}(x, grname = names(x$ngroups), scale = c("link",
-  "original"), main = NULL, breaks = "FD",
+  "original"), type = c("boot", "permut"), main = NULL, breaks = "FD",
   xlab = "Repeatability estimates", ...)
 }
 \arguments{

@@ -302,6 +302,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
                         permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
                 }
+                names(permut_org) <- grname
+                names(permut_link) <- grname
         }
 
         P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut

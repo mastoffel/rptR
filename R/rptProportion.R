@@ -312,6 +312,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
                                 permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
                         }
+                        names(permut_org) <- grname
+                        names(permut_link) <- grname
         }
         
         
