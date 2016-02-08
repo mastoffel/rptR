@@ -2,13 +2,13 @@
 % Please edit documentation in R/rptGaussian.R
 \name{rptGaussian}
 \alias{rptGaussian}
-\title{LMM-based Repeatability Using REML}
+\title{GLMM-based Repeatability Using REML}
 \usage{
 rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000,
   npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor of
+\item{formula}{Formula as used e.g. by \link{glmer}. The grouping factor(s) of
 interest needs to be included as a random effect, e.g. '(1|groups)'.
 Covariates and additional random effects can be included to estimate adjusted repeatabilities.}
 
@@ -16,7 +16,8 @@ Covariates and additional random effects can be included to estimate adjusted re
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula}.}
 
-\item{data}{A dataframe that contains the variables included in the formula argument.}
+\item{data}{A dataframe that contains the variables included in the \code{formula}
+and \code{grname} arguments.}
 
 \item{CI}{Width of the confidence interval (defaults to 0.95).}
 
@@ -25,7 +26,7 @@ Defaults to 1000. Larger numbers of permutations give a better
 asymtotic CI, but may be very time-consuming.}
 
 \item{npermut}{Number of permutations used when calculating 
-asymptotic \emph{P} values (defaults to 1000). Currently not in use!}
+asymptotic \emph{P} values (defaults to 1000).}
 
 \item{parallel}{If TRUE, bootstraps will be distributed.}
 
@@ -34,39 +35,41 @@ all cores but one are used.}
 }
 \value{
 Returns an object of class rpt that is a a list with the following elements: 
-\item{datatype}{Response distribution (here: 'Gaussian').}
-\item{method}{Method used to calculate repeatability (here: 'REML').}
+\item{call}{function call}
+\item{datatype}{Response distribution (here: 'Gaussian')}.
 \item{CI}{Width of the confidence interval.}
-\item{R}{Point estimate for repeatability.}
-\item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
-\item{CI.R}{Confidence interval for  repeatability.}
-\item{P}{Approximate \emph{P} value from a significance test based on likelihood-ratio.}
-\item{P.permut}{Approximate \emph{P} value from a significance test based on permutation of residuals.}
-\item{R.boot}{Parametric bootstrap samples for \emph{R}.}
-\item{R.permut}{Permutation samples for \emph{R}.}
-\item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
+\item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
+     are groups of interest. Rows are original and link scale, in this order.}
+\item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. 
+     Grouping factors are rows.
+     Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+\item{CI_emp}{\code{data.frame} containing the confidence intervals for the repeatabilities from
+     parametric bootstrapping. Each row is a grouping factor of interest.}
+\item{P}{Approximate \emph{P} \code{data.frame} with p-values from a significance test based on likelihood-ratio
+     in the first column and significance test based on permutation of residuals in the second column. 
+     Each row is a grouping factor.}
+\item{R_boot}{Parametric bootstrap samples for \emph{R}. Each \code{list}
+      element is a grouping factor.}
+\item{R_permut}{Permutation samples for \emph{R}. Each \code{list}
+      element is a grouping factor.}
+\item{LRT}{List of Likelihood-ratios for the model and the reduced model(s), 
+      and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
 }
 \description{
-Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
+Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
 \examples{
  
-
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rptGaussian(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
+(rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|Sex) + (1|BirdID), grname = c('Sex', 'BirdID'), 
  data=BodySize, nboot=10, npermut=10))
-# reduced number of nboot and npermut iterations
-
-# repeatability estimation for weight (body mass) - a lower R than the previous one
-data(BodySize)
-(rpt.Weight <- rptGaussian(Weight ~ Sex + (1|BirdID), 'BirdID', 
-                               data=BodySize, nboot=10, npermut=10))
-# reduced number of nboot and npermut iterations
-
+ 
+ (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
+ data=BodySize, nboot=10, npermut=10))
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
@@ -83,6 +86,6 @@ Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
 non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
-\link{rpt.mcmcLMM}, \link{print.rpt}, \link{rpt}, \link{rpt.adj}
+\link{rpt}
 }
 

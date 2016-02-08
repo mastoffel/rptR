@@ -24,7 +24,7 @@
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
 #' \item{call}{function call}
-#' \item{datatype}{Response distribution (here: 'Poisson').
+#' \item{datatype}{Response distribution (here: 'Poisson').}
 #' \item{CI}{Width of the confidence interval.}
 #' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
 #'      are groups of interest. Rows are original and link scale, in this order.}
@@ -77,9 +77,6 @@
 #' ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
 #' # some rows have entries 0,0 and need to be removed
 #' zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
-#' (rpt.BroodPar <- rpt.binomGLMM.multi( data = ParasitismOR[-zz, ],
-#'                                      y = list(cbpEggs, parasitised), groups = FemaleID,
-#'                                      nboot = 10, npermut = 10))  
 #'                                      
 #'  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
 #'                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
@@ -102,8 +99,9 @@
 #' beta0 = latmu
 #' md = data.frame(obs_success, obs_failure, indid, groid)
 #'
-#' R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 0, link = "logit", npermut = 2, parallel = FALSE)
+#' R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), 
+#'                        grname = c("indid", "groid"), 
+#'                        data = md, nboot = 0, link = "logit", npermut = 2, parallel = FALSE)
 #'                                
 #' @export
 #' 

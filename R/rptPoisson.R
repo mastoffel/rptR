@@ -23,7 +23,7 @@
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
 #' \item{call}{function call}
-#' \item{datatype}{Response distribution (here: 'Poisson').
+#' \item{datatype}{Response distribution (here: 'Poisson')}.
 #' \item{CI}{Width of the confidence interval.}
 #' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
 #'      are groups of interest. Rows are original and link scale, in this order.}
@@ -70,13 +70,14 @@
 #' @examples  
 #' # repeatability for female clutch size over two years.
 #' data(BroodParasitism)
-#' (rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", data = BroodParasitism, link = "log",
-#'                                 nboot=10, npermut=10))  
+#' (rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", 
+#' data = BroodParasitism, link = "log", nboot=10, npermut=10))  
 #' # reduced number of nboot and npermut iterations
 #'        
 #' # repeatability for male fledgling success
 #' data(Fledglings)
-#' (rpt.Fledge <- rptPoisson(formula = Fledge~(1|MaleID), grname = "MaleID", data = Fledglings, nboot=10, npermut=10))  
+#' (rpt.Fledge <- rptPoisson(formula = Fledge~(1|MaleID), grname = "MaleID", data = Fledglings, 
+#' nboot=10, npermut=10))  
 #' # reduced number of nboot and npermut iterations
 #' 
 #' 

@@ -19,9 +19,6 @@
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com) 
 #'      
-#' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
-#'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
-#' 
 #' @keywords models
 #' 
 #' @export
@@ -132,8 +129,8 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
     
     if (x$datatype == "Gaussian") {
         if (type == "boot") {
-                boot_hist(R = x$R[grname], R.boot = unlist(x$R_boot[grname]), CI.l = unname(x$CI_emp[i, 
-                  1]), CI.u = unname(x$CI_emp[i, 2]), main. = paste("Bootstrap repeatabilities for", 
+                boot_hist(R = x$R[grname], R.boot = unlist(x$R_boot[grname]), CI.l = unname(x$CI_emp[grname, 
+                  1]), CI.u = unname(x$CI_emp[grname, 2]), main. = paste("Bootstrap repeatabilities for", 
                   grname), ...)
             }
        if (type == "permut") {

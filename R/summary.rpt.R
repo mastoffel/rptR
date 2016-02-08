@@ -45,7 +45,7 @@ summary.rpt <- function(object, ...) {
                                                         names = c("R", "SE", colnames(object$CI_emp)[1], colnames(object$CI_emp)[2],
                                                         colnames(object$P)[2],  colnames(object$P)[1]), 
                                                            row.names = "rpt")
-                        bootperm      <- structure(data.frame(do.call(rbind, lapply(list(x$R_boot[[i]], x$R_permut[[i]]), extr_comps))),
+                        bootperm      <- structure(data.frame(do.call(rbind, lapply(list(object$R_boot[[i]], object$R_permut[[i]]), extr_comps))),
                                          row.names = c("boot", "permut"), names = c("N", "Mean", "Median", names(object$CI_emp)))
         
                         object$boot[[i]]   <-  bootperm[1, ]

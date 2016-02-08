@@ -35,6 +35,38 @@ asymptotic \emph{P} values (defaults to 1000).}
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
 }
+\value{
+Returns an object of class rpt that is a a list with the following elements: 
+\item{call}{function call}
+\item{datatype}{Response distribution (here: 'Poisson').}
+\item{CI}{Width of the confidence interval.}
+\item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
+     are groups of interest. Rows are original and link scale, in this order.}
+\item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. Columns
+     are groups of interest. Rows are original and link scale, in this order.
+     Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+\item{CI_emp}{\code{list} of two elements containing the confidence intervals for repeatabilities 
+     on the link and original scale, respectively. Within each list element, lower and upper CI
+     are columns and each row is a grouping factor of interest.}
+\item{P}{Approximate \emph{P} \code{data.frame} with p-values from a significance test based on likelihood-ratio
+     in the first column and significance test based on permutation of residuals for 
+     both the original and link scale in the second and third column. Each row is a grouping
+     factors.}
+\item{R_boot_link}{Parametric bootstrap samples for \emph{R} on the link scale. Each \code{list}
+      element is a grouping factor.}
+\item{R_boot_org}{Parametric bootstrap samples for \emph{R} on the original scale. Each \code{list}
+      element is a grouping factor.}
+\item{R_permut_link}{Permutation samples for \emph{R} on the link scale. Each \code{list}
+      element is a grouping factor.}
+\item{R_permut_org}{Permutation samples for \emph{R} on the original scale. Each \code{list}
+      element is a grouping factor.}
+\item{LRT}{List of Likelihood-ratios for the model and the reduced model(s), 
+      and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
+\item{ngroups}{Number of groups.}
+\item{nobs}{Number of observations.}
+\item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
+\item{mod}{Fitted model.}
+}
 \description{
 Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
@@ -48,9 +80,6 @@ ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
 ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
 # some rows have entries 0,0 and need to be removed
 zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
-(rpt.BroodPar <- rpt.binomGLMM.multi( data = ParasitismOR[-zz, ],
-                                     y = list(cbpEggs, parasitised), groups = FemaleID,
-                                     nboot = 10, npermut = 10))  
                                      
  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
@@ -73,8 +102,9 @@ obs_failure = 10-obs_success
 beta0 = latmu
 md = data.frame(obs_success, obs_failure, indid, groid)
 
-R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 0, link = "logit", npermut = 2, parallel = FALSE)
+R_est <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), 
+                       grname = c("indid", "groid"), 
+                       data = md, nboot = 0, link = "logit", npermut = 2, parallel = FALSE)
                                
 }
 \author{

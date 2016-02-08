@@ -26,17 +26,17 @@ R_est <- rptBinary(formula = obsvals ~ (1|indid), grname = c("indid"),
 
 test_that("repeatability point estimate works", {
         expect_that(is.numeric(unlist(R_est$R)), is_true()) 
-        expect_equal(R_est$R["R_org", ], 0.065, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ], 0.078, tolerance = 0.01)
+        expect_equal(R_est$R["R_org", ], 0.0368, tolerance = 0.01)
+        expect_equal(R_est$R["R_link", ], 0.0444, tolerance = 0.01)
 })
 
-R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-        data = md, nboot = 0, link = "log", npermut = 0, parallel = FALSE)
+R_est <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+        data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
 
 test_that("repeatability point estimate works for more than one group", {
         expect_that(is.numeric(unlist(R_est$R)), is_true()) 
-        expect_equal(R_est$R["R_org", ]$indid, 0.0148, tolerance = 0.01)
-        expect_equal(R_est$R["R_org", ]$groid, 0, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ]$indid, 0.0263, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ]$groid, 0, tolerance = 0.01)
+        expect_equal(R_est$R["R_org", ]$indid, 0.0397, tolerance = 0.01)
+        expect_equal(R_est$R["R_org", ]$groid, 0.0253, tolerance = 0.01)
+        expect_equal(R_est$R["R_link", ]$indid, 0.0478, tolerance = 0.01)
+        expect_equal(R_est$R["R_link", ]$groid, 0.0306, tolerance = 0.01)
 })

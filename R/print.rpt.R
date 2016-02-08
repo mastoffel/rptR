@@ -13,9 +13,6 @@
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
-#' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
-#'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
-#' 
 #'       
 #' @keywords models
 #' 

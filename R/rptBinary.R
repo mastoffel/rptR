@@ -24,7 +24,7 @@
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
 #' \item{call}{function call}
-#' \item{datatype}{Response distribution (here: 'Poisson').
+#' \item{datatype}{Response distribution (here: 'Binomial')}.
 #' \item{CI}{Width of the confidence interval.}
 #' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
 #'      are groups of interest. Rows are original and link scale, in this order.}
@@ -71,7 +71,8 @@
 #' @examples  
 #' # repeatability estimations for egg dumping (binary data)
 #' data(BroodParasitism)
-#' (rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), data = BroodParasitism))
+#' (rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), 
+#' data = BroodParasitism))
 #' 
 #' 
 #' 

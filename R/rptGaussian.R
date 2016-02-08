@@ -1,37 +1,45 @@
-#' LMM-based Repeatability Using REML
+#' GLMM-based Repeatability Using REML
 #' 
-#' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
-#' 
-#' @param formula Formula as used e.g. by \link{lmer}. The grouping factor of
+#' Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
+#' @param formula Formula as used e.g. by \link{glmer}. The grouping factor(s) of
 #'        interest needs to be included as a random effect, e.g. '(1|groups)'.
 #'        Covariates and additional random effects can be included to estimate adjusted repeatabilities.
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula}.
-#' @param data A dataframe that contains the variables included in the formula argument.
+#' @param data A dataframe that contains the variables included in the \code{formula}
+#'        and \code{grname} arguments.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation.
 #'        Defaults to 1000. Larger numbers of permutations give a better
 #'        asymtotic CI, but may be very time-consuming.
 #' @param npermut Number of permutations used when calculating 
-#'        asymptotic \emph{P} values (defaults to 1000). Currently not in use!
+#'        asymptotic \emph{P} values (defaults to 1000). 
 #' @param parallel If TRUE, bootstraps will be distributed. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores but one are used.
 #' 
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
-#' \item{datatype}{Response distribution (here: 'Gaussian').}
-#' \item{method}{Method used to calculate repeatability (here: 'REML').}
+#' \item{call}{function call}
+#' \item{datatype}{Response distribution (here: 'Gaussian')}.
 #' \item{CI}{Width of the confidence interval.}
-#' \item{R}{Point estimate for repeatability.}
-#' \item{se}{Approximate standard error (\emph{se}) for repeatability. Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
-#' \item{CI.R}{Confidence interval for  repeatability.}
-#' \item{P}{Approximate \emph{P} value from a significance test based on likelihood-ratio.}
-#' \item{P.permut}{Approximate \emph{P} value from a significance test based on permutation of residuals.}
-#' \item{R.boot}{Parametric bootstrap samples for \emph{R}.}
-#' \item{R.permut}{Permutation samples for \emph{R}.}
-#' \item{LRT}{Vector of Likelihood-ratios for the model(s) and the reduced model(s), and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
+#' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
+#'      are groups of interest. Rows are original and link scale, in this order.}
+#' \item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. 
+#'      Grouping factors are rows.
+#'      Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+#' \item{CI_emp}{\code{data.frame} containing the confidence intervals for the repeatabilities from
+#'      parametric bootstrapping. Each row is a grouping factor of interest.}
+#' \item{P}{Approximate \emph{P} \code{data.frame} with p-values from a significance test based on likelihood-ratio
+#'      in the first column and significance test based on permutation of residuals in the second column. 
+#'      Each row is a grouping factor.}
+#' \item{R_boot}{Parametric bootstrap samples for \emph{R}. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{R_permut}{Permutation samples for \emph{R}. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{LRT}{List of Likelihood-ratios for the model and the reduced model(s), 
+#'       and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
@@ -49,62 +57,59 @@
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
-#' @seealso \link{rpt.mcmcLMM}, \link{print.rpt}, \link{rpt}, \link{rpt.adj}
+#' @seealso \link{rpt}
 #' 
 #' @examples  
-#' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rptGaussian(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
+#' (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|Sex) + (1|BirdID), grname = c('Sex', 'BirdID'), 
 #'  data=BodySize, nboot=10, npermut=10))
-#' # reduced number of nboot and npermut iterations
-#' 
-#' # repeatability estimation for weight (body mass) - a lower R than the previous one
-#' data(BodySize)
-#' (rpt.Weight <- rptGaussian(Weight ~ Sex + (1|BirdID), 'BirdID', 
-#'                                data=BodySize, nboot=10, npermut=10))
-#' # reduced number of nboot and npermut iterations
-#' 
+#'  
+#'  (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
+#'  data=BodySize, nboot=10, npermut=10))
 #' @export
 #' 
 
-rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
-        parallel = FALSE, ncores = NULL) {
+rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
+        npermut = 1000, parallel = FALSE, ncores = NULL) {
+        
+        # to do: missing values
+        # no bootstrapping case
         
         mod <- lme4::lmer(formula, data = data)
-        if (nboot < 0) nboot <- 0
-        if (npermut < 1) npermut <- 1
-        e1 <- environment()
-        
-#         # check if all variance components are 0
-#         if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+        VarComps <- as.data.frame(lme4::VarCorr(mod))
+
+        # check if all variance components are 0
+#         if (sum(VarComps$vcov[-"Residual"]!=0) == 0) {
 #                 nboot <- 0
 #                 npermut <- 0
 #                 warning("all variance components are 0, bootstrapping and permutation skipped")
 #         }
         
+        
+        if (nboot < 0) nboot <- 0
+        if (npermut < 1) npermut <- 1
         # point estimates of R
-        R.pe <- function(formula, data, grname, peYN = FALSE) {
-                mod.fnc <- lme4::lmer(formula, data)
-                varComps <- lme4::VarCorr(mod.fnc)
-#                 if (peYN & any(varComps == 0) & nboot > 0) {
-#                         assign("nboot", 0, envir = e1)
-#                         warning("(One of) the point estimate(s) for the repeatability was exactly zero; parametric bootstrapping has been skipped.")
-#                 }
-                var.a <- as.numeric(varComps[grname])
-                var.p <- sum(as.numeric(varComps)) + attr(varComps, "sc")^2
-                # var.e <- as.numeric(attr(varComps, 'sc')^2)
-                R <- var.a/var.p
+        R_pe <- function(formula, data, grname) {
+                mod <- lme4::lmer(formula, data)
+                VarComps <- lme4::VarCorr(mod)
+                var_a <- as.numeric(VarComps[grname])
+                names(var_a) <- grname
+                var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
+                R <- var_a/var_p
+                R <- as.data.frame(t(R))
+                names(R) <- grname
                 return(R)
         }
-        R <- R.pe(formula, data, grname, peYN = FALSE)
-        names(R) <- grname
+        
+        R <- R_pe(formula, data, grname) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
-        Ysim <- as.matrix(simulate(mod, nsim = nboot))
+        if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
+        
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, names(model.frame(mod))[1]] <- as.vector(y)
-                R.pe(formula, data, grname)
+                R_pe(formula, data, grname)
         }
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -113,32 +118,51 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut 
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                R.boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
+                parallel::clusterExport(cl, "R_pe")
+                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
         }
         if (nboot > 0 & parallel == FALSE) {
-                R.boot <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
+                R_boot <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
                         grname = grname))
         }
         if (nboot == 0) {
-                R.boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+                #                 R_boot <- list(structure(as.data.frame(matrix(rep(NA, 2*length(grname)), nrow = 2)),
+                #                           names = grname, row.names = c("R_org", "R_link")))
+                R_boot <- NA
         }
-        if (length(grname) == 1) {
-                CI.R <- quantile(R.boot, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-                se <- sd(R.boot)
-                names(se) <- grname
-        } else {
-                CI.R <- t(apply(R.boot, 1, function(x) {
-                        quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-                }))
-                se <- apply(R.boot, 1, sd)
-                rownames(R.boot) <- grname
-                rownames(CI.R) <- grname
-                names(se) <- grname
+        
+        # transform bootstrapping repeatabilities into vectors
+        boot <- as.list(rep(NA, length(grname)))
+        names(boot) <- grname
+        # CI function
+        calc_CI <- function(x) {
+                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
         }
+        
+        if (length(R_boot) == 1) {
+                # creating tables when R_boot = NA
+                if (is.na(R_boot)) {
+                       se <- NA
+                       CI_emp <- calc_CI(NA)
+                }
+        } else  {
+                for (i in 1:length(grname)) {
+                        boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
+                       
+                }
+                # CI 
+                CI_emp <- as.data.frame(t(as.data.frame(lapply(boot, calc_CI))))
+                # se
+                se <- as.data.frame(t(as.data.frame(lapply(boot, sd))))
+                names(se) <- "se"
+              
+        }
+        
         # significance test by permutation of residuals
-        P.permut <- rep(NA, length(grname))
+        P_permut <- rep(NA, length(grname))
         
         # significance test by likelihood-ratio-test
         terms <- attr(terms(formula), "term.labels")
@@ -146,111 +170,97 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut 
         
         # no permutation test
         if (npermut == 1) {
-                R.permut <- R
-                P.permut <- NA
+                R_permut <- R
+                P_permut <- NA
         }
         
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
-        permut <- function(nperm, formula, mod_red, dep_var, grname, i) {
+        permut <- function(nperm, formula, data, mod_red, dep_var, grname, i) {
                 y_perm <- fitted(mod_red) + sample(resid(mod_red))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                R.pe <- R.pe(formula, data_perm, grname)[i]
+                out <- R_pe(formula, data_perm, grname[i])
+                out
         }
-        # response variable
+        
+        # multiple random effects, uses lmer()
         dep_var <- as.character(formula)[2]
         # one random effect, uses lm()
-        if (length(randterms) == 1) {
+        # multiple random effects, uses lmer()
+ 
+        R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
+        P_permut <- rep(NA, length(grname))
+        for (i in 1:length(grname)) {
+                if (length(randterms) == 1) {
+                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                        mod_red <- lm(formula_red, data = data)
+                } else if (length(randterms) > 1) {
+                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                                ")"))))
+                        mod_red <- lme4::lmer(formula_red, data = data)
+                }
                 
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                mod_red <- lm(formula_red, data = data)
-                # R.permut <- c(R, replicate(npermut-1, permut(formula, groups), simplify=TRUE))
-                if (parallel == TRUE){
+                if(parallel == TRUE) {
                         if (is.null(ncores)) {
                                 ncores <- parallel::detectCores()
                                 warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
                         }
                         # start cluster
                         cl <- parallel::makeCluster(ncores)
-                        R.permut <- c(R, parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname))
+                        parallel::clusterExport(cl, "R_pe")
+                        R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
                         parallel::stopCluster(cl)
-                        P.permut <- sum(R.permut >= R)/npermut
-                        
+                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                 } else if (parallel == FALSE) {
-                        R.permut <- c(R, replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname), 
-                                simplify = TRUE))
-                        P.permut <- sum(R.permut >= R)/npermut
+                        R_permut[i, ] <- c(R[i], as.numeric(unlist(replicate(npermut - 1, permut(formula=formula, data = data, 
+                                mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))))
+                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                 }
         }
-        # multiple random effects, uses lmer()
-        if (length(randterms) > 1) {
-                R.permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-                P.permut <- rep(NA, length(grname))
-                for (i in 1:length(grname)) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                ")"))))
-                        mod_red <- lme4::lmer(formula_red, data = data)
-                        
-                        if(parallel == TRUE) {
-                                if (is.null(ncores)) {
-                                        ncores <- parallel::detectCores()
-                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                                }
-                                # start cluster
-                                cl <- parallel::makeCluster(ncores)
-                                R.permut[i, ] <- c(R[i], parallel::parSapply(cl, npermut-1, permut, formula, mod_red, dep_var, grname, i))
-                                parallel::stopCluster(cl)
-                                P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
-                        } else if (parallel == FALSE) {
-                                R.permut[i, ] <- c(R[i], replicate(npermut - 1, permut(formula=formula, mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))
-                                P.permut[i] <- sum(R.permut[i, ] >= R[i])/npermut
-                        }
-                }
-        }
+                
+        row.names(R_permut) <- grname
+        names(P_permut) <- grname
+  
         
         ## likelihood-ratio-test
-        LRT.mod <- as.numeric(logLik(mod))
-        LRT.df <- 1
-        if (length(randterms) == 1) {
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
-                LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
-                LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lm(update(formula, eval(paste('. ~ . ', paste('- (',
-                # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
-                # pchisq(LR,1,lower.tail=FALSE)/2)
-        }
-        if (length(randterms) > 1) {
-                for (i in c("LRT.P", "LRT.D", "LRT.red")) assign(i, rep(NA, length(grname)))
-                for (i in 1:length(grname)) {
+        LRT_mod <- as.numeric(logLik(mod))
+        LRT_df <- 1
+        
+        for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
+        
+        for (i in 1:length(grname)) {
+                if (length(randterms) == 1) {
+                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                        LRT_red[i] <- as.numeric(logLik(lm(formula_red, data = data)))
+                } else if (length(randterms) >= 1){
                         formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                ")"))))
-                        LRT.red[i] <- as.numeric(logLik(lme4::lmer(formula_red, data = data)))
-                        LRT.D[i] <- as.numeric(-2 * (LRT.red[i] - LRT.mod))
-                        LRT.P[i] <- ifelse(LRT.D[i] <= 0, 1, pchisq(LRT.D[i], 1, lower.tail = FALSE)/2)
-                        # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
-                        # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                        # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+                        ")"))))
+                        LRT_red[i] <- as.numeric(logLik(lme4::lmer(formula = formula_red, data = data)))
                 }
+                LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
+                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
+                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
         }
         
+        P <- cbind(LRT_P, P_permut)
+        row.names(P) <- grname
+
         
-        # preparing results
-        # if more than one random term make matrix
-        if (nrow(matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)) > 1) {
-                P <- matrix(c(LRT.P, P.permut), ncol = 2, byrow = FALSE)
-                colnames(P) <- c("P.LRT", "P.permut")
-                rownames(P) <- grname
-                # else make vector in congruency with rpt.remlLMM
-        } else {
-                P = c(P.LRT = LRT.P, P.permut = P.permut)
-        }
-        
-        res <- list(call = match.call(), datatype = "Gaussian", method = "LMM.REML", CI = CI, 
-                R = R, se = se, CI.R = CI.R, P = P, P.permut = P.permut, R.boot = R.boot, R.permut = R.permut, 
-                LRT = list(LRT.mod = LRT.mod, LRT.red = LRT.red, LRT.D = LRT.D, LRT.df = LRT.df, 
-                        LRT.P = LRT.P), ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+        res <- list(call = match.call(), 
+                datatype = "Gaussian", 
+                CI = CI, 
+                R = R, 
+                se = se,
+                CI_emp = CI_emp, 
+                P = as.data.frame(P),
+                R_boot = boot, 
+                R_permut = lapply(as.data.frame(t(R_permut)), function(x) return(x)),
+                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
+                        LRT_P = LRT_P), 
+                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod)
         class(res) <- "rpt"
         return(res)
