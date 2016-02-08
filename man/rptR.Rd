@@ -6,7 +6,7 @@
 \alias{rptR-package}
 \title{rptR: Repeatability calculation for Gaussian and Non-Gaussian data}
 \description{
-A collection of functions for caluculating point estimates, interval estimates and 
+A collection of functions for calculating point estimates, interval estimates and 
 significance tests of the repeatability (intra-class correlation coefficient) of measurements.
 The function \link{rpt} is a the core functions that calls more specialised functions as required. 
 Specialised functions can also be called directly (see \link{rpt} for details).

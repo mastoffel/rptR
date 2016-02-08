@@ -23,21 +23,30 @@
 #' @return 
 #' Returns an object of class rpt that is a a list with the following elements: 
 #' \item{call}{function call}
-#' \item{datatype}{Response distribution (here: 'Poisson').}
-#' \item{method}{Method used to calculate repeatability (here: 'REML').}
+#' \item{datatype}{Response distribution (here: 'Poisson').
 #' \item{CI}{Width of the confidence interval.}
-#' \item{R}{Point estimates for repeatabilities on the link and original scale.}
-#' \item{se}{Approximate standard errors (\emph{se}) for repeatabilitieson the link and original scale.
-#'            Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
-#' \item{CI_emp}{Confidence intervals for repeatabilities on the link and original scale.}
-#' \item{P}{Approximate \emph{P} data frame with p-values from a significance test based on likelihood-ratio
-#' and significance test based on permutation of residuals for both the original and link scale.}
-#' \item{R_boot_link}{Parametric bootstrap samples for \emph{R} on the link scale.}
-#' \item{R_boot_org}{Parametric bootstrap samples for \emph{R} on the original scale.}
-#' \item{R_permut_link}{Permutation samples for \emph{R} on the link scale.}
-#' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale.}
-#' \item{LRT}{List of Likelihood-ratios for the model(s) and the reduced model(s), 
-#' and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
+#' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
+#'      are groups of interest. Rows are original and link scale, in this order.}
+#' \item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. Columns
+#'      are groups of interest. Rows are original and link scale, in this order.
+#'      Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+#' \item{CI_emp}{\code{list} of two elements containing the confidence intervals for repeatabilities 
+#'      on the link and original scale, respectively. Within each list element, lower and upper CI
+#'      are columns and each row is a grouping factor of interest.}
+#' \item{P}{Approximate \emph{P} \code{data.frame} with p-values from a significance test based on likelihood-ratio
+#'      in the first column and significance test based on permutation of residuals for 
+#'      both the original and link scale in the second and third column. Each row is a grouping
+#'      factors.}
+#' \item{R_boot_link}{Parametric bootstrap samples for \emph{R} on the link scale. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{R_boot_org}{Parametric bootstrap samples for \emph{R} on the original scale. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{R_permut_link}{Permutation samples for \emph{R} on the link scale. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale. Each \code{list}
+#'       element is a grouping factor.}
+#' \item{LRT}{List of Likelihood-ratios for the model and the reduced model(s), 
+#'       and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
@@ -79,7 +88,6 @@
 #' latrv = 0.2
 #' indid = factor(rep(1:nind, each=nrep))
 #' groid = factor(rep(1:nrep, nind))
-#' obsid = factor(rep(1:I(nind*nrep)))
 #' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 #' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 #' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
@@ -87,7 +95,7 @@
 #' obsvals = rpois(nind*nrep, expvals)
 #' beta0 = latmu
 #' beta0 = log(mean(obsvals))
-#' md = data.frame(obsvals, indid, obsid, groid)
+#' md = data.frame(obsvals, indid, groid)
 #'
 #' R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
 #'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
@@ -108,6 +116,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
         # observational level random effect
         obsid <- factor(1:nrow(data))
+        data <- cbind(data, obsid)
         # check overdispersion
         formula <- update(formula,  ~ . + (1|obsid))
         mod <- lme4::glmer(formula, data = data, family = poisson(link = link))
@@ -361,9 +370,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 link = link,
                 CI = CI, 
                 R = R, 
-                se = cbind(se_org,se_link),
+                se = as.data.frame(t(cbind(se_org,se_link))),
                 CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
-                P = P,
+                P = as.data.frame(P),
                 R_boot_link = boot_link, 
                 R_boot_org = boot_org,
                 R_permut_link = permut_link, 

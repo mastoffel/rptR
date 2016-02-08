@@ -13,7 +13,9 @@
 
 \item{grname}{The name of the grouping factor to plot.}
 
-\item{scale}{Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.}
+\item{scale}{Either "link" or "original" scale results for results of non-Gaussian functions.}
+
+\item{type}{Either "boot" or "permut" for plotting the results of bootstraps or permutations.}
 
 \item{main}{Plot title}
 
@@ -25,17 +27,6 @@
 }
 \description{
 Plots the distribution of repeatability estimates from bootstrapping and permutation tests.
-For MCMC methods (to fill in)
-}
-\examples{
- 
-# repeatability estimation for tarsus length - a very high R
-data(BodySize)
-(rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID, nboot=100, npermut=100))   
-# reduced number of nboot and npermut iterations
-plot(rpt.BS)
-
-      
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se), 

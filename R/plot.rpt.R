@@ -1,11 +1,11 @@
 #' Plot a rpt object
 #' 
 #' Plots the distribution of repeatability estimates from bootstrapping and permutation tests.
-#' For MCMC methods (to fill in)
 #' 
 #' @param x An rpt object returned from one of the rpt functions.
 #' @param grname The name of the grouping factor to plot.
-#' @param scale Either link or original scale results for binomial or poisson data and the multiplicative overdispersion model.
+#' @param scale Either "link" or "original" scale results for results of non-Gaussian functions.
+#' @param type Either "boot" or "permut" for plotting the results of bootstraps or permutations.
 #' @param main Plot title
 #' @param breaks hist() argument
 #' @param xlab x-axis title
@@ -22,14 +22,6 @@
 #' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
 #'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
 #' 
-#' @examples  
-#' # repeatability estimation for tarsus length - a very high R
-#' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM(data = BodySize, Tarsus, BirdID, nboot=100, npermut=100))   
-#' # reduced number of nboot and npermut iterations
-#' plot(rpt.BS)
-#' 
-#'       
 #' @keywords models
 #' 
 #' @export

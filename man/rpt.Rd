@@ -44,38 +44,6 @@ all cores but one are used.}
 }
 \value{
 Returns an object of class rpt. See details for specific functions.
-\item{datatype}{Type of repsonse ('Gaussian', 'binomial' or 'count').}
-\item{method}{Method used to calculate repeatability ('REML', 'MCMC', 'ANOVA',
-      'corr', 'GLMM.add' or 'GLMM.multi').}
-\item{link}{Link functions used (GLMMs only).}
-\item{CI}{Width of the confidence interval or Bayesian credibility interval.}
-\item{R}{Point estimate for repeatability.}
-\item{R.link}{Point estimate for repeatability on link scale (GLMM only).}
-\item{R.org}{Point estimate for repeatability on original scale (GLMM only).}
-\item{se}{Standard error (\emph{se}) for repeatability. Note that the 
-     distribution might not be symmetrical, in which case the se is less 
-     informative.}
-\item{se.link}{Standard error (\emph{se}) for repeatability on link scale 
-     (GLMM only).}
-\item{se.org}{Standard error (\emph{se}) for repeatability on original scale 
-     (GLMM only).}
-\item{CI.R}{Confidence interval or Bayesian credibility interval for the 
-     repeatability.}
-\item{CI.link}{Confidence interval or Bayesian credibility interval for 
-     repeatability on link scale (GLMM only).}
-\item{CI.org}{Confidence interval or Bayesian credibility interval for 
-     repeatability on original scale (GLMM only).}
-\item{P}{Significace test, returned as \emph{NA} for the Bayesian approach 
-     conflicts with the null hypothesis testing.}
-\item{P.link}{Significace test for repeatability on link scale, returned 
-     as \emph{NA} for the Bayesian approach conflicts with the null 
-     hypothesis testing.}
-\item{P.org}{Significace test for repeatability on original scale, returned 
-     as \emph{NA} for the Bayesian approach conflicts with the null 
-     hypothesis testing.}
-\item{R.post}{MCMC samples form the posterior distributions of \emph{R}.} 
-\item{R.boot}{Parametric bootstrap samples for \emph{R}.}
-\item{R.permut}{Permutation samples for \emph{R}.}
 }
 \description{
 A wrapper function for (adjusted) repeatability calculations. Calls 
@@ -90,8 +58,9 @@ For \code{datatype='Gaussian'} calls function \link{rptGaussian},
 
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se) & 
-     Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz)
+Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
+        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),
+        Martin A. Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
 Nakagawa, S. and Schielzeth, H. (2011) \emph{Repeatability for 

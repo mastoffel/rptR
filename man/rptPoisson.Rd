@@ -35,29 +35,6 @@ asymptotic \emph{P} values (defaults to 1000).}
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
 }
-\value{
-Returns an object of class rpt that is a a list with the following elements: 
-\item{call}{function call}
-\item{datatype}{Response distribution (here: 'Poisson').}
-\item{method}{Method used to calculate repeatability (here: 'REML').}
-\item{CI}{Width of the confidence interval.}
-\item{R}{Point estimates for repeatabilities on the link and original scale.}
-\item{se}{Approximate standard errors (\emph{se}) for repeatabilitieson the link and original scale.
-           Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
-\item{CI_emp}{Confidence intervals for repeatabilities on the link and original scale.}
-\item{P}{Approximate \emph{P} data frame with p-values from a significance test based on likelihood-ratio
-and significance test based on permutation of residuals for both the original and link scale.}
-\item{R_boot_link}{Parametric bootstrap samples for \emph{R} on the link scale.}
-\item{R_boot_org}{Parametric bootstrap samples for \emph{R} on the original scale.}
-\item{R_permut_link}{Permutation samples for \emph{R} on the link scale.}
-\item{R_permut_org}{Permutation samples for \emph{R} on the original scale.}
-\item{LRT}{List of Likelihood-ratios for the model(s) and the reduced model(s), 
-and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
-\item{ngroups}{Number of groups.}
-\item{nobs}{Number of observations.}
-\item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
-\item{mod}{Fitted model.}
-}
 \description{
 Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
@@ -83,7 +60,6 @@ latgv = 0.3
 latrv = 0.2
 indid = factor(rep(1:nind, each=nrep))
 groid = factor(rep(1:nrep, nind))
-obsid = factor(rep(1:I(nind*nrep)))
 latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
@@ -91,7 +67,7 @@ expvals = exp(latvals)
 obsvals = rpois(nind*nrep, expvals)
 beta0 = latmu
 beta0 = log(mean(obsvals))
-md = data.frame(obsvals, indid, obsid, groid)
+md = data.frame(obsvals, indid, groid)
 
 R_est <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)

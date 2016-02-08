@@ -1,6 +1,5 @@
 #' Summary of a rpt object
-#' 
-#' 
+#'
 #' 
 #' @param object An rpt object returned from one of the rpt functions
 #' @param \dots Additional arguments; none are used in this method.
@@ -13,14 +12,6 @@
 #'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
-#' @seealso \link{rpt}, \link{rpt.corr}, \link{rpt.aov}, \link{rpt.remlLMM}, \link{rpt.mcmcLMM},
-#'          \link{rpt.binomGLMM.add}, \link{rpt.binomGLMM.multi}, \link{rpt.poisGLMM.add}, \link{rpt.poisGLMM.multi}
-#' 
-#' @examples  
-#' # repeatability estimation for weight (body mass)
-#' data(BodySize)
-#' rpt.Weight <- rpt.mcmcLMM(data = BodySize, Weight, BirdID) 
-#' summary(rpt.Weight)
 #' @keywords models
 #' 
 #' @export
@@ -79,7 +70,7 @@ summary.rpt <- function(object, ...) {
                 boot <- list(object$R_boot_org, object$R_boot_link)
                 perm <- list(object$R_permut_org, object$R_permut_link)
                 for(i in 1:ncol(object$R)) {
-                        object$rpt[[i]] <- structure(data.frame(R = object$R[[i]], as.data.frame(t(object$se))[[i]], 
+                        object$rpt[[i]] <- structure(data.frame(R = object$R[[i]], object$se[[i]], 
                                           do.call(rbind, lapply(object$CI_emp, function(x) x[i, ])),
                                           object$P[i, c("P_permut_org", "P_permut_link")]),
                                            names = c("R", "SE", names(calc_CI(object$R_boot_org[[1]])), "P_val"),

@@ -2,7 +2,7 @@
 #' 
 #' Calculates repeatability from a linear mixed-effects models fitted by REML (restricted maximum likelihood).
 #' 
-#' @param formula Formula as used e.g. by \link{glmer}. The grouping factor of
+#' @param formula Formula as used e.g. by \link{lmer}. The grouping factor of
 #'        interest needs to be included as a random effect, e.g. '(1|groups)'.
 #'        Covariates and additional random effects can be included to estimate adjusted repeatabilities.
 #' @param grname A character string or vector of character strings giving the
@@ -55,13 +55,13 @@
 #' 
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
-#' (rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
+#' (rpt.BS <- rptGaussian(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
 #'  data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 #' 
 #' # repeatability estimation for weight (body mass) - a lower R than the previous one
 #' data(BodySize)
-#' (rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), 'BirdID', 
+#' (rpt.Weight <- rptGaussian(Weight ~ Sex + (1|BirdID), 'BirdID', 
 #'                                data=BodySize, nboot=10, npermut=10))
 #' # reduced number of nboot and npermut iterations
 #' 
@@ -71,21 +71,21 @@
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 1000, 
         parallel = FALSE, ncores = NULL) {
         
-        mod <- lme4::glmer(formula, data = data)
+        mod <- lme4::lmer(formula, data = data)
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         
-        # check if all variance components are 0
-        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-                nboot <- 0
-                npermut <- 0
-                warning("all variance components are 0, bootstrapping and permutation skipped")
-        }
+#         # check if all variance components are 0
+#         if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+#                 nboot <- 0
+#                 npermut <- 0
+#                 warning("all variance components are 0, bootstrapping and permutation skipped")
+#         }
         
         # point estimates of R
         R.pe <- function(formula, data, grname, peYN = FALSE) {
-                mod.fnc <- lme4::glmer(formula, data)
+                mod.fnc <- lme4::lmer(formula, data)
                 varComps <- lme4::VarCorr(mod.fnc)
 #                 if (peYN & any(varComps == 0) & nboot > 0) {
 #                         assign("nboot", 0, envir = e1)
@@ -183,14 +183,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut 
                         P.permut <- sum(R.permut >= R)/npermut
                 }
         }
-        # multiple random effects, uses glmer()
+        # multiple random effects, uses lmer()
         if (length(randterms) > 1) {
                 R.permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
                 P.permut <- rep(NA, length(grname))
                 for (i in 1:length(grname)) {
                         formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                                 ")"))))
-                        mod_red <- lme4::glmer(formula_red, data = data)
+                        mod_red <- lme4::lmer(formula_red, data = data)
                         
                         if(parallel == TRUE) {
                                 if (is.null(ncores)) {
@@ -226,7 +226,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, npermut 
                 for (i in 1:length(grname)) {
                         formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                                 ")"))))
-                        LRT.red[i] <- as.numeric(logLik(lme4::glmer(formula_red, data = data)))
+                        LRT.red[i] <- as.numeric(logLik(lme4::lmer(formula_red, data = data)))
                         LRT.D[i] <- as.numeric(-2 * (LRT.red[i] - LRT.mod))
                         LRT.P[i] <- ifelse(LRT.D[i] <= 0, 1, pchisq(LRT.D[i], 1, lower.tail = FALSE)/2)
                         # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',

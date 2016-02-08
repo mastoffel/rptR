@@ -8,7 +8,7 @@ rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000,
   npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{glmer}. The grouping factor of
+\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor of
 interest needs to be included as a random effect, e.g. '(1|groups)'.
 Covariates and additional random effects can be included to estimate adjusted repeatabilities.}
 
@@ -57,13 +57,13 @@ Calculates repeatability from a linear mixed-effects models fitted by REML (rest
 
 # repeatability estimation for tarsus length - a very high R
 data(BodySize)
-(rpt.BS <- rpt.remlLMM.adj(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
+(rpt.BS <- rptGaussian(Tarsus ~ 1 + (1|Sex) + (1|BirdID), c('Sex', 'BirdID'), 
  data=BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 
 # repeatability estimation for weight (body mass) - a lower R than the previous one
 data(BodySize)
-(rpt.Weight <- rpt.remlLMM.adj(Weight ~ Sex + (1|BirdID), 'BirdID', 
+(rpt.Weight <- rptGaussian(Weight ~ Sex + (1|BirdID), 'BirdID', 
                                data=BodySize, nboot=10, npermut=10))
 # reduced number of nboot and npermut iterations
 

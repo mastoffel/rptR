@@ -22,24 +22,27 @@
 #' @export
 #' 
 #' 
-#' @examples  
-#' # repeatability estimation for weight 
-#' data(BodySize)
-#' rpt.Weight <- rpt.mcmcLMM(BodySize, Weight, BirdID)
-#' print(rpt.Weight)  # alternative call to print.rpt() through print()
 #' 
 print.rpt <- function(x, ...) {
     # rpt.corr, rpt.mcmcLMM
-
+#         if (x$datatype == "Gaussian") {
+#                         #  rpt.remlLMM.adj with one group factor
+#                         cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
+#                                 "R  = ", round(x$R, 3), "\n", "SE = ", round(x$se, 3), "\n", "CI = [", round(x$CI.R[1], 
+#                                         3), ", ", round(x$CI.R[2], 3), "]", "\n", "P  = ", signif(x$P[1], 3), 
+#                                 " [",names(x$P[1]), "]", "\n", "     ", signif(x$P[2], 3), " [", 
+#                                 x$P[2], "]", "\n\n", sep = "")     
+#                 }
     # rpt.remlLMM.adj   
-    if (x$datatype == "Gaussian" & length(x$P) > 1 & length(x$R) > 1) {
+    if (x$datatype == "Gaussian") {
         cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n")
         for (i in 1:length(x$R)) {
-            cat("Repeatability for ", names(x$R)[i], "\n", "R  = ", round(x$R[i], 3), 
-                "\n", "SE = ", round(x$se[i], 3), "\n", "CI = [", round(x$CI.R[i, 1], 
-                  3), ", ", round(x$CI.R[i, 2], 3), "]", "\n", "P  = ", signif(x$P[i, 
-                  1], 3), " [", attr(x$P, "dimnames")[[2]][1], "]", "\n", "     ", signif(x$P[i, 
-                  2], 3), " [", attr(x$P, "dimnames")[[2]][2], "]", "\n\n", sep = "")
+            cat("Repeatability for ", names(x$R)[i], "\n", 
+                 "R  = ", round(unlist(x$R[i]), 3), "\n", 
+                 "SE = ", round(unlist(x$se[i, ]), 3), "\n", 
+                 "CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n", 
+                  "P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
+                  "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
         }
     }
         
@@ -52,11 +55,11 @@ print.rpt <- function(x, ...) {
                     cat("Repeatability for ", names(x$R)[i], "\n",
                          "--------------------------------", "\n",
                          "Link scale repeatabilities:", 
-                         "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se[grname, "se_link"], 3),
+                         "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se["se_link", grname], 3),
                           "\n", "CI = [", round(x$CI_emp$CI_link[grname, 1], 3), ", ",  round(x$CI_emp$CI_link[grname, 2], 3), "]", "\n", 
                           "P  = ", signif(x$P[grname,  "P_permut_link"], 3), "\n\n",
                         "Original scale repeatabilities:",
-                        "\n", "R  = ", round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se[grname, "se_org"], 3), "\n", 
+                        "\n", "R  = ", round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se["se_org", grname], 3), "\n", 
                         "CI = [", round(x$CI_emp$CI_org[grname, 1], 3), ", ", round(x$CI_emp$CI_org[grname, 2], 3), "]", "\n", 
                         "P  = ", signif(x$P[grname,  "P_permut_org"], 3), "\n\n", sep = "")
             }

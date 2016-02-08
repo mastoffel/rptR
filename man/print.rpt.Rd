@@ -14,14 +14,6 @@
 \description{
 Displays the results a rpt object (i.e. the result of a rpt function call) in a nice form.
 }
-\examples{
- 
-# repeatability estimation for weight 
-data(BodySize)
-rpt.Weight <- rpt.mcmcLMM(BodySize, Weight, BirdID)
-print(rpt.Weight)  # alternative call to print.rpt() through print()
-
-}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se), 
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
