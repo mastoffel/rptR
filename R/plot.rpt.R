@@ -131,23 +131,16 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
     }
     
     if (x$datatype == "Gaussian") {
-        devAskNewPage(ask = TRUE)
-        on.exit(devAskNewPage(ask = NULL))
         if (type == "boot") {
-            for (i in 1:length(x$R)) {
-                boot_hist(R = x$R[i], R.boot = x$R.boot[i, ], CI.l = unname(x$CI.R[i, 
-                  1]), CI.u = unname(x$CI.R[i, 2]), main. = paste("Bootstrap repeatabilities for", 
-                  names(x$R)[i]), ...)
+                boot_hist(R = x$R[grname], R.boot = unlist(x$R_boot[grname]), CI.l = unname(x$CI_emp[i, 
+                  1]), CI.u = unname(x$CI_emp[i, 2]), main. = paste("Bootstrap repeatabilities for", 
+                  grname), ...)
             }
-        } else if (type == "permut") {
-            for (i in 1:length(x$R)) {
-                permut_hist(R = x$R[i], R.permut = x$R.permut[i, ], main. = paste("Permutation repeatabilities for", 
-                  names(x$R)[i]), ...)
-            }
-        }
+       if (type == "permut") {
+                permut_hist(R = x$R[grname], R.permut = unlist(x$R_permut[grname]), main. = paste("Permutation repeatabilities for", 
+                  grname), ...)
+       }
     }
-    
-
     
 }
  

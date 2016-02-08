@@ -35,7 +35,7 @@ print.rpt <- function(x, ...) {
 #                 }
     # rpt.remlLMM.adj   
     if (x$datatype == "Gaussian") {
-        cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n")
+        cat("\n", "Repeatability calculation using the glmm method", "\n\n")
         for (i in 1:length(x$R)) {
             cat("Repeatability for ", names(x$R)[i], "\n", 
                  "R  = ", round(unlist(x$R[i]), 3), "\n", 

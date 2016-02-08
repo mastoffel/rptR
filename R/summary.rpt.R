@@ -24,7 +24,7 @@
 summary.rpt <- function(object, ...) {
 
         # helper functions for 
-        CI <- R_est$CI
+        CI <- object$CI
         calc_CI <- function(x) {
                 out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
                 out
@@ -39,27 +39,20 @@ summary.rpt <- function(object, ...) {
         }
         
         if(object$datatype=="Gaussian") {
-                # warning("Not yet implemented")
-#                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
-        for(i in 1:length(object$R)) {
-                CI.perm  <- quantile(object$R.permut[i, ], c((1-object$CI)/2,1-(1-object$CI)/2), na.rm=TRUE) # should be taken out of the loop to the top when impl.
-                object$rpt[[i]]    <- structure(data.frame(object$R[i], object$se[i] ,unname(object$P[i, 1]), object$CI.R[i, 1], object$CI.R[i, 2]), 
-                                           names = c("R", "SE", colnames(object$P)[1], 
-                                                   colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
-                                                   row.names = "rpt")
-                bootperm      <- structure(data.frame(c(ncol(object$R.boot), ncol(object$R.permut)),
-                                                 c(mean(object$R.boot[i, ]), mean(object$R.permut[i, ])),
-                                                 c(median(object$R.boot[i, ]), median(object$R.permut[i, ])),
-                                                 c(unname(object$CI.R[i, 1]), unname(CI.perm[1])), # should be CI.perm[i, 1] when implemented
-                                                 c(unname(object$CI.R[i, 2]), unname(CI.perm[2]))),
-                                                 names = c("N", "Mean", "Median", 
-                                                 colnames(object$CI.R)[1], colnames(object$CI.R)[2]),
-                                                 row.names = c("boot", "permut"))
-                object$boot[[i]]   <-  bootperm[1, ]
-                object$permut[[i]] <-  bootperm[2, ]
-        }
-                class(object) <- "summary.rpt"
-                return(object)
+                for(i in 1:length(object$R)) {
+                        object$rpt[[i]]    <- structure(data.frame(object$R[i], object$se[i, ], object$CI_emp[i, 1], object$CI_emp[i, 2], 
+                                                        unname(object$P[i, 2]), round(unname(object$P[i, 1]), 3)), 
+                                                        names = c("R", "SE", colnames(object$CI_emp)[1], colnames(object$CI_emp)[2],
+                                                        colnames(object$P)[2],  colnames(object$P)[1]), 
+                                                           row.names = "rpt")
+                        bootperm      <- structure(data.frame(do.call(rbind, lapply(list(x$R_boot[[i]], x$R_permut[[i]]), extr_comps))),
+                                         row.names = c("boot", "permut"), names = c("N", "Mean", "Median", names(object$CI_emp)))
+        
+                        object$boot[[i]]   <-  bootperm[1, ]
+                        object$permut[[i]] <-  bootperm[2, ]
+                }
+                        class(object) <- "summary.rpt"
+                        return(object)
         }
         
         
