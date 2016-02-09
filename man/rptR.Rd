@@ -7,28 +7,37 @@
 \title{rptR: Repeatability calculation for Gaussian and Non-Gaussian data}
 \description{
 A collection of functions for calculating point estimates, interval estimates and 
-significance tests of the repeatability (intra-class correlation coefficient) of measurements.
-The function \link{rpt} is a the core functions that calls more specialised functions as required. 
-Specialised functions can also be called directly (see \link{rpt} for details).
-All functions return lists of values. The function \link{summary.rpt} produces summaries in a detailed format.
+  significance tests of the repeatability (intra-class correlation coefficient) of measurements. 
+  The function \link{rpt} is a the core functions that calls more specialised functions as
+  required. Specialised functions can also be called directly (see \link{rpt} for details). All
+  functions return lists of values. The function \link{summary.rpt} produces summaries in a
+  detailed format and \link{plot.rpt} plots bootstraps or permutation results.
 }
 \note{
-Currently there is are a number of functions that use the three arguments, (1) \code{formula}, specifies
-the \code{data.frame} containing the variables, \code{y} specifies the response variable and \code{groups} specifies
-the group variable in the \code{data.frame}. These are used to 
-estimate standard repeatabilities (see e.g. function \link{rpt}). There is another group of 
-functions that uses the arguments \code{formula} and \code{grname} besides the \code{data} argument, which allows 
-to estimate adjusted repeatabilities (controlling for fixed effects) and the estimation of multiple variance 
-components simulatneously (multiple random effects). In the long run, the two groups of functions will be merged 
-and will use the more flexible fomula arguments. So far, adjusted repeatabilities are only implemented for 
-Gaussian data using REML estimation.
+Currently there four different functions depending on the distribution and type of respnse: (1)
+\link{rptGaussian} for a gaussian distributed response, (2) \link{rptPoisson} for poisson data, 
+(3) \link{rptBinary} assumes a binomial distributed binary response and (4) \link{rptProportion}
+takes a response matrix with a column for successes and a column for failures, also
+assuming a binomial distribution. All function use a mixed model framework in \code{lme4}, 
+and the non-gaussian functions use an observational level random effect to account
+for overdispersion.
+All functions use the argument \code{formula}, which is the same formula interface as in the
+ \code{lme4} package. Repeatabilites are calculated for the response variable, while one or
+more grouping factors of interest can be assigned as random effects in the form (1|group) and
+have to be specified with the \code{grname} argument. This allows to estimate adjusted
+repeatabilities (controlling for fixed effects) and the estimation of multiple variance 
+components simulatneously (multiple random effects). All variables have to be columns 
+in a \code{data.frame} given in the \code{data} argument. The \code{link} argument specifies
+the link function for a given non-gaussian distribtion. Finally, all computation can be 
+parallelized with the \code{parallel} argument, which enhances computation speed for larger
+computations.
 }
 \author{
-Holger Schielzeth (holger.schielzeth@ebc.uu.se), Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),
-        Martin Stoffel (martin.adam.stoffel@gmail.com)
+Holger Schielzeth (holger.schielzeth@ebc.uu.se), Shinichi Nakagawa
+  (shinichi.nakagawa@otago.ac.nz), Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
-Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and non-Gaussian data: 
-            a practical guide for biologists}. Biological Reviews 85: 935-956
+Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
+  non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 
