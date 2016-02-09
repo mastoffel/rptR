@@ -63,7 +63,7 @@
 #' # repeatability estimation for tarsus length - a very high R
 #' data(BodySize)
 #' (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|Sex) + (1|BirdID), grname = c('Sex', 'BirdID'), 
-#'  data=BodySize, nboot=10, npermut=10))
+#'  data=BodySize, nboot=10, npermut=10, parallel = TRUE))
 #'  
 #'  (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
 #'  data=BodySize, nboot=10, npermut=10))
@@ -191,6 +191,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
  
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
+        
         for (i in 1:length(grname)) {
                 if (length(randterms) == 1) {
                         formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))

@@ -65,17 +65,17 @@ summary.rpt <- function(object, ...) {
                 for(i in 1:ncol(object$R)) {
                         object$rpt[[i]] <- structure(data.frame(R = object$R[[i]], object$se[[i]], 
                                           do.call(rbind, lapply(object$CI_emp, function(x) x[i, ])),
-                                          object$P[i, c("P_permut_org", "P_permut_link")]),
-                                           names = c("R", "SE", names(calc_CI(object$R_boot_org[[1]])), "P_val"),
+                                          t(object$P[i, c("P_permut_org", "P_permut_link")])),
+                                           names = c("R", "SE", names(calc_CI(object$R_boot_org[[1]])), "P_permut"),
                                           row.names = c("Org", "Link"))
                         object$boot[[i]] <- structure(do.call(rbind, 
                                             lapply(boot, function(x) extr_comps(x[[i]]))),
                                             row.names = c("Org", "Link"))
                         object$permut[[i]] <- structure(cbind(
                                 do.call(rbind, lapply(perm, function(x) extr_comps(x[[i]]))),
-                                object$P[i, c("P_permut_org", "P_permut_link")]),
+                                t(object$P[i, c("P_permut_org", "P_permut_link")])),
                                               row.names = c("Org", "Link"))
-                        names(object$permut[[i]])[6] <- "P_val"
+                        names(object$permut[[i]])[6] <- "P_permut"
                        
                 }
                 class(object) <- "summary.rpt"
