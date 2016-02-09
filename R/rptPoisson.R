@@ -119,8 +119,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         obsid <- factor(1:nrow(data))
         data <- cbind(data, obsid)
         # check overdispersion
-        formula <- update(formula,  ~ . + (1|obsid))
-        mod <- lme4::glmer(formula, data = data, family = poisson(link = link))
+        formula <- stats::update(formula,  ~ . + (1|obsid))
+        mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
         obsind_id <- which(VarComps[["grp"]] == "obsid")
         overdisp <- VarComps$vcov[obsind_id]
@@ -139,7 +139,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = poisson(link = link))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 # find groups and obsid
@@ -176,10 +176,10 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         R <- R_pe(formula, data, grname, peYN = FALSE) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
-        if (nboot > 0)  Ysim <- as.matrix(simulate(mod, nsim = nboot))
+        if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
        
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(model.frame(mod))[1]] <- as.vector(y)
+                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
         if (nboot > 0 & parallel == TRUE) {
@@ -233,7 +233,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 names(boot_link) <- grname
         
                 calc_CI <- function(x) {
-                        out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                        out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
                 }
         
         # CI into data.frame and transpose to have grname in rows
@@ -241,8 +241,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
         
         # se
-                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
-                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
+                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, stats::sd))))
+                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, stats::sd))))
                 names(se_org) <- "se_org"
                 names(se_link) <- "se_link"
         }
@@ -267,7 +267,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 permut <- function(nperm, formula, mod, dep_var, grname, data) {
                         # for binom it will be logit 
                         #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
-                        y_perm <- rpois(nrow(data), (sqrt(fitted(mod)) + sample(resid(mod)))^2)
+                        y_perm <- stats::rpois(nrow(data), (sqrt(stats::fitted(mod)) + sample(stats::resid(mod)))^2)
                         data_perm <- data
                         data_perm[dep_var] <- y_perm
                         out <- R_pe(formula, data_perm, grname)
@@ -277,7 +277,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 permut <- function(nperm, formula, mod, dep_var, grname, data) {
                         # for binom it will be logit 
                        #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
-                        y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
+                        y_perm <- stats::rpois(nrow(data), exp(log(stats::fitted(mod)) + sample(stats::resid(mod))))
                         data_perm <- data
                         data_perm[dep_var] <- y_perm
                         out <- R_pe(formula, data_perm, grname)
@@ -337,16 +337,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
                 
         ## likelihood-ratio-test
-        LRT_mod <- as.numeric(logLik(mod))
+        LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
         
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))
-                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = poisson(link = link))))
+                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
+                        family = stats::poisson(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
                 # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',

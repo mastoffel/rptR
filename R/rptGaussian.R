@@ -108,7 +108,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
         
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(model.frame(mod))[1]] <- as.vector(y)
+                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
         if (nboot > 0 & parallel == TRUE) {
@@ -139,7 +139,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         names(boot) <- grname
         # CI function
         calc_CI <- function(x) {
-                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
         }
         
         if (length(R_boot) == 1) {
@@ -156,7 +156,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # CI 
                 CI_emp <- as.data.frame(t(as.data.frame(lapply(boot, calc_CI))))
                 # se
-                se <- as.data.frame(t(as.data.frame(lapply(boot, sd))))
+                se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
               
         }
@@ -177,7 +177,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
         permut <- function(nperm, formula, data, mod_red, dep_var, grname, i) {
-                y_perm <- fitted(mod_red) + sample(resid(mod_red))
+                y_perm <- stats::fitted(mod_red) + sample(stats::resid(mod_red))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname[i])
@@ -186,7 +186,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # multiple random effects, uses lmer()
         dep_var <- as.character(formula)[2]
-        # one random effect, uses lm()
+        # one random effect, uses stats::lm()
         # multiple random effects, uses lmer()
  
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
@@ -194,10 +194,10 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         for (i in 1:length(grname)) {
                 if (length(randterms) == 1) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        mod_red <- lm(formula_red, data = data)
+                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                        mod_red <- stats::lm(formula_red, data = data)
                 } else if (length(randterms) > 1) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                                 ")"))))
                         mod_red <- lme4::lmer(formula_red, data = data)
                 }
@@ -225,25 +225,25 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
   
         
         ## likelihood-ratio-test
-        LRT_mod <- as.numeric(logLik(mod))
+        LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
         
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
                 if (length(randterms) == 1) {
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        LRT_red[i] <- as.numeric(logLik(lm(formula_red, data = data)))
+                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                        LRT_red[i] <- as.numeric(stats::logLik(lm(formula_red, data = data)))
                 } else if (length(randterms) >= 1){
-                        formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))
-                        LRT_red[i] <- as.numeric(logLik(lme4::lmer(formula = formula_red, data = data)))
+                        LRT_red[i] <- as.numeric(stats::logLik(lme4::lmer(formula = formula_red, data = data)))
                 }
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                # LR <- as.numeric(-2*(logLik(lme4::lmer(stats::update(formula, eval(paste('. ~ . ',
                 # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+                # ifelse(LR<=0, 1, stats::pchisq(LR,1,lower.tail=FALSE)/2)
         }
         
         P <- cbind(LRT_P, P_permut)

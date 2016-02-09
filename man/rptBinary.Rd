@@ -92,7 +92,7 @@ latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
 expvals = VGAM::logit(latvals, inverse = TRUE)
-obsvals = rbinom(nind*nrep, 1, expvals)
+obsvals = stats::rbinom(nind*nrep, 1, expvals)
 beta0 = latmu
 beta0 = VGAM::logit(mean(obsvals))
 md = data.frame(obsvals, indid, groid)

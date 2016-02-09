@@ -119,8 +119,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         obsid <- factor(1:nrow(data))
         data <- cbind(data, obsid)
         
-        formula <- update(formula,  ~ . + (1|obsid))
-        mod <- lme4::glmer(formula, data = data, family = binomial(link = link))
+        formula <- stats::update(formula,  ~ . + (1|obsid))
+        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
         obsind_id <- which(VarComps[["grp"]] == "obsid")
         overdisp <- VarComps$vcov[obsind_id]
@@ -138,7 +138,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = binomial(link = link))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 # find groups and obsid
@@ -236,7 +236,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 names(boot_link) <- grname
                 
                 calc_CI <- function(x) {
-                        out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                        out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
                 }
                 
                 # CI into data.frame and transpose to have grname in rows
@@ -275,7 +275,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- rbinom(nrow(data), rowSums(dep_var), prob = trans_fun((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
+                y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), prob = trans_fun((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod))), inverse = TRUE))
                 # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm
@@ -330,7 +330,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         
         ## likelihood-ratio-test
-        LRT_mod <- as.numeric(logLik(mod))
+        LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
         #         if (length(randterms) == 1) {
         #                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
@@ -346,12 +346,12 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))
-                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = binomial(link = link))))
+                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
+                        family = stats::binomial(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
                 # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
                 # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
                 # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)

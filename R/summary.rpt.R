@@ -26,13 +26,13 @@ summary.rpt <- function(object, ...) {
         # helper functions for 
         CI <- object$CI
         calc_CI <- function(x) {
-                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
                 out
         }
         
         extr_comps <- function(x) {
                 CI <- calc_CI(x)
-                out <- data.frame("N" = length(x), "Mean" = mean(x), "Median" = median(x),
+                out <- data.frame("N" = length(x), "Mean" = mean(x), "Median" = stats::median(x),
                         calc_CI(x)[[1]], calc_CI(x)[[2]])
                 names(out)[4:5] <- names(calc_CI(x))
                 out

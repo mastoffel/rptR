@@ -69,14 +69,14 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         dots <- list(...)
         
         # y position of confidence band
-        v.pos <- max((hist(R.boot, breaks = breaks., plot = FALSE))$counts)
+        v.pos <- max((graphics::hist(R.boot, breaks = breaks., plot = FALSE))$counts)
         # plot
-        do.call(hist, args = c(list(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
-        lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
-        arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.3, angle = 90, code = 3, 
+        do.call(graphics::hist, args = c(list(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
+        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+        graphics::arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.3, angle = 90, code = 3, 
             lwd = 2.5, col = "black")
-        points(R, v.pos * 1.15, cex = 1.2, pch = 19, col = "red")
-        legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), c("Repeatability with CI"), 
+        graphics::points(R, v.pos * 1.15, cex = 1.2, pch = 19, col = "red")
+        graphics::legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), c("Repeatability with CI"), 
             box.lty = 0)
     }
     
@@ -84,20 +84,20 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         ...) {
         dots <- list(...)
         # get CI for permutation
-        CI.perm <- quantile(R.permut, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-        Median.R <- median(R.permut)
+        CI.perm <- stats::quantile(R.permut, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+        Median.R <- stats::median(R.permut)
         # y position of confidence band
-        v.pos <- max((hist(R.permut, breaks = breaks., plot = FALSE))$counts)
+        v.pos <- max((graphics::hist(R.permut, breaks = breaks., plot = FALSE))$counts)
         # plot
-        do.call(hist, args = c(list(R.permut, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
-        lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", 
+        do.call(graphics::hist, args = c(list(R.permut, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
+        graphics::lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", 
             lty = 5)
-        lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
-        arrows(unname(CI.perm[1]), v.pos * 1.15, unname(CI.perm[2]), v.pos * 1.15, length = 0.3, 
+        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
+        graphics::arrows(unname(CI.perm[1]), v.pos * 1.15, unname(CI.perm[2]), v.pos * 1.15, length = 0.3, 
             angle = 90, code = 3, lwd = 2.5, col = "black")
-        points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
-        points(R, v.pos * 1.3, cex = 1.2, pch = 19, col = "red")
-        legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), c("Median of repeatabilities from permuted datasets with CI", 
+        graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
+        graphics::points(R, v.pos * 1.3, cex = 1.2, pch = 19, col = "red")
+        graphics::legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), c("Median of repeatabilities from permuted datasets with CI", 
             "Observed repeatability"), box.lty = 0)
     }
     

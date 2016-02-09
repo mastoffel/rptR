@@ -89,7 +89,7 @@
 #' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 #' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
 #' expvals = VGAM::logit(latvals, inverse = TRUE)
-#' obsvals = rbinom(nind*nrep, 1, expvals)
+#' obsvals = stats::rbinom(nind*nrep, 1, expvals)
 #' beta0 = latmu
 #' beta0 = VGAM::logit(mean(obsvals))
 #' md = data.frame(obsvals, indid, groid)
@@ -115,8 +115,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         obsid <- factor(1:nrow(data))
         data <- cbind(data, obsid)
         
-        formula <- update(formula,  ~ . + (1|obsid))
-        mod <- lme4::glmer(formula, data = data, family = binomial(link = link))
+        formula <- stats::update(formula,  ~ . + (1|obsid))
+        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
         obsind_id <- which(VarComps[["grp"]] == "obsid")
         overdisp <- VarComps$vcov[obsind_id]
@@ -134,7 +134,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = binomial(link = link))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 # find groups and obsid
@@ -177,7 +177,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
         
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(model.frame(mod))[1]] <- as.vector(y)
+                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
         
@@ -231,7 +231,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         names(boot_link) <- grname
         
                         calc_CI <- function(x) {
-                                out <- quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                                out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
                         }
         
                 # CI into data.frame and transpose to have grname in rows
@@ -239,8 +239,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
                 
                 # se
-                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, sd))))
-                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, sd))))
+                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, stats::sd))))
+                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, stats::sd))))
                 names(se_org) <- "se_org"
                 names(se_link) <- "se_link"
         }
@@ -266,8 +266,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- rbinom(nrow(data), 1, prob = VGAM::logit((trans_fun(fitted(mod)) + sample(resid(mod))), inverse = TRUE))
-                # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
+                y_perm <- stats::rbinom(nrow(data), 1, prob = VGAM::logit((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod))), inverse = TRUE))
+                # y_perm <- stats::rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(stats::resid(mod))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
@@ -322,21 +322,21 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         
         ## likelihood-ratio-test
-        LRT_mod <- as.numeric(logLik(mod))
+        LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
         
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
-                formula_red <- update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))
-                LRT_red[i] <- as.numeric(logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = binomial(link = link))))
+                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
+                        family = stats::binomial(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                # LR <- as.numeric(-2*(logLik(lme4::lmer(stats::update(formula, eval(paste('. ~ . ',
                 # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
+                # ifelse(LR<=0, 1, stats::pchisq(LR,1,lower.tail=FALSE)/2)
         }
         
         P <- cbind(LRT_P, t(P_permut))
@@ -345,7 +345,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # from Harrison (2014): Using observation-level random effects to
         # model overdispersion in count data in ecology and evolution, PeerJ
         #     od.point<-function(modelobject){
-        #             x<-sum(resid(modelobject,type="pearson")^2)
+        #             x<-sum(stats::resid(modelobject,type="pearson")^2)
         #             rdf<-summary(modelobject)$AICtab[5]
         #             return(x/rdf)
         #     }

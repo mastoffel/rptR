@@ -53,10 +53,6 @@ specialised functions depending of the choice of datatype and method.
 For \code{datatype='Gaussian'} calls function \link{rptGaussian},
          for \code{datatype='Poisson'} calls function \link{rptPoisson}, etc.
 }
-\examples{
- 
-
-}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),

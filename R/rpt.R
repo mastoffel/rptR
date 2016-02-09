@@ -42,8 +42,6 @@
 #'         Martin A. Stoffel (martin.adam.stoffel@@gmail.com)
 #' @seealso \link{rpt}
 #' 
-#' @examples  
-#' 
 #' @keywords models
 #' 
 #' @export
