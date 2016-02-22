@@ -233,7 +233,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         for (i in 1:length(grname)) {
                 if (length(randterms) == 1) {
                         formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        LRT_red[i] <- as.numeric(stats::logLik(lm(formula_red, data = data)))
+                        LRT_red[i] <- as.numeric(stats::logLik(stats::lm(formula_red, data = data)))
                 } else if (length(randterms) >= 1){
                         formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                         ")"))))

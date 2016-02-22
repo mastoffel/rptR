@@ -77,8 +77,8 @@
 #' 
 #' 
 #' 
-#' nind = 80
-#' nrep = 30 # a bit higher
+#' nind = 20
+#' nrep = 5 # a bit higher
 #' latmu = 0
 #' latbv = 0.3
 #' latgv = 0.1
@@ -95,7 +95,7 @@
 #' md = data.frame(obsvals, indid, groid)
 #'
 #' R_est_bin <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 20, link = "logit", npermut = 20, parallel = FALSE)
+#'                     data = md, nboot = 20, link = "logit", npermut = 100, parallel = FALSE)
 #' R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
 #'                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
 #'                     
@@ -137,23 +137,13 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
-                # find groups and obsid
-                row_group <- which(VarComps[["grp"]] %in% grname)
-                row_obsid <- which(VarComps[["grp"]] %in% "obsid")
-                # random effect variances
-                var_a <- VarComps[["vcov"]][row_group]
-                names(var_a) <- VarComps[["grp"]][row_group]
-                var_e = VarComps[["vcov"]][row_obsid]
+                # groups random effect variances
+                var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
+                names(var_a) <- grname
+                # olre variance
+                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
-                
-#                 if (peYN & any(VarCompsGr$vcov == 0)) {
-#                         if (nboot > 0){
-#                                 assign("nboot", 0, envir = e1)
-#                                 warning("(One of) the point estimate(s) for the repeatability was exactly 
-#                                         zero; parametric bootstrapping has been skipped.")
-#                         }
-#                 }
                 
                 if (link == "logit") {
                         R_link <- var_a/(var_a + var_e + (pi^2)/3)
@@ -280,9 +270,20 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
                 row.names = c("P_permut_org", "P_permut_link")), names = grname)
         
-        if (npermut == 1) {
-                R_permut <- NA
-        }  else {
+        # for likelihood ratio and permutation test
+        terms <- attr(terms(formula), "term.labels")
+        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        
+        if (npermut > 1){
+                for (i in 1:length(grname)) {
+                        if (length(randterms) > 1) {
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                                        ")"))))
+                                mod_red <- lme4::glmer(formula_red, data = data, family = binomial(link = link))
+                        } else if (length(randterms) == 1) {
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                                mod_red <- stats::glm(formula_red, data = data, family = binomial(link = link))
+                        }
                 if(parallel == TRUE) {
                         if (is.null(ncores)) {
                                 ncores <- parallel::detectCores()
@@ -292,14 +293,15 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         cl <- parallel::makeCluster(ncores)
                         parallel::clusterExport(cl, "R_pe")
                         R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                mod=mod, dep_var=dep_var, grname=grname, data = data)
+                                mod_red=mod_red, dep_var=dep_var, grname=grname, data = data)
                         parallel::stopCluster(cl)
                         
                 } else if (parallel == FALSE) {
-                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod, dep_var, grname, data)
+                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
                 }
                 # adding empirical rpt 
                 R_permut <- c(list(R), R_permut)
+                }
         }
         
 
@@ -341,15 +343,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
-        #Function to calculate a point estimate of overdispersion from a mixed model object
-        # from Harrison (2014): Using observation-level random effects to
-        # model overdispersion in count data in ecology and evolution, PeerJ
-        #     od.point<-function(modelobject){
-        #             x<-sum(stats::resid(modelobject,type="pearson")^2)
-        #             rdf<-summary(modelobject)$AICtab[5]
-        #             return(x/rdf)
-        #     }
-        
+
         res <- list(call = match.call(), 
                 datatype = "Binary", 
                 link = link,

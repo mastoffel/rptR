@@ -99,7 +99,7 @@
 #' md = data.frame(obsvals, indid, groid)
 #'
 #' R_est_pois <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
+#'                     data = md, nboot = 0, link = "log", npermut = 10, parallel = FALSE)
 #'                     
 #' R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
 #'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
@@ -115,24 +115,22 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # link
         if (length(link) > 1) link <- link[1]
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
+        
         # observational level random effect
         obsid <- factor(1:nrow(data))
         data <- cbind(data, obsid)
-        # check overdispersion
         formula <- stats::update(formula,  ~ . + (1|obsid))
-        mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link))
-        VarComps <- as.data.frame(lme4::VarCorr(mod))
-        obsind_id <- which(VarComps[["grp"]] == "obsid")
-        overdisp <- VarComps$vcov[obsind_id]
         
-        # check if all variance components are 0
-        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-                nboot <- 0
-                npermut <- 0
-                warning("all variance components are 0, bootstrapping and permutation skipped")
-        }
-        
-                
+         mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link))
+         VarComps <- as.data.frame(lme4::VarCorr(mod))
+# 
+#         # check if all variance components are 0
+#         if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
+#                 nboot <- 0
+#                 npermut <- 0
+#                 warning("all variance components are 0, bootstrapping and permutation skipped")
+#         }
+#         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
@@ -142,22 +140,14 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
-                # find groups and obsid
-                row_group <- which(VarComps[["grp"]] %in% grname)
-                row_obsid <- which(VarComps[["grp"]] %in% "obsid")
-                # random effect variances
-                var_a <- VarComps[["vcov"]][row_group]
-                names(var_a) <- VarComps[["grp"]][row_group]
-                var_e = VarComps[["vcov"]][row_obsid]
+                # groups random effect variances
+                var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
+                names(var_a) <- grname
+                # olre variance
+                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
-#                  if (peYN & any(VarCompsGr$vcov == 0)) {
-#                          if (nboot > 0){
-#                          assign("nboot", 0, envir = e1)
-#                          warning("(One of) the point estimate(s) for the repeatability was exactly 
-#                                  zero; parametric bootstrapping has been skipped.")
-#                          }
-#                  }
+                
                 if (link == "sqrt") {
                         R_link <- var_a/(var_a + var_e + 0.25)
                         R_org <- NA
@@ -173,6 +163,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 return(R)
         }
         
+        
         R <- R_pe(formula, data, grname, peYN = FALSE) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
@@ -182,6 +173,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
+        
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
                         ncores <- parallel::detectCores() - 1
@@ -199,9 +191,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         grname = grname))
         }
         if (nboot == 0) {
-                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
-#                 R_boot <- list(structure(as.data.frame(matrix(rep(NA, 2*length(grname)), nrow = 2)),
-#                           names = grname, row.names = c("R_org", "R_link")))
                 R_boot <- NA
         }
         
@@ -209,20 +198,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         boot_org <- as.list(rep(NA, length(grname)))
         boot_link <- as.list(rep(NA, length(grname)))
         if (length(R_boot) == 1) {
-                # creating tables when R_boot = NA
+                # creating tables when R_boot = NA for simplicity with subsequent processing
                 if (is.na(R_boot)) {
-                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
                         for(i in c("se_org", "se_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname))), row.names = grname, names = i), 
-                                        envir = e1)   
+                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname))), 
+                                        row.names = grname, names = i), envir = e1)   
                         }
                         for(i in c("CI_org", "CI_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname), ncol = 2)), row.names = grname), 
-                                        envir = e1)   
+                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname), 
+                                        ncol = 2)), row.names = grname), envir = e1)   
                         }
-                        
                 }
         } else  {
                 for (i in 1:length(grname)) {
@@ -250,9 +235,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
-        # significance test by likelihood-ratio-test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
         # no permutation test
         if (npermut == 1) {
@@ -263,28 +245,21 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
         
-        if (link == "sqrt") {
-                permut <- function(nperm, formula, mod, dep_var, grname, data) {
-                        # for binom it will be logit 
-                        #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
-                        y_perm <- stats::rpois(nrow(data), (sqrt(stats::fitted(mod)) + sample(stats::resid(mod)))^2)
-                        data_perm <- data
-                        data_perm[dep_var] <- y_perm
-                        out <- R_pe(formula, data_perm, grname)
-                        out
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
+                if (link == "sqrt") {
+                        y_perm <- stats::rpois(nrow(data), 
+                        (sqrt(stats::fitted(mod_red)) + sample(stats::resid(mod_red)))^2)
+                        }
+                if (link == "log") {
+                        y_perm <- stats::rpois(nrow(data), 
+                        exp(log(stats::fitted(mod_red)) + sample(stats::resid(mod_red))))
                 }
-        } else if (link == "log") {
-                permut <- function(nperm, formula, mod, dep_var, grname, data) {
-                        # for binom it will be logit 
-                       #  y_perm <- rpois(nrow(data), exp(log(fitted(mod)) + sample(resid(mod))))
-                        y_perm <- stats::rpois(nrow(data), exp(log(stats::fitted(mod)) + sample(stats::resid(mod))))
-                        data_perm <- data
-                        data_perm[dep_var] <- y_perm
-                        out <- R_pe(formula, data_perm, grname)
-                        out
-                }
+                data_perm <- data
+                data_perm[dep_var] <- y_perm
+                out <- R_pe(formula, data_perm, grname)
+                out
         }
-        
+
         # response variable
         dep_var <- as.character(formula)[2]
 
@@ -292,35 +267,46 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
                 row.names = c("P_permut_org", "P_permut_link")), names = grname)
         
-         if (npermut == 1) {
-                 R_permut <- NA
-         } else {
+        # for likelihood ratio and permutation test
+        terms <- attr(terms(formula), "term.labels")
+        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+    
+         if (npermut > 1){
+                 for (i in 1:length(grname)) {
+                         if (length(randterms) > 1) {
+                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                                         ")"))))
+                                 mod_red <- lme4::glmer(formula_red, data = data, family = poisson(link = link))
+                         } else if (length(randterms) == 1) {
+                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                                 mod_red <- stats::glm(formula_red, data = data, family = poisson(link = link))
+                         }
                  if(parallel == TRUE) {
                          if (is.null(ncores)) {
                                  ncores <- parallel::detectCores()
                                  warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe")
-                R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                        mod=mod, dep_var=dep_var, grname=grname, data = data)
-                parallel::stopCluster(cl)
-                
-                } else if (parallel == FALSE) {
-                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod, dep_var, grname, data)
-                }
+                         }
+                         # start cluster
+                         cl <- parallel::makeCluster(ncores)
+                         parallel::clusterExport(cl, "R_pe")
+                         R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
+                                 mod_red=mod_red, dep_var=dep_var, grname=grname, data = data)
+                         parallel::stopCluster(cl)
+                         
+                 } else if (parallel == FALSE) {
+                         R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
+                 }
                  
                  # adding empirical rpt 
                  R_permut <- c(list(R), R_permut)
+                 }
          }
-        
-    
+                 
         # equal to boot
         permut_org <- as.list(rep(NA, length(grname)))
         permut_link <- as.list(rep(NA, length(grname)))
         
-        if (!(length(R_permut) == 1)){
+        if (!(npermut == 1)){
                 for (i in 1:length(grname)) {
                         permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
                         permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
@@ -328,8 +314,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 names(permut_org) <- grname
                 names(permut_link) <- grname
         }
-       # names(permut_org) <- grname
-       # names(permut_link) <- grname
         
         P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
         P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
@@ -348,7 +332,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
                         family = stats::poisson(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
                 # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
                 # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
                 # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
@@ -357,14 +341,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
         
-        #Function to calculate a point estimate of overdispersion from a mixed model object
-        # from Harrison (2014): Using observation-level random effects to
-        # model overdispersion in count data in ecology and evolution, PeerJ
-        #     od.point<-function(modelobject){
-        #             x<-sum(resid(modelobject,type="pearson")^2)
-        #             rdf<-summary(modelobject)$AICtab[5]
-        #             return(x/rdf)
-        #     }
      
         res <- list(call = match.call(), 
                 datatype = "Poisson", 

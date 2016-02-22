@@ -80,8 +80,8 @@ data = BroodParasitism))
 
 
 
-nind = 80
-nrep = 30 # a bit higher
+nind = 20
+nrep = 5 # a bit higher
 latmu = 0
 latbv = 0.3
 latgv = 0.1
