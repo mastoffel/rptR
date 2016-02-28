@@ -61,8 +61,9 @@
 #' 
 #' @examples  
 #' # repeatability estimation for tarsus length - a very high R
+#' # NA problems here
 #' data(BodySize)
-#' (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|Sex) + (1|BirdID), grname = c('Sex', 'BirdID'), 
+#' (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + BillL + (1|BirdID), grname = c('BirdID'), 
 #'  data=BodySize, nboot=10, npermut=10, parallel = FALSE))
 #'  
 #'  (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
@@ -73,19 +74,17 @@
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
         npermut = 1000, parallel = FALSE, ncores = NULL) {
         
-        # to do: missing values
+        # missing values
+        no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
+        if (sum(!no_NA_vals ) > 0 ){
+                warning(paste0(sum(!no_NA_vals), " rows containing missing values were removed"))
+                data <- data[no_NA_vals, ]
+        } 
+        
         # no bootstrapping case
         
         mod <- lme4::lmer(formula, data = data)
         VarComps <- as.data.frame(lme4::VarCorr(mod))
-
-        # check if all variance components are 0
-#         if (sum(VarComps$vcov[-"Residual"]!=0) == 0) {
-#                 nboot <- 0
-#                 npermut <- 0
-#                 warning("all variance components are 0, bootstrapping and permutation skipped")
-#         }
-        
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1

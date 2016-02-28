@@ -106,7 +106,12 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         npermut = 1000, parallel = FALSE, ncores = NULL) {
         
         # to do: missing values
-        # no bootstrapping case
+        # missing values
+        no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
+        if (sum(!no_NA_vals ) > 0 ){
+                warning(paste0(sum(!no_NA_vals), " rows containing missing values were removed"))
+                data <- data[no_NA_vals, ]
+        } 
         
         # link
         if (length(link) > 1) link <- link[1]
