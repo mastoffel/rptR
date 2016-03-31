@@ -281,10 +281,10 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                          if (length(randterms) > 1) {
                                  formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                                          ")"))))
-                                 mod_red <- lme4::glmer(formula_red, data = data, family = poisson(link = link))
+                                 mod_red <- lme4::glmer(formula_red, data = data, family = stats::poisson(link = link))
                          } else if (length(randterms) == 1) {
                                  formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                 mod_red <- stats::glm(formula_red, data = data, family = poisson(link = link))
+                                 mod_red <- stats::glm(formula_red, data = data, family = stats::poisson(link = link))
                          }
                  if(parallel == TRUE) {
                          if (is.null(ncores)) {

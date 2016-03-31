@@ -256,8 +256,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 inv_fun <- stats::plogis
         }
         if (link == "probit") {
-                trans_fun <- qnorm            # VGAM::probit
-                inv_fun <- pnorm
+                trans_fun <- stats::qnorm            # VGAM::probit
+                inv_fun <- stats::pnorm
         }
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
@@ -287,10 +287,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if (length(randterms) > 1) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
                                         ")"))))
-                                mod_red <- lme4::glmer(formula_red, data = data, family = binomial(link = link))
+                                mod_red <- lme4::glmer(formula_red, data = data, family = stats::binomial(link = link))
                         } else if (length(randterms) == 1) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                mod_red <- stats::glm(formula_red, data = data, family = binomial(link = link))
+                                mod_red <- stats::glm(formula_red, data = data, family = stats::binomial(link = link))
                         }
                 if(parallel == TRUE) {
                         if (is.null(ncores)) {
