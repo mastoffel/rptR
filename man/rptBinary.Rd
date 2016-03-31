@@ -64,7 +64,6 @@ Returns an object of class rpt that is a a list with the following elements:
       and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
-\item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 \item{mod}{Fitted model.}
 }
 \description{

@@ -49,7 +49,6 @@
 #'       and \emph{P} value(s) and degrees of freedom for the Likelihood-ratio test} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
-#' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
 #'
 #' @references 
@@ -362,7 +361,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                 LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), overdisp = overdisp, mod = mod)
+                nobs = nrow(data), mod = mod)
         class(res) <- "rpt"
         return(res)
 } 
