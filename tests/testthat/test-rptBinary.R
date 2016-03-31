@@ -12,16 +12,19 @@ latgv = 0.1
 latrv = 0.2
 indid = factor(rep(1:nind, each=nrep))
 groid = factor(rep(1:nrep, nind))
+# latent individual mean
 latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
+# latent group mean
 latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
+
 latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = VGAM::logit(latvals, inverse = TRUE)
+expvals = stats::plogis(latvals)
 obsvals = rbinom(nind*nrep, 1, expvals)
-beta0 = latmu
-beta0 = VGAM::logit(mean(obsvals))
 md = data.frame(obsvals, indid, groid)
 
-R_est <- rptBinary(formula = obsvals ~ (1|indid), grname = c("indid"), 
+rptFunc <- rptBinary
+
+R_est <- rptFunc(formula = obsvals ~ (1|indid), grname = c("indid"), 
         data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
 
 test_that("repeatability point estimate works", {
@@ -30,8 +33,8 @@ test_that("repeatability point estimate works", {
         expect_equal(R_est$R["R_link", ], 0.0444, tolerance = 0.01)
 })
 
-R_est <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-        data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
+R_est <- rptFunc(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
+        data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
 
 test_that("repeatability point estimate works for more than one group", {
         expect_that(is.numeric(unlist(R_est$R)), is_true()) 

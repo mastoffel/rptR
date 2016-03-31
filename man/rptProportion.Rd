@@ -84,7 +84,7 @@ zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0)
  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
                                npermut = 10)      
-                               
+\dontrun{                       
 nind = 80
 nrep = 10 # a bit higher
 latmu = 0
@@ -96,7 +96,7 @@ groid = factor(rep(1:nrep, nind))
 latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = VGAM::logit(latvals, inverse = TRUE)
+expvals = stats::plogis(latvals)
 obs_success = rbinom(nind*nrep, 10, expvals)
 obs_failure = 10-obs_success
 beta0 = latmu
@@ -105,7 +105,7 @@ md = data.frame(obs_success, obs_failure, indid, groid)
 R_est_prop <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), 
                        grname = c("indid", "groid"), 
                        data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-                               
+}    
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

@@ -84,7 +84,7 @@ data(Fledglings)
 nboot=10, npermut=10))  
 # reduced number of nboot and npermut iterations
 
-
+\dontrun{  
 nind = 40
 nrep = 10
 latmu = 0
@@ -99,7 +99,7 @@ latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
 expvals = exp(latvals)
 obsvals = rpois(nind*nrep, expvals)
 beta0 = latmu
-beta0 = log(mean(obsvals))
+# beta0 = log(mean(obsvals))
 md = data.frame(obsvals, indid, groid)
 
 R_est_pois <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
@@ -107,6 +107,7 @@ R_est_pois <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("
                     
 R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
+}
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

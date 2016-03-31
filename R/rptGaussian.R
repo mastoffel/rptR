@@ -81,8 +81,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 data <- data[no_NA_vals, ]
         } 
         
-        # no bootstrapping case
-        
         mod <- lme4::lmer(formula, data = data)
         VarComps <- as.data.frame(lme4::VarCorr(mod))
         
@@ -183,7 +181,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 out
         }
         
-        # multiple random effects, uses lmer()
         dep_var <- as.character(formula)[2]
         # one random effect, uses stats::lm()
         # multiple random effects, uses lmer()

@@ -79,9 +79,9 @@ data = BroodParasitism))
 
 
 
-
-nind = 20
-nrep = 5 # a bit higher
+\dontrun{  
+nind = 30
+nrep = 15 # a bit higher
 latmu = 0
 latbv = 0.3
 latgv = 0.1
@@ -91,17 +91,20 @@ groid = factor(rep(1:nrep, nind))
 latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = VGAM::logit(latvals, inverse = TRUE)
+expvals = stats::plogis(latvals)
 obsvals = stats::rbinom(nind*nrep, 1, expvals)
 beta0 = latmu
-beta0 = VGAM::logit(mean(obsvals))
+# beta0 = VGAM::logit(mean(obsvals))
+# beta0 = stats::qlogis(mean(obsvals))
+# VGAM::probit(mean(obsvals))
+# qnorm(mean(obsvals))
 md = data.frame(obsvals, indid, groid)
 
 R_est_bin <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 20, link = "logit", npermut = 100, parallel = FALSE)
-R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-                    
+R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
+                    data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
+}        
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

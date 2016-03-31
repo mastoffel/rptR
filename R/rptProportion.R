@@ -81,7 +81,7 @@
 #'  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
 #'                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
 #'                                npermut = 10)      
-#'                                
+#' \dontrun{                       
 #' nind = 80
 #' nrep = 10 # a bit higher
 #' latmu = 0
@@ -93,7 +93,7 @@
 #' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 #' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 #' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals = VGAM::logit(latvals, inverse = TRUE)
+#' expvals = stats::plogis(latvals)
 #' obs_success = rbinom(nind*nrep, 10, expvals)
 #' obs_failure = 10-obs_success
 #' beta0 = latmu
@@ -102,7 +102,7 @@
 #' R_est_prop <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), 
 #'                        grname = c("indid", "groid"), 
 #'                        data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-#'                                
+#' }    
 #' @export
 #' 
 
@@ -264,12 +264,20 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
         
-        if (link == "logit") trans_fun <- VGAM::logit
-        if (link == "probit") trans_fun <- VGAM::probit
+        if (link == "logit") {
+                trans_fun <- stats::qlogis     # VGAM::logit
+                inv_fun <- stats::plogis
+        }
+        if (link == "probit") {
+                trans_fun <- qnorm            # VGAM::probit
+                inv_fun <- pnorm
+        }
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), prob = trans_fun((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod))), inverse = TRUE))
+                 y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
+                                  prob = inv_fun((trans_fun(stats::fitted(mod)) + 
+                                  sample(stats::resid(mod)))))
                 # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm

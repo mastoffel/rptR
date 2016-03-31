@@ -76,9 +76,9 @@
 #' 
 #' 
 #' 
-#' 
-#' nind = 20
-#' nrep = 5 # a bit higher
+#' \dontrun{  
+#' nind = 30
+#' nrep = 15 # a bit higher
 #' latmu = 0
 #' latbv = 0.3
 #' latgv = 0.1
@@ -88,24 +88,26 @@
 #' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
 #' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 #' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals = VGAM::logit(latvals, inverse = TRUE)
+#' expvals = stats::plogis(latvals)
 #' obsvals = stats::rbinom(nind*nrep, 1, expvals)
 #' beta0 = latmu
-#' beta0 = VGAM::logit(mean(obsvals))
+#' # beta0 = VGAM::logit(mean(obsvals))
+#' # beta0 = stats::qlogis(mean(obsvals))
+#' # VGAM::probit(mean(obsvals))
+#' # qnorm(mean(obsvals))
 #' md = data.frame(obsvals, indid, groid)
 #'
 #' R_est_bin <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 20, link = "logit", npermut = 100, parallel = FALSE)
-#' R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
 #'                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-#'                     
+#' R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
+#'                     data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
+#' }        
 #' @export
 #' 
 
 rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 1000, parallel = FALSE, ncores = NULL) {
         
-        # to do: missing values
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
         if (sum(!no_NA_vals ) > 0 ){
@@ -123,22 +125,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         formula <- stats::update(formula,  ~ . + (1|obsid))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
-        obsind_id <- which(VarComps[["grp"]] == "obsid")
-        overdisp <- VarComps$vcov[obsind_id]
-        
-        # check if all variance components are 0
-        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-                nboot <- 0
-                npermut <- 0
-                warning("all variance components are 0, bootstrapping and permutation skipped")
-        }
-   
+#         obsind_id <- which(VarComps[["grp"]] == "obsid")
+#         overdisp <- VarComps$vcov[obsind_id]
+
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         # point estimates of R
-        R_pe <- function(formula, data, grname, peYN = FALSE) {
-                
+        R_pe <- function(formula, data, grname) {
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
@@ -153,7 +147,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 if (link == "logit") {
                         R_link <- var_a/(var_a + var_e + (pi^2)/3)
                         P <- exp(beta0) / (1 + exp(beta0))
-                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / (((var_a + var_e) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
+                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
+                                (((var_a + var_e) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
                 }
                 
                 if (link == "probit") {
@@ -166,7 +161,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 return(R)
         }
         
-        R <- R_pe(formula, data, grname, peYN = FALSE) # no parametric bootstrap skipping atm
+        R <- R_pe(formula, data, grname) # no parametric bootstrap skipping atm
         
         # confidence interval estimation by parametric bootstrapping
         if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
@@ -256,13 +251,21 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
         
-        if (link == "logit") trans_fun <- VGAM::logit
-        if (link == "probit") trans_fun <- VGAM::probit
+        if (link == "logit") {
+                trans_fun <- stats::qlogis     # VGAM::logit
+                inv_fun <- stats::plogis
+        }
+        if (link == "probit") {
+                trans_fun <- qnorm            # VGAM::probit
+                inv_fun <- pnorm
+        }
         
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
-                y_perm <- stats::rbinom(nrow(data), 1, prob = VGAM::logit((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod))), inverse = TRUE))
-                # y_perm <- stats::rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(stats::resid(mod))))
+                y_perm <- stats::rbinom(nrow(data), 1, 
+                          prob = inv_fun((trans_fun(stats::fitted(mod)) + 
+                                        sample(stats::resid(mod)))))
+               
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
