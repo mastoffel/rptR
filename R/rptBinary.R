@@ -318,8 +318,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         if (!(length(R_permut) == 1)){
                 for (i in 1:length(grname)) {
-                        permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                        permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+                        permut_org[[i]] <- unlist(R_permut["R_org", grname[i]])
+                        permut_link[[i]] <- unlist(R_permut["R_link", grname[i]])
                 }
                 names(permut_org) <- grname
                 names(permut_link) <- grname

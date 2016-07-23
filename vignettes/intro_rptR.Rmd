@@ -186,7 +186,7 @@ Binary data are sets of single observations with failure/success status (coded 0
 Males in our toy example occur in two distinct color morphs: dark and reddish-brown. We will analyze the repeatability of color morph identities (`Colour`) as an example for the repeatability of binary data. This is a test for spatial heterogeneity in morph ratios.
 
 ```{r data-loading-binary, fig.width=7}
-md3 <- read.csv(file.choose(), header=TRUE)
+data(md3)
 table(c("dark","reddish")[md3$Colour+1])
 ```
 
