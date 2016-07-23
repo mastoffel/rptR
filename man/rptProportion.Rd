@@ -83,7 +83,7 @@ zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0)
                                      
  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
-                               npermut = 10)      
+                               npermut = 100)      
 \dontrun{                       
 nind = 80
 nrep = 10 # a bit higher

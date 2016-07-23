@@ -30,18 +30,41 @@ print.rpt <- function(x, ...) {
 #                                 " [",names(x$P[1]), "]", "\n", "     ", signif(x$P[2], 3), " [", 
 #                                 x$P[2], "]", "\n\n", sep = "")     
 #                 }
-    # rpt.remlLMM.adj   
-    if (x$datatype == "Gaussian") {
-        cat("\n", "Repeatability calculation using the glmm method", "\n\n")
-        for (i in 1:length(x$R)) {
-            cat("Repeatability for ", names(x$R)[i], "\n", 
-                 "R  = ", round(unlist(x$R[i]), 3), "\n", 
-                 "SE = ", round(unlist(x$se[i, ]), 3), "\n", 
-                 "CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n", 
-                  "P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
-                  "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
+    
+    # if (x$datatype == "Gaussian") {
+    #     cat("\n", "Repeatability calculation using the glmm method", "\n\n")
+    #     for (i in 1:length(x$R)) {
+    #         cat("Repeatability for ", names(x$R)[i], "\n",
+    #              "R  = ", round(unlist(x$R[i]), 3), "\n",
+    #              "SE = ", round(unlist(x$se[i, ]), 3), "\n",
+    #              "CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n",
+    #               "P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
+    #               "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
+    #     }
+    # }
+        
+        
+        if (x$datatype == "Gaussian") {
+                cat("\n", "Repeatability calculation using the glmm method", "\n\n")
+                for (i in 1:length(x$R)) {
+                        cat("Repeatability for ", names(x$R)[i], "\n",
+                                "R  = ", round(unlist(x$R[i]), 3), "\n", sep = "")
+                        if (is.na(x$se)){
+                        cat("SE = ", x$se, "\n")
+                        } else {
+                        cat("SE = ", round(unlist(x$se[i, ]), 3), "\n", sep = "")    
+                        }
+                        if (is.na(x$CI_emp[1])){
+                        cat("CI = [", x$CI_emp[1], ", ", x$CI_emp[2], "]", "\n", sep = "")
+                        } else {
+                        cat("CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n", sep = "")
+                        }
+                        cat("P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
+                        "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
+                }
         }
-    }
+        
+        
         
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion") {
             cat("\n", "Repeatability calculation using the glmm method and", x$link, 

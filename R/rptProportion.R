@@ -80,7 +80,7 @@
 #'                                      
 #'  rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
 #'                                grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
-#'                                npermut = 10)      
+#'                                npermut = 100)      
 #' \dontrun{                       
 #' nind = 80
 #' nrep = 10 # a bit higher
@@ -314,7 +314,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 cl <- parallel::makeCluster(ncores)
                 parallel::clusterExport(cl, "R_pe")
                 R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                        mod_red=mod_red, dep_var=dep_var, grname=grname, data = data)
+                        mod=mod_red, dep_var=dep_var, grname=grname, data = data)
                 parallel::stopCluster(cl)
                 
                 } else if (parallel == FALSE) {
