@@ -197,6 +197,7 @@ rep6 <- rpt(Colour ~ (1|Population),  grname=c("Population"), data=md3, datatype
 print(rep6)
 ```
 **Multiple random effects does not seem to work currently!**
+**should work now**
 
 For a check of robustness, we still estimate the adjusted repeatabilities controlling for the treatment manipulation, but it turns out that this change to the model does hardly affect the repeatability estimates (due to the low explanatory power of the treatment).
 ```{r binary-with-covariate, fig.width=3.2, fig.show='hold'}
@@ -226,7 +227,7 @@ The choice of additive versus multiplicative overdispersion is a matter of conve
 
 ## Link functions
 
-In our examples we have used the default link functions of Poisson models (`log` link) and binary/proportion data (`logit` link). Alternative link functions are possible, as long as the distribution-specific variances are known for the distribution-link combination (see Nakagawa & Schielzeth 2010 for an overview). `rptR` supports the `sqrt` link for Poisson and the `porbit` link for binary/proportion data. In the above examples, this differences between alternative links are rather minor (but not that the original scale repeatability is not available for Possion data with `sqrt` link and for binary/proportion models with `probit` link).
+In our examples we have used the default link functions of Poisson models (`log` link) and binary/proportion data (`logit` link). Alternative link functions are possible, as long as the distribution-specific variances are known for the distribution-link combination (see Nakagawa & Schielzeth 2010 for an overview). `rptR` supports the `sqrt` link for Poisson and the `probit` link for binary/proportion data. In the above examples, this differences between alternative links are rather minor (but not that the original scale repeatability is not available for Possion data with `sqrt` link and for binary/proportion models with `probit` link).
 
 ###Poisson models###
 ```{r poisson-model-link comparison, warning=FALSE}
@@ -251,7 +252,7 @@ print(rep8a) # probit link
 
 ## The quantification of $\lambda$ in Poisson models
 
-The quantification of the distribution-specific variance of Poisson models requires a parameter $\lambda$ that we have previously adviced to be estimated as the inverse-link of the intercept at the latent scale. While this often gives a reasonable approximation, it is better to use the average in the orginal sample instead. **The current version of `rptR` implements this option.** The difference is minor if the average is sufficient large (larger than about 2), but may be substantial with small average counts.
+The quantification of the distribution-specific variance of Poisson models requires a parameter $\lambda$ that we have previously adviced to be estimated as the inverse-link of the intercept at the latent scale. While this often gives a reasonable approximation, it is better to use the average in the original sample instead. **The current version of `rptR` implements this option.** The difference is minor if the average is sufficient large (larger than about 2), but may be substantial with small average counts.
 
 ## Conclusing remarks
 

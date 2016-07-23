@@ -10,7 +10,7 @@
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula}.
 #' @param data A dataframe that contains the variables included in the \code{formula}
 #'        and \code{grname} arguments.
-#' @param link Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.
+#' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
 #' @param CI Width of the confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation.
 #'        Defaults to 1000. Larger numbers of permutations give a better
