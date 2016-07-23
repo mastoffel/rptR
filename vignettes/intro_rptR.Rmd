@@ -53,10 +53,10 @@ table(md1$Population)
 
 We analyse the data using the `rpt` function with the argument `datatype = "Gaussian"`. Equivalently, it is possible to call `rptGaussian` directly, while omitting the `datatype` argument. Since parametric bootstrapping and permutation can be slow, we recommend starting with shutting bootstrapping and permutation of by setting `nboot = 0` and `npermut = 0`. Note that the formula argument uses the same syntax as `lmer` from the `lme4` packages, because the formula-call is directly forwarded to `lmer`. Also note that `grname` has to be specified with quotation marks and that the term has to match exactly a random effect as it is used in the `formula` argument. The `data` argument is mandatory and is specified without quotes.
 ```{r gaussian-reduced-boot}
-x3 <- rpt(BodyL ~ (1|Population),  grname="Population", data=md1, datatype="Gaussian", nboot=2, npermut=2)
+rpt(BodyL ~ (1|Population),  grname="Population", data=md1, datatype="Gaussian", nboot=0, npermut=0)
 ```
 **... It is currently not possible to set nboot = 0, because the printing function will complain. Is this possible to catch? ...**
-
+**...fixed...**
 Since this seems to work and we see a sizable repeatability, we increase the number of parametric bootstraps to 1000, in order to evaluate the uncertainty in the repeatability estimate. The increase in the number of parametric bootstraps will not affect on the point estimates, but interval estimates will be affected. At the same time, the permutation test can be kept switched off. The results are stored as an object names `rep1`.
 ```{r gaussian-full-boot}
 rep1 <- rpt(BodyL ~ (1|Population),  grname="Population", data=md1, datatype="Gaussian", nboot=99, npermut=0)
@@ -77,7 +77,7 @@ The statistical significance of the repeatability is tested by likelihood ratio 
 Permutation can be used as a robust alternative or addition to LRT. In the simplest case this will work by randomizing the vector of group identities against the response vector followed by refitting the model to the randomized data and storage of the repeatability for each of many replications. However, in more complex models involving multiple random effects and/or fixed effects, this will also break the data structure between the grouping factor of interest and other aspects of the experimental design. We therefore construct randomized datasets by fitting a model without the grouping factor of interest and add randomized residuals for this model to the fitted values of this model. This maintains the general data structure and any effects of other design aspects on the response while still breaking the link between grouping factor and the response.
 
 ```{r gaussian-full-boot-permut, warning=1}
-rep2 <- rpt(BodyL ~ (1|Population),  grname="Population", data=md1, datatype="Gaussian", nboot=2, npermut=99)
+rep2 <- rpt(BodyL ~ (1|Population),  grname="Population", data=md1, datatype="Gaussian", nboot=0, npermut=99)
 ```
 
 It is not unusual to see warnings about convergence problems, because the data is simulated with zero group-level variance and this might occasionally produce odd data. The results of the permutation tests are shown as part of `print` and `summary`, and can be visualized using the `type` argument in the `plot` function. The results are in general agreement with the LRT in this case, but note that the resolution of the permutation tests is limited by the number of iterations. Since the empirical estimate is always included as one permutation sample (since data is simulated under the null hypothesis being true this is a possible, albeit may highly unlikely extreme event, Manly 2007), the resolution is limited to $1/N$ were $N$ is the number of permutations.

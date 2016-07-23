@@ -117,7 +117,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         } 
         
         # link
-        if (length(link) > 1) link <- link[1]
+        if (length(link) > 1) link <- "log" 
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
         
         # observational level random effect

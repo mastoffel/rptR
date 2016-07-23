@@ -49,12 +49,12 @@ print.rpt <- function(x, ...) {
                 for (i in 1:length(x$R)) {
                         cat("Repeatability for ", names(x$R)[i], "\n",
                                 "R  = ", round(unlist(x$R[i]), 3), "\n", sep = "")
-                        if (is.na(x$se)){
+                        if (is.na(unlist(x$se)[1])){ # check if permutations have been done
                         cat("SE = ", x$se, "\n")
                         } else {
                         cat("SE = ", round(unlist(x$se[i, ]), 3), "\n", sep = "")    
                         }
-                        if (is.na(x$CI_emp[1])){
+                        if (is.na(unlist(x$CI_emp)[1])){ # check if bootstraps have been done
                         cat("CI = [", x$CI_emp[1], ", ", x$CI_emp[2], "]", "\n", sep = "")
                         } else {
                         cat("CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n", sep = "")

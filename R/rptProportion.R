@@ -117,7 +117,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         } 
         
         # link
-        if (length(link) > 1) link <- link[1]
+        if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         # observational level random effect
         obsid <- factor(1:nrow(data))

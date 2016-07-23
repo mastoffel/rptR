@@ -73,7 +73,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         # plot
         do.call(graphics::hist, args = c(list(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
         graphics::lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
-        graphics::arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.3, angle = 90, code = 3, 
+        graphics::arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.05, angle = 90, code = 3, 
             lwd = 2.5, col = "black")
         graphics::points(R, v.pos * 1.15, cex = 1.2, pch = 19, col = "red")
         graphics::legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), c("Repeatability with CI"), 
@@ -93,7 +93,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         graphics::lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", 
             lty = 5)
         graphics::lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
-        graphics::arrows(unname(CI.perm[1]), v.pos * 1.15, unname(CI.perm[2]), v.pos * 1.15, length = 0.3, 
+        graphics::arrows(unname(CI.perm[1]), v.pos * 1.15, unname(CI.perm[2]), v.pos * 1.15, length = 0.05, 
             angle = 90, code = 3, lwd = 2.5, col = "black")
         graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
         graphics::points(R, v.pos * 1.3, cex = 1.2, pch = 19, col = "red")
