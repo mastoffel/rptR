@@ -146,16 +146,17 @@ While in a Gaussian model, there are different parameters for the location and t
 
 As an example, we will analyse the number of eggs laid by female beetles (`Eggs`) in our toy dataset. We will estimate the repeatability at the level of the population as well as at the level of the container simultaneously while controlling for excess variation introduced by the experimental nutritional treatment. There is no need to control for sex-differences in this sex-limited trait.
 ```{r data-loading-poisson, fig.width=7}
-md2 <- read.csv(file.choose(), header=TRUE)
+data(md2)
 hist(md2$Egg, nclass=max(md2$Egg))
 ```
 
 We will then fit estimate the repeatability through the `rpt` function using the `datatype = "Poisson"` argument. Alternatively, it would be possible to fit the model directly using the `rptPoisson` function. The `formula` syntax follows the notation using in `glmer` from the `lme4` package, which is also the central engine for fitting the mixed effects model.
 ```{r poisson-model, warning=1}
-rep5 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), link="log", data=md2, datatype="Poisson", nboot=99, npermut=0)
+rep5 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"),  data=md2, datatype="Poisson", nboot=99, npermut=0)
 ```
 
 **Log link should be made the default, shouldn't it? Its not working without specifying the link**
+**fixed**
 
 In non-Gaussian models it frequently happens that some of the bootstrap or permutation iterations to not converge on a model fit. Warnings are thrown by `glmer`. We handle these situations by **...To be done...**
 
@@ -165,6 +166,7 @@ print(rep5)
 ```
 
 **No LRT for GLMM!**
+**added to print function**
 
 There are two repeatabilities for Poisson GLMM, the latent scale and the original scale repeatability. The _latent scale repeatability_ adds the distribution-specific variance to the denominator. All other components are estimated on the latent scale, but the latent scale does not explicitly included the distribution-specific variances. The latent scale repeatability thus takes some of the unavoidable (inherent) phenotypic variation to the latent scale. The distribution-specific variance depends also on the link function. 
 
