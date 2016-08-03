@@ -66,43 +66,8 @@
 #'      
 #' @seealso \link{rpt}
 #' 
-#' @examples  
-#' # repeatability for female clutch size over two years.
-#' data(BroodParasitism)
-#' (rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", 
-#' data = BroodParasitism, link = "log", nboot=10, npermut=10))  
-#' # reduced number of nboot and npermut iterations
-#'        
-#' # repeatability for male fledgling success
-#' data(Fledglings)
-#' (rpt.Fledge <- rptPoisson(formula = Fledge~(1|MaleID), grname = "MaleID", data = Fledglings, 
-#' nboot=10, npermut=10))  
-#' # reduced number of nboot and npermut iterations
 #' 
-#' \dontrun{  
-#' nind = 40
-#' nrep = 10
-#' latmu = 0
-#' latbv = 0.3
-#' latgv = 0.3
-#' latrv = 0.2
-#' indid = factor(rep(1:nind, each=nrep))
-#' groid = factor(rep(1:nrep, nind))
-#' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-#' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-#' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals = exp(latvals)
-#' obsvals = rpois(nind*nrep, expvals)
-#' beta0 = latmu
-#' # beta0 = log(mean(obsvals))
-#' md = data.frame(obsvals, indid, groid)
-#'
-#' R_est_pois <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 0, link = "log", npermut = 10, parallel = FALSE)
-#'                     
-#' R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
-#'                     data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
-#' }
+#' 
 #' @export
 #' 
 
@@ -134,14 +99,18 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
 #                 npermut <- 0
 #                 warning("all variance components are 0, bootstrapping and permutation skipped")
 #         }
-#         
+#        
+         if (nboot == 1) {
+                 warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
+                 nboot <- 0
+         }
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
+                mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link)))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 # groups random effect variances
@@ -242,7 +211,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
         # no permutation test
         if (npermut == 1) {
-                R_permut <- R
+                R_permut <- NA # earlier: R
                 P_permut <- NA
         }
         

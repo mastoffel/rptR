@@ -72,11 +72,11 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         v.pos <- max((graphics::hist(R.boot, breaks = breaks., plot = FALSE))$counts)
         # plot
         do.call(graphics::hist, args = c(list(R.boot, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
-        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", lty = 5)
+        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.15), lwd = 1.5, col = "grey", lty = 5)
         graphics::arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.05, angle = 90, code = 3, 
-            lwd = 2.5, col = "black")
-        graphics::points(R, v.pos * 1.15, cex = 1.2, pch = 19, col = "red")
-        graphics::legend("topleft", pch = 19, cex = 1, bty = "n", col = c("red"), c("Repeatability with CI"), 
+            lwd = 1.5, col = "black")
+        graphics::points(R, v.pos * 1.15, cex = 1.1, pch = 19, col = "cornflowerblue")
+        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("cornflowerblue"), c("Repeatability with CI"), 
             box.lty = 0)
     }
     
@@ -90,14 +90,14 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         v.pos <- max((graphics::hist(R.permut, breaks = breaks., plot = FALSE))$counts)
         # plot
         do.call(graphics::hist, args = c(list(R.permut, breaks = breaks., ylim = c(0, v.pos * 1.5), xlab = xlab., main = main.), dots))
-        graphics::lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 2.5, col = "grey", 
+        graphics::lines(x = c(Median.R, Median.R), y = c(0, v.pos * 1.15), lwd = 1.5, col = "grey", 
             lty = 5)
-        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 2.5, col = "grey", lty = 5)
+        graphics::lines(x = c(R, R), y = c(0, v.pos * 1.3), lwd = 1.5, col = "grey", lty = 5)
         graphics::arrows(unname(CI.perm[1]), v.pos * 1.15, unname(CI.perm[2]), v.pos * 1.15, length = 0.05, 
-            angle = 90, code = 3, lwd = 2.5, col = "black")
+            angle = 90, code = 3, lwd = 1.5, col = "black")
         graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
-        graphics::points(R, v.pos * 1.3, cex = 1.2, pch = 19, col = "red")
-        graphics::legend("topleft", pch = 19, cex = 1, bty = "n", col = c("black", "red"), c("Median of repeatabilities from permuted datasets with CI", 
+        graphics::points(R, v.pos * 1.3, cex = 1.1, pch = 19, col = "cornflowerblue")
+        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with CI", 
             "Observed repeatability"), box.lty = 0)
     }
     

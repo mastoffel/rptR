@@ -67,40 +67,8 @@
 #'      
 #' @seealso \link{rpt}
 #' 
-#' @examples  
-#' # repeatability estimations for egg dumping (binary data)
-#' data(BroodParasitism)
-#' (rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), 
-#' data = BroodParasitism))
-#' 
-#' 
-#' 
-#' \dontrun{  
-#' nind = 30
-#' nrep = 15 # a bit higher
-#' latmu = 0
-#' latbv = 0.3
-#' latgv = 0.1
-#' latrv = 0.2
-#' indid = factor(rep(1:nind, each=nrep))
-#' groid = factor(rep(1:nrep, nind))
-#' latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-#' latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-#' latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-#' expvals = stats::plogis(latvals)
-#' obsvals = stats::rbinom(nind*nrep, 1, expvals)
-#' beta0 = latmu
-#' # beta0 = VGAM::logit(mean(obsvals))
-#' # beta0 = stats::qlogis(mean(obsvals))
-#' # VGAM::probit(mean(obsvals))
-#' # qnorm(mean(obsvals))
-#' md = data.frame(obsvals, indid, groid)
-#'
-#' R_est_bin <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-#'                     data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-#' R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
-#'                     data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
-#' }        
+#'   
+#'      
 #' @export
 #' 
 
@@ -126,13 +94,17 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         VarComps <- as.data.frame(lme4::VarCorr(mod))
 #         obsind_id <- which(VarComps[["grp"]] == "obsid")
 #         overdisp <- VarComps$vcov[obsind_id]
-
+        
+        if (nboot == 1) {
+                warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
+                nboot <- 0
+        }
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         # point estimates of R
         R_pe <- function(formula, data, grname) {
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                suppressWarnings(mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 # groups random effect variances
@@ -243,7 +215,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # no permutation test
         if (npermut == 1) {
-                R_permut <- R
+                R_permut <- NA # earlier: R
                 P_permut <- NA
         }
         
@@ -318,8 +290,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         if (!(length(R_permut) == 1)){
                 for (i in 1:length(grname)) {
-                        permut_org[[i]] <- unlist(R_permut["R_org", grname[i]])
-                        permut_link[[i]] <- unlist(R_permut["R_link", grname[i]])
+                        permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
+                        permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
                 }
                 names(permut_org) <- grname
                 names(permut_link) <- grname

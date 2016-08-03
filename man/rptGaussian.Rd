@@ -63,14 +63,11 @@ Calculates repeatability from a general linear mixed-effects models fitted by RE
 }
 \examples{
  
-# repeatability estimation for tarsus length - a very high R
-# NA problems here
-data(BodySize)
-(rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + BillL + (1|BirdID), grname = c('BirdID'), 
- data=BodySize, nboot=10, npermut=10, parallel = FALSE))
- 
- (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
- data=BodySize, nboot=10, npermut=10))
+
+data(md1)
+summary(rptGaussian(BodyL ~ (1|Population),  grname="Population", data=md1, nboot=0, npermut=0))
+
+
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

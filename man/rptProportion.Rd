@@ -70,43 +70,6 @@ Returns an object of class rpt that is a a list with the following elements:
 \description{
 Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
-\examples{
- 
-# repeatability estimations for egg dumping (binary data)
-
-data(BroodParasitism)
-
-ParasitismOR <- subset(BroodParasitism,  select= c(cbpEggs, nEggs, FemaleID))
-ParasitismOR$parasitised <-  ParasitismOR$nEggs  - ParasitismOR$cbpEggs
-# some rows have entries 0,0 and need to be removed
-zz = which(ParasitismOR[,1]==0 & ParasitismOR[,2]==0) 
-                                     
- rpt.BroodPar <- rptProportion(formula = cbind(cbpEggs, parasitised) ~ (1|FemaleID), 
-                               grname = "FemaleID", data = ParasitismOR[-zz, ], nboot = 10,
-                               npermut = 100)      
-\dontrun{                       
-nind = 80
-nrep = 10 # a bit higher
-latmu = 0
-latbv = 0.5
-latgv = 0.3
-latrv = 0.2
-indid = factor(rep(1:nind, each=nrep))
-groid = factor(rep(1:nrep, nind))
-latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = stats::plogis(latvals)
-obs_success = rbinom(nind*nrep, 10, expvals)
-obs_failure = 10-obs_success
-beta0 = latmu
-md = data.frame(obs_success, obs_failure, indid, groid)
-
-R_est_prop <- rptProportion(formula = cbind(obs_success, obs_failure) ~ (1|indid) + (1|groid), 
-                       grname = c("indid", "groid"), 
-                       data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-}    
-}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &

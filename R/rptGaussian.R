@@ -60,14 +60,11 @@
 #' @seealso \link{rpt}
 #' 
 #' @examples  
-#' # repeatability estimation for tarsus length - a very high R
-#' # NA problems here
-#' data(BodySize)
-#' (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + BillL + (1|BirdID), grname = c('BirdID'), 
-#'  data=BodySize, nboot=10, npermut=10, parallel = FALSE))
-#'  
-#'  (rpt.BS <- rptGaussian(formula = Tarsus ~ 1 + (1|BirdID), grname = c('BirdID'), 
-#'  data=BodySize, nboot=10, npermut=10))
+#' 
+#' data(md1)
+#' summary(rptGaussian(BodyL ~ (1|Population),  grname="Population", data=md1, nboot=0, npermut=0))
+#' 
+#' 
 #' @export
 #' 
 
@@ -83,6 +80,11 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         mod <- lme4::lmer(formula, data = data)
         VarComps <- as.data.frame(lme4::VarCorr(mod))
+        
+        if (nboot == 1) {
+                warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
+                nboot <- 0
+        }
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
@@ -243,8 +245,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         P <- cbind(LRT_P, P_permut)
+    
         row.names(P) <- grname
-
         
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 

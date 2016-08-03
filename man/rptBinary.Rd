@@ -19,7 +19,7 @@ be estimated. Spelling needs to match the random effect names as given in \code{
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
 
-\item{link}{Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.}
+\item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
 \item{CI}{Width of the confidence interval (defaults to 0.95).}
 
@@ -68,42 +68,6 @@ Returns an object of class rpt that is a a list with the following elements:
 }
 \description{
 Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
-}
-\examples{
- 
-# repeatability estimations for egg dumping (binary data)
-data(BroodParasitism)
-(rpt.BroodPar <- rptBinary(formula = cbpYN ~ (1|FemaleID), grname = c("FemaleID"), 
-data = BroodParasitism))
-
-
-
-\dontrun{  
-nind = 30
-nrep = 15 # a bit higher
-latmu = 0
-latbv = 0.3
-latgv = 0.1
-latrv = 0.2
-indid = factor(rep(1:nind, each=nrep))
-groid = factor(rep(1:nrep, nind))
-latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = stats::plogis(latvals)
-obsvals = stats::rbinom(nind*nrep, 1, expvals)
-beta0 = latmu
-# beta0 = VGAM::logit(mean(obsvals))
-# beta0 = stats::qlogis(mean(obsvals))
-# VGAM::probit(mean(obsvals))
-# qnorm(mean(obsvals))
-md = data.frame(obsvals, indid, groid)
-
-R_est_bin <- rptBinary(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
-R_est2 <- rptBinary(formula = obsvals ~ (1|indid), grname = "indid", 
-                    data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
-}        
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),

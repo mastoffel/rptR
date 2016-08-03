@@ -69,45 +69,6 @@ Returns an object of class rpt that is a a list with the following elements:
 \description{
 Calculates repeatability from a general linear mixed-effects models fitted by REML (restricted maximum likelihood).
 }
-\examples{
- 
-# repeatability for female clutch size over two years.
-data(BroodParasitism)
-(rpt.Host <- rptPoisson(formula = OwnClutches ~ (1|FemaleID), grname = "FemaleID", 
-data = BroodParasitism, link = "log", nboot=10, npermut=10))  
-# reduced number of nboot and npermut iterations
-       
-# repeatability for male fledgling success
-data(Fledglings)
-(rpt.Fledge <- rptPoisson(formula = Fledge~(1|MaleID), grname = "MaleID", data = Fledglings, 
-nboot=10, npermut=10))  
-# reduced number of nboot and npermut iterations
-
-\dontrun{  
-nind = 40
-nrep = 10
-latmu = 0
-latbv = 0.3
-latgv = 0.3
-latrv = 0.2
-indid = factor(rep(1:nind, each=nrep))
-groid = factor(rep(1:nrep, nind))
-latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
-latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = exp(latvals)
-obsvals = rpois(nind*nrep, expvals)
-beta0 = latmu
-# beta0 = log(mean(obsvals))
-md = data.frame(obsvals, indid, groid)
-
-R_est_pois <- rptPoisson(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-                    data = md, nboot = 0, link = "log", npermut = 10, parallel = FALSE)
-                    
-R_est2 <- rptPoisson(formula = obsvals ~ (1|indid), grname = "indid", 
-                    data = md, nboot = 10, link = "log", npermut = 10, parallel = FALSE)
-}
-}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &

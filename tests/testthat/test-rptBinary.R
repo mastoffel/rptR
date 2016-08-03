@@ -1,45 +1,151 @@
 
 context("rptBinary")
 
+# load data
+data(BeetlesMale)
+
 # Set a seed for reproducibility of the randomization 
 set.seed(23)
 
-nind = 80
-nrep = 30 # a bit higher
-latmu = 0
-latbv = 0.3
-latgv = 0.1
-latrv = 0.2
-indid = factor(rep(1:nind, each=nrep))
-groid = factor(rep(1:nrep, nind))
-# latent individual mean
-latim = rep(rnorm(nind, 0, sqrt(latbv)), each=nrep)
-# latent group mean
-latgm = rep(rnorm(nrep, 0, sqrt(latgv)), nind)
 
-latvals = latmu + latim + latgm + rnorm(nind*nrep, 0, sqrt(latrv))
-expvals = stats::plogis(latvals)
-obsvals = rbinom(nind*nrep, 1, expvals)
-md = data.frame(obsvals, indid, groid)
+########## checks for one random effect
 
-rptFunc <- rptBinary
+# run with one random effect, no boot, no permut
+R_est_1 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=0)
 
-R_est <- rptFunc(formula = obsvals ~ (1|indid), grname = c("indid"), 
-        data = md, nboot = 0, link = "logit", npermut = 0, parallel = FALSE)
-
-test_that("repeatability point estimate works", {
-        expect_that(is.numeric(unlist(R_est$R)), is_true()) 
-        expect_equal(R_est$R["R_org", ], 0.0368, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ], 0.0444, tolerance = 0.01)
+test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
+        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_equal(R_est_1$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_link", ], 0.2232935, tolerance = 0.001)
 })
 
-R_est <- rptFunc(formula = obsvals ~ (1|indid) + (1|groid), grname = c("indid", "groid"), 
-        data = md, nboot = 10, link = "logit", npermut = 10, parallel = FALSE)
+test_that("LRT works", {
+        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_equal(R_est_1$P$LRT_P, 8.656602e-15, tolerance = 0.001)
+})
 
-test_that("repeatability point estimate works for more than one group", {
-        expect_that(is.numeric(unlist(R_est$R)), is_true()) 
-        expect_equal(R_est$R["R_org", ]$indid, 0.0397, tolerance = 0.01)
-        expect_equal(R_est$R["R_org", ]$groid, 0.0253, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ]$indid, 0.0478, tolerance = 0.01)
-        expect_equal(R_est$R["R_link", ]$groid, 0.0306, tolerance = 0.01)
+
+# run with one random effect, boot, no permut
+R_est_2 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=2, npermut=0)
+
+test_that("rpt estimation works for one random effect, boot, no permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_2$R)), is_true()) 
+        expect_equal(R_est_2$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_2$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["2.5%"]), 0.1793817, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["97.5%"]), 0.2019976, tolerance = 0.001)
+        # link scale
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["2.5%"]), 0.2189531, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["97.5%"]), 0.2374219, tolerance = 0.001)
+        
+})
+
+
+
+# run with one random effect, no boot, permut
+R_est_3 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=5)
+
+test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_equal(R_est_3$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_3$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(R_est_3$P$P_permut_org, 0.2, tolerance = 0.001)
+        # link scale
+        expect_equal(R_est_3$P$P_permut_link, 0.2, tolerance = 0.001)
+        
+})
+
+# run with one random effect, 1 boot, no permut
+R_est_4 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=1)
+
+test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_equal(R_est_3$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_3$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(R_est_3$P$P_permut_org, 0.2, tolerance = 0.001)
+        # link scale
+        expect_equal(R_est_3$P$P_permut_link, 0.2, tolerance = 0.001)
+        
+})
+
+
+
+
+########## checks for two random effects
+
+
+# run with one random effect, no boot, no permut
+R_est_1 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=0)
+
+test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
+        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_equal(R_est_1$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_link", ], 0.2232935, tolerance = 0.001)
+})
+
+test_that("LRT works", {
+        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_equal(R_est_1$P$LRT_P, 8.656602e-15, tolerance = 0.001)
+})
+
+
+# run with one random effect, boot, no permut
+R_est_2 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=2, npermut=0)
+
+test_that("rpt estimation works for one random effect, boot, no permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_2$R)), is_true()) 
+        expect_equal(R_est_2$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_2$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["2.5%"]), 0.1793817, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["97.5%"]), 0.2019976, tolerance = 0.001)
+        # link scale
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["2.5%"]), 0.2189531, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["97.5%"]), 0.2374219, tolerance = 0.001)
+        
+})
+
+
+
+# run with one random effect, no boot, permut
+R_est_3 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=5)
+
+test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_equal(R_est_3$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_3$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(R_est_3$P$P_permut_org, 0.2, tolerance = 0.001)
+        # link scale
+        expect_equal(R_est_3$P$P_permut_link, 0.2, tolerance = 0.001)
+        
+})
+
+# run with one random effect, 1 boot, no permut
+R_est_4 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=1)
+
+test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
+        
+        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_equal(R_est_3$R["R_org", ], 0.1858031, tolerance = 0.001)
+        expect_equal(R_est_3$R["R_link", ], 0.2232935, tolerance = 0.001)
+        
+        # original scale
+        expect_equal(R_est_3$P$P_permut_org, 0.2, tolerance = 0.001)
+        # link scale
+        expect_equal(R_est_3$P$P_permut_link, 0.2, tolerance = 0.001)
+        
 })
