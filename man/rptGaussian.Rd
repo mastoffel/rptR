@@ -69,8 +69,12 @@ Estimates the repeatability from a general linear mixed-effects models fitted by
 \examples{
  
 
-data(md1)
-summary(rptGaussian(BodyL ~ (1|Population),  grname="Population", data=md1, nboot=0, npermut=0))
+data(BeetlesBody)
+# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# for the real analysis.
+
+# one random effect
+rptGaussian(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, nboot=5, npermut=5)
 
 
 }
