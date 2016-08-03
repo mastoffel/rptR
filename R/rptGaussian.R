@@ -43,7 +43,7 @@
 #'       element respesents a grouping factor.}
 #' \item{R_permut}{Vector(s) of permutation samples for \emph{R}. Each \code{list}
 #'       element represents a grouping factor.}
-#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph(D), 
+#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
 #'      \emph{P} value(s) and degrees of freedom for the likelihood-ratio test.} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}

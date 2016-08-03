@@ -55,7 +55,7 @@
 #'       element is a grouping factor.}
 #' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale. Each \code{list}
 #'       element is a grouping factor.}
-#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph(D), 
+#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
 #'      \emph{P} value(s) and degrees of freedom for the likelihood-ratio test.} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}

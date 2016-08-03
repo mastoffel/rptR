@@ -9,18 +9,18 @@ rpt(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion",
   nboot = 1000, npermut = 1000, parallel = FALSE, ncores = NULL)
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor of 
-interest needs to be included as a random effect, e.g. '(1|groups)'. 
-Covariates and additional random effects can be included to estimate 
-adjusted repeatabilities.}
+\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
+interest needs to be included as a random effect, e.g. '(1|groups)'.
+Covariates and additional random effects can be included to estimate adjusted 
+repeatabilities.}
 
-\item{grname}{A character string or vector of character strings giving the 
-name(s) of the grouping factor(s), for which the repeatability should be 
-estimated. Spelling needs to match the random effect names as given in 
-\code{formula}.}
+\item{grname}{A character string or vector of character strings giving the
+name(s) of the grouping factor(s), for which the repeatability should
+be estimated. Spelling needs to match the random effect names as given in \code{formula} 
+and terms have to be set in quotation marks.}
 
-\item{data}{A dataframe that contains the variables included in the formula 
-argument.}
+\item{data}{A dataframe that contains the variables included in the \code{formula}
+and \code{grname} arguments.}
 
 \item{datatype}{Character string specifying the data type ('Gaussian', 
 'Binary', 'Proportion', 'Poisson').}
@@ -28,30 +28,37 @@ argument.}
 \item{link}{Character string specifying the link function. Ignored for 
 'Gaussian' datatype.}
 
-\item{CI}{Width of the confidence interval between 0 and 1 (defaults to 
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
 0.95).}
 
-\item{nboot}{Number of bootstrapping runs used when calculating the asymtotic
-confidence interval (defaults to 1000).}
+\item{nboot}{Number of parametric bootstraps for interval estimation.
+Defaults to 1000. Larger numbers of bootstraps give a better
+asymtotic CI, but may be very time-consuming (in particular for non-Gaussian data if some variance component 
+is low). Bootstrapping can be switch off by setting \code{nboot = 0}.}
 
-\item{npermut}{Number of permutations used when calculating asymtotic 
-\emph{P} values (defaults to 1000).}
+\item{npermut}{Number of permutations used when calculating asymptotic \emph{P} 
+values (defaults to 1000). Larger numbers of permutations give a better
+asymtotic CI, but may be very time-consuming (in particular for non-Gaussian data if some variance component 
+is low). Permutaton tests can be switch off by setting \code{npermut = 0}.}
 
-\item{parallel}{If TRUE, bootstraps will be distributed.}
+\item{parallel}{If TRUE, bootstraps and permutations will be distributed across multiple cores.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
 }
 \value{
-Returns an object of class rpt. See details for specific functions.
+Returns an object of class \code{rpt}. See details for specific functions.
 }
 \description{
-A wrapper function for (adjusted) repeatability calculations. Calls 
+A wrapper function for (adjusted) repeatability estimation from generalized linear mixed-effects 
+models fitted by restricted maximum likelihood (REML). Calls 
 specialised functions depending of the choice of datatype and method.
 }
 \details{
 For \code{datatype='Gaussian'} calls function \link{rptGaussian},
-         for \code{datatype='Poisson'} calls function \link{rptPoisson}, etc.
+         for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
+         for \code{datatype='Binary'} calls function \link{rptBinary}, 
+         for \code{datatype='Proportion'} calls function \link{rptProportion}.
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
@@ -64,7 +71,7 @@ Nakagawa, S. and Schielzeth, H. (2011) \emph{Repeatability for
      Biological Reviews 85: 935-956.
 }
 \seealso{
-\link{rpt}
+\link{rptR}
 }
 \keyword{models}
 
