@@ -60,6 +60,38 @@ For \code{datatype='Gaussian'} calls function \link{rptGaussian},
          for \code{datatype='Binary'} calls function \link{rptBinary}, 
          for \code{datatype='Proportion'} calls function \link{rptProportion}.
 }
+\examples{
+# load data
+data(BeetlesBody)
+data(BeetlesMale)
+data(BeetlesFemale)
+
+#  prepare proportion data
+BeetlesMale$Dark <- BeetlesMale$Colour
+BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
+md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
+
+
+# Note: all function calls are run without bootstraps and permutation for speed reasons
+
+# gaussian data
+rpt(BodyL ~ (1|Population), grname="Population", data=BeetlesBody, 
+nboot=0, npermut=0, datatype = "Gaussian"
+
+# poisson data
+rpt(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
+nboot=0, npermut=0, datatype = "Poisson")
+
+# binary data
+rpt(Colour ~ (1|Population), grname=c("Population"), 
+data=BeetlesMale, nboot=5, npermut=0, datatype = "Binary")
+
+# proportion data
+rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
+nboot=0, npermut=0, datatype = "Proportion")
+
+
+}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz),

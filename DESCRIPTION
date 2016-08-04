@@ -1,5 +1,5 @@
 Package: rptR
-Title: Repeatability For Gaussian And Non-Gaussian Data
+Title: Repeatability for Gaussian and Non-Gaussian Data
 Version: 0.6.405
 Depends: 
     R (>= 3.2.1)
