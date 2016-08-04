@@ -40,10 +40,12 @@ summary.rpt <- function(object, ...) {
         
         if(object$datatype=="Gaussian") {
                 for(i in 1:length(object$R)) {
-                        object$rpt[[i]]    <- structure(data.frame(object$R[i], object$se[i, ], object$CI_emp[i, 1], object$CI_emp[i, 2], 
+                      
+                        object$rpt[[i]]    <- structure(data.frame(object$R[i], unlist(object$se)[[i]], as.numeric(matrix(object$CI_emp, ncol = 2)[i, 1]), 
+                                                        as.numeric(matrix(object$CI_emp, ncol = 2)[i, 2]), 
                                                         unname(object$P[i, 2]), round(unname(object$P[i, 1]), 3)), 
-                                                        names = c("R", "SE", colnames(object$CI_emp)[1], colnames(object$CI_emp)[2],
-                                                        colnames(object$P)[2],  colnames(object$P)[1]), 
+                                                        names = c("R", "SE", names(object$CI_emp)[1], names(object$CI_emp)[2],
+                                                        names(object$P)[2],  names(object$P)[1]), 
                                                            row.names = "rpt")
                         bootperm      <- structure(data.frame(do.call(rbind, lapply(list(object$R_boot[[i]], object$R_permut[[i]]), extr_comps))),
                                          row.names = c("boot", "permut"), names = c("N", "Mean", "Median", names(object$CI_emp)))
