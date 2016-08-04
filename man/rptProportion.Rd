@@ -81,6 +81,22 @@ Calculates repeatability from a general linear mixed-effects models fitted by RE
 \details{
 Calculates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 }
+\examples{
+data(BeetlesMale)
+
+# prepare proportion data
+BeetlesMale$Dark <- BeetlesMale$Colour
+BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
+md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
+
+# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# for the real analysis.
+
+rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
+nboot=5, npermut=5)
+
+ 
+}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &

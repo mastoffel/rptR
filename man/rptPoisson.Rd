@@ -75,6 +75,17 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \description{
 Calculates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 }
+\examples{
+# load data
+data(BeetlesFemale)
+
+# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# for the real analysis.
+
+rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
+nboot=0, npermut=0)
+
+}
 \author{
 Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
         Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &

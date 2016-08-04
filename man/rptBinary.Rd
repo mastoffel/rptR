@@ -76,9 +76,13 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 Calculates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 }
 \examples{
-# data(BeetlesMale)
-# rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
-# data=BeetlesMale, nboot=5, npermut=5, parallel = TRUE)
+data(BeetlesMale)
+
+# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# for the real analysis.
+
+rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
+data=BeetlesMale, nboot=5, npermut=5)
   
      
 }

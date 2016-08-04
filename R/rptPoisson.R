@@ -73,7 +73,16 @@
 #' @seealso \link{rpt}
 #' 
 #' 
+#' @examples 
+#' # load data
+#' data(BeetlesFemale)
 #' 
+#' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+#' # for the real analysis.
+#' 
+#' rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
+#' nboot=0, npermut=0)
+#'
 #' @export
 #' 
 

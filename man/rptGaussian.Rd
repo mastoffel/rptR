@@ -70,11 +70,18 @@ Estimates the repeatability from a general linear mixed-effects models fitted by
  
 
 data(BeetlesBody)
+
 # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # one random effect
-res <- rptGaussian(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, nboot=5, npermut=5)
+rptGaussian(BodyL ~ (1|Population), grname="Population", 
+                   data=BeetlesBody, nboot=5, npermut=5)
+
+# two random effects
+rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
+                   data=BeetlesBody, nboot=5, npermut=5)
+               
 
 
 }
