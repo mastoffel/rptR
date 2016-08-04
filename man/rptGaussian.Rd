@@ -4,8 +4,8 @@
 \alias{rptGaussian}
 \title{GLMM-based Repeatability Using REML for Gaussian data}
 \usage{
-rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000,
-  npermut = 1000, parallel = FALSE, ncores = NULL)
+rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 0,
+  parallel = FALSE, ncores = NULL)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of

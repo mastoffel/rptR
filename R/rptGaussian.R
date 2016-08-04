@@ -78,7 +78,7 @@
 #' 
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
-        npermut = 1000, parallel = FALSE, ncores = NULL) {
+        npermut = 0, parallel = FALSE, ncores = NULL) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])

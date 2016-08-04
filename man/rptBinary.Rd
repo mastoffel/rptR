@@ -5,7 +5,7 @@
 \title{GLMM-based Repeatability Using REML for Binary data}
 \usage{
 rptBinary(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
-  nboot = 1000, npermut = 1000, parallel = FALSE, ncores = NULL)
+  nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
