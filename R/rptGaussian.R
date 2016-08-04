@@ -71,7 +71,7 @@
 #' # for the real analysis.
 #' 
 #' # one random effect
-#' rptGaussian(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, nboot=5, npermut=5)
+#' res <- rptGaussian(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, nboot=5, npermut=5)
 #' 
 #' 
 #' @export

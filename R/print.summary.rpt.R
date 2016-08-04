@@ -44,6 +44,7 @@ print.summary.rpt <- function(x, ...) {
                             ", ", "P_val  = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
                     cat("\n")
                     cat("----------------------------------------")
+                    cat("\n\n")
             }
     }
     
@@ -66,6 +67,7 @@ print.summary.rpt <- function(x, ...) {
                 ", ", "P_val  = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
             cat("\n")
             cat("----------------------------------------")
+            cat("\n\n")
         }
     }
     

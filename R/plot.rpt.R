@@ -40,28 +40,19 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         if (is.null(main)) {
             if (type == "boot") {
                 if (scale == "link") 
-                  main <- "Link scale distribution of repeatability \nestimates from bootstrap"
+                  main <- paste("Link scale bootstrap \nrepeatabilities for", grname)
                 if (scale == "original") 
-                  main <- "Original scale distribution of repeatability \nestimates from bootstrap"
+                  main <- paste("Original scale bootstrap \nrepeatabilities for", grname)
             } else if (type == "permut") {
                 if (scale == "link") 
-                  main <- "Link scale distribution of repeatability \nestimates from permutation"
+                  main <- paste("Link scale permutation test \nrepeatabilities for", grname)
                 if (scale == "original") 
-                  main <- "Original scale distribution of repeatability \nestimates from permutation"
+                  main <- paste("Original scale permutation test \nrepeatabilities for", grname)
                 
             }
         }
         }
     
-#     if (x$datatype == "Gaussian" & ((x$method == "corr") | (x$method == "LMM.REML") | 
-#         (x$method == "ANOVA"))) {
-#         if (is.null(main)) {
-#             if (type == "boot") 
-#                 main <- "Distribution of repeatability estimates \nfrom bootstrap"
-#             if (type == "permut") 
-#                 main <- "Distribution of repeatability estimates \nfrom permutation"
-#         }
-#     }
     
     # make bootstrap histogram
     boot_hist <- function(R, R.boot, CI.l, CI.u, xlab. = xlab, breaks. = breaks, main. = main, 
@@ -108,34 +99,42 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                             boot_hist(R = x$R[2, grname], R.boot = unname(unlist(x$R_boot_link[grname])), 
                                     CI.l = unname(x$CI_emp$CI_link[grname, 1]), 
                                     CI.u = unname(x$CI_emp$CI_link[grname, 2]), 
-                                    main. = paste("Link scale bootstrap repeatabilities for", grname), ...)   
+                                    main. = main, ...)   
                     } else if (scale == "original") {
                             boot_hist(R = x$R[2, grname], R.boot = unname(unlist(x$R_boot_org[grname])), 
                                     CI.l = unname(x$CI_emp$CI_org[grname, 1]), 
                                     CI.u = unname(x$CI_emp$CI_org[grname, 2]), 
-                                    main. = paste("Original scale bootstrap repeatabilities for", grname), ...)   
+                                    main. = main, ...)   
                     }
             } else if (type == "permut") {
                     if (scale == "link") {
                             permut_hist(R = x$R[2, grname], R.permut = unname(unlist(x$R_permut_link[grname])), 
-                                    main. = paste("Permutation test repeatabilities for", grname), ...)  
+                                    main. = main, ...)  
                     }
                     if (scale == "org") {
                             permut_hist(R = x$R[2, grname], R.permut = unname(unlist(x$R_permut_org[grname])), 
-                                    main. = paste("Permutation test repeatabilities for", grname), ...)  
+                                    main. = main, ...)  
                     }
             }
     }
     
     if (x$datatype == "Gaussian") {
-        if (type == "boot") {
+            if (is.null(main)) {
+                    if (type == "boot") {
+                            if (scale == "link") 
+                            main <- paste("Bootstrap repeatabilities \nfor", grname)
+                    } else if (type == "permut") {
+                            main <- paste("Permutation repeatabilities \nfor", grname)
+                    }
+            }      
+            
+            
+       if (type == "boot") {
                 boot_hist(R = x$R[grname], R.boot = unlist(x$R_boot[grname]), CI.l = unname(x$CI_emp[grname, 
-                  1]), CI.u = unname(x$CI_emp[grname, 2]), main. = paste("Bootstrap repeatabilities for", 
-                  grname), ...)
+                  1]), CI.u = unname(x$CI_emp[grname, 2]), main. = main, ...)
             }
        if (type == "permut") {
-                permut_hist(R = x$R[grname], R.permut = unlist(x$R_permut[grname]), main. = paste("Permutation repeatabilities for", 
-                  grname), ...)
+                permut_hist(R = x$R[grname], R.permut = unlist(x$R_permut[grname]), main. = main, ...)
        }
     }
     
