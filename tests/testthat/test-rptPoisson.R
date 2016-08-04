@@ -145,3 +145,7 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
         
 })
 
+
+
+# R_est_4 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
+#         nboot=5, npermut=5, parallel = TRUE)

@@ -61,6 +61,13 @@ test_that("rpt estimation works for one random effect, no boot, permut, no paral
         
 })
 
+# test parallel
+# test_that("rpt estimation in parallel does not throw error", {
+# expect_error(rptBinary(Colour ~ (1|Population) + (1|Habitat),  grname=c("Population", "Habitat"), 
+#                      data=BeetlesMale, nboot=2, npermut=2, parallel = TRUE, ncores = 2), NA)
+# })
+
+
 # run with one random effect, 1 boot, no permut
 # R_est_4 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=1)
 # 

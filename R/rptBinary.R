@@ -72,6 +72,10 @@
 #'      
 #' @seealso \link{rpt}
 #' 
+#' @examples 
+#' # data(BeetlesMale)
+#' # rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
+#' # data=BeetlesMale, nboot=5, npermut=5, parallel = TRUE)
 #'   
 #'      
 #' @export
@@ -155,14 +159,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe")
-                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
-                        data = data, grname = grname))
+                parallel::clusterExport(cl, "R_pe", envir=environment())
+                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod, formula, 
+                        data, grname))
                 parallel::stopCluster(cl)
         }
         if (nboot > 0 & parallel == FALSE) {
-                R_boot <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
-                        grname = grname))
+                R_boot <- unname(apply(Ysim, 2, bootstr, mod, formula, data , 
+                        grname))
         }
         if (nboot == 0) {
                 # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
@@ -275,9 +279,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         }
                         # start cluster
                         cl <- parallel::makeCluster(ncores)
-                        parallel::clusterExport(cl, "R_pe")
-                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                mod_red=mod_red, dep_var=dep_var, grname=grname, data = data)
+                        parallel::clusterExport(cl, "R_pe", envir=environment())
+                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
+                                mod_red, dep_var, grname, data)
                         parallel::stopCluster(cl)
                         
                 } else if (parallel == FALSE) {

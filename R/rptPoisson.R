@@ -160,7 +160,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe")
+                parallel::clusterExport(cl, "R_pe", envir=environment())
                 R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
@@ -267,7 +267,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                          }
                          # start cluster
                          cl <- parallel::makeCluster(ncores)
-                         parallel::clusterExport(cl, "R_pe")
+                         parallel::clusterExport(cl, "R_pe", envir=environment())
                          R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
                                  mod_red=mod_red, dep_var=dep_var, grname=grname, data = data)
                          parallel::stopCluster(cl)

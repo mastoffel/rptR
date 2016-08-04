@@ -117,3 +117,7 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
         
 })
 
+
+# testing parallel computing or rpt.
+# R_est_1 <- rptGaussian(BodyL ~ (1|Population), grname="Population", data=BeetlesBody, nboot=5,
+#         npermut=5, parallel = TRUE)

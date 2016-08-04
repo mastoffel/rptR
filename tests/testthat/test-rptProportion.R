@@ -60,6 +60,8 @@ test_that("rpt estimation works for one random effect, no boot, permut, no paral
 })
 
 
-
+# run with one random effect, no boot, no permut
+# R_est_4 <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
+#         nboot=5, npermut=5, parallel = TRUE)
 
 

@@ -126,7 +126,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 }
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe")
+                parallel::clusterExport(cl, "R_pe", envir=environment())
                 R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
@@ -216,7 +216,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         }
                         # start cluster
                         cl <- parallel::makeCluster(ncores)
-                        parallel::clusterExport(cl, "R_pe")
+                        parallel::clusterExport(cl, "R_pe", envir=environment())
                         R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
                         parallel::stopCluster(cl)
                         P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
