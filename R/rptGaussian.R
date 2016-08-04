@@ -185,7 +185,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # no permutation test
         if (npermut == 1) {
-                R_permut <- R
+                R_permut <- NA
                 P_permut <- NA
         }
         
@@ -206,31 +206,33 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
-        for (i in 1:length(grname)) {
-                if (length(randterms) == 1) {
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        mod_red <- stats::lm(formula_red, data = data)
-                } else if (length(randterms) > 1) {
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                ")"))))
-                        mod_red <- lme4::lmer(formula_red, data = data)
-                }
-                
-                if(parallel == TRUE) {
-                        if (is.null(ncores)) {
-                                ncores <- parallel::detectCores()
-                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+        if (npermut > 1){
+                for (i in 1:length(grname)) {
+                        if (length(randterms) == 1) {
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                                mod_red <- stats::lm(formula_red, data = data)
+                        } else if (length(randterms) > 1) {
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                                        ")"))))
+                                mod_red <- lme4::lmer(formula_red, data = data)
                         }
-                        # start cluster
-                        cl <- parallel::makeCluster(ncores)
-                        parallel::clusterExport(cl, "R_pe", envir=environment())
-                        R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
-                        parallel::stopCluster(cl)
-                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
-                } else if (parallel == FALSE) {
-                        R_permut[i, ] <- c(R[i], as.numeric(unlist(replicate(npermut - 1, permut(formula=formula, data = data, 
-                                mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))))
-                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
+                        
+                        if(parallel == TRUE) {
+                                if (is.null(ncores)) {
+                                        ncores <- parallel::detectCores()
+                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                                }
+                                # start cluster
+                                cl <- parallel::makeCluster(ncores)
+                                parallel::clusterExport(cl, "R_pe", envir=environment())
+                                R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
+                                parallel::stopCluster(cl)
+                                P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
+                        } else if (parallel == FALSE) {
+                                R_permut[i, ] <- c(R[i], as.numeric(unlist(replicate(npermut - 1, permut(formula=formula, data = data, 
+                                        mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))))
+                                P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
+                        }
                 }
         }
                 
