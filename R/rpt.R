@@ -21,11 +21,11 @@
 #' @param CI Width of the required confidence interval between 0 and 1 (defaults to 
 #'        0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation.
-#'        Defaults to 1000. Larger numbers of bootstraps give a better
+#'        (defaults to 1000). Larger numbers of bootstraps give a better
 #'        asymtotic CI, but may be very time-consuming (in particular for non-Gaussian data if some variance component 
 #'        is low). Bootstrapping can be switch off by setting \code{nboot = 0}.
 #' @param npermut Number of permutations used when calculating asymptotic \emph{P} 
-#'        values (defaults to 1000). Larger numbers of permutations give a better
+#'        values (defaults to 0). Larger numbers of permutations give a better
 #'        asymtotic CI, but may be very time-consuming (in particular for non-Gaussian data if some variance component 
 #'        is low). Permutaton tests can be switch off by setting \code{npermut = 0}. 
 #' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
@@ -39,13 +39,14 @@
 #' 
 #' @return Returns an object of class \code{rpt}. See details for specific functions.
 #'
-#' @references Nakagawa, S. and Schielzeth, H. (2011) \emph{Repeatability for 
+#' @references Nakagawa, S. & Schielzeth, H. (2011) \emph{Repeatability for 
 #'      Gaussian and non-Gaussian data: a practical guide for biologists}. 
 #'      Biological Reviews 85: 935-956.
 #'      
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
-#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz),
-#'         Martin A. Stoffel (martin.adam.stoffel@@gmail.com)
+#' @author Holger Schielzeth  (holger.schielzeth@@uni-jena.de), 
+#'         Shinichi Nakagawa (s.nakagawa@unsw.edu.au),
+#'         Martin Stoffel (martin.adam.stoffel@@gmail.com) 
+#'         
 #' @seealso \link{rptR}
 #' 
 #' @examples
@@ -84,7 +85,7 @@
 #' @export
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion", 
-    "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 1000,
+    "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
     parallel = FALSE, ncores = NULL) {
         
     if (datatype == "Gaussian") {

@@ -1,6 +1,6 @@
 #' GLMM-based Repeatability Using REML for Binary data
 #' 
-#' Calculates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
+#' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @param formula Formula as used e.g. by \link{lmer}. The grouping factor(s) of
 #'        interest needs to be included as a random effect, e.g. '(1|groups)'.
 #'        Covariates and additional random effects can be included to estimate adjusted 
@@ -13,12 +13,12 @@
 #'        and \code{grname} arguments.
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
 #' @param CI Width of the required confidence interval (defaults to 0.95).
-#' @param nboot Number of parametric bootstraps for interval estimation.
-#'        Defaults to 1000. Larger numbers of bootstraps give a better
+#' @param nboot Number of parametric bootstraps for interval estimation 
+#'        (defaults to 1000). Larger numbers of bootstraps give a better
 #'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
 #'        is low). Bootstrapping can be switch off by setting \code{nboot = 0}.
-#' @param npermut Number of permutations used when calculating asymptotic \emph{P} 
-#'        values (defaults to 1000). Larger numbers of permutations give a better
+#' @param npermut Number of permutations used when calculating asymptotic p-values 
+#'        (defaults to 0). Larger numbers of permutations give a better
 #'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
 #'        is low). Permutaton tests can be switch off by setting \code{npermut = 0}. 
 #' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
@@ -27,19 +27,19 @@
 #' 
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
-#' \item{call}{Function call}
-#' \item{datatype}{Response distribution (here: 'Binary')}.
+#' \item{call}{Function call.}
+#' \item{datatype}{Response distribution (here: 'Binary').}
 #' \item{CI}{Coverage of the confidence interval as specified by the \code{CI} argument.}
 #' \item{R}{\code{data.frame} with point estimates for repeatabilities. Columns
 #'      represent grouping factors of interest. Rows show original and link scale repeatabilites 
 #'      (in this order).}
 #' \item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. Columns
-#'      are groups of interest. Rows are original and link scale, in this order.
-#'      Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
+#'      are groups of interest. Rows are original and link scale (in this order).
+#'      Note that the distribution might not be symmetrical, in which case the emph{se} is less informative.}
 #' \item{CI_emp}{\code{list} of two elements containing the confidence intervals for repeatabilities 
 #'      on the link and original scale, respectively. Within each list element, lower and upper CI
 #'      are columns and each row for each grouping factor of interest.}
-#' \item{P}{Approximate \emph{P} \code{data.frame} with p-values from a significance test based on likelihood-ratio
+#' \item{P}{\code{data.frame} with p-values from a significance test based on likelihood-ratios
 #'      in the first column and significance test based on permutation of residuals for 
 #'      both the original and link scale in the second and third column. Each row represents a grouping
 #'      factor of interest.}
@@ -52,22 +52,22 @@
 #' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale. Each \code{list}
 #'       element is a grouping factor.}
 #' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-#'      \emph{P} value(s) and degrees of freedom for the likelihood-ratio test.} 
+#'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
 #'
 #' @references 
-#' Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized 
+#' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
 #' concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
 #'
-#' Faraway, J. J. (2006). \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
+#' Faraway, J. J. (2006) \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
 #' 
-#' Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
+#' Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
-#' @author Holger Schielzeth  (holger.schielzeth@@ebc.uu.se),
-#'         Shinichi Nakagawa (shinichi.nakagawa@@otago.ac.nz) &
+#' @author Holger Schielzeth  (holger.schielzeth@@uni-jena.de),
+#'         Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt}

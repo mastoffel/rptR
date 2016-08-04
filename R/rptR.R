@@ -1,8 +1,8 @@
-#' rptR: Repeatability calculation for Gaussian and Non-Gaussian data
+#' rptR: Repeatability estimation for Gaussian and Non-Gaussian data
 #' 
 #' 
 #' @description A collection of functions for calculating point estimates, interval estimates and 
-#'   significance tests of the repeatability (intra-class correlation coefficient) of measurements. 
+#'   significance tests of the repeatability (intra-class correlation coefficient). 
 #'   The function \link{rpt} is a the core functions that calls more specialised functions as
 #'   required. Specialised functions can also be called directly (see \link{rpt} for details). All
 #'   functions return lists of values. The function \link{summary.rpt} produces summaries in a
@@ -10,28 +10,31 @@
 #'   
 #' @note
 #' 
-#' Currently there four different functions depending on the distribution and type of respnse: (1)
-#' \link{rptGaussian} for a gaussian distributed response, (2) \link{rptPoisson} for poisson data, 
-#' (3) \link{rptBinary} assumes a binomial distributed binary response and (4) \link{rptProportion}
-#' takes a response matrix with a column for successes and a column for failures, also
-#' assuming a binomial distribution. All function use a mixed model framework in \code{lme4}, 
-#' and the non-gaussian functions use an observational level random effect to account
+#' Currently there four different functions depending on the distribution and type of response: (1)
+#' \link{rptGaussian} for a Gaussian response distributions, (2) \link{rptPoisson} for Poisson-distributed data, 
+#' (3) \link{rptBinary} for binary response following binomial distributions and (4) \link{rptProportion} for
+#' response matrices with a column for successes and a column for failures that are analysed as proportions
+#' following binomial distributions. All function use a mixed model framework in \code{lme4}, 
+#' and the non-Gaussian functions use an observational level random effect to account
 #' for overdispersion.
+#' 
 #' All functions use the argument \code{formula}, which is the same formula interface as in the
-#'  \code{lme4} package. Repeatabilites are calculated for the response variable, while one or
+#'  \code{lme4} package (indeed models are fitted by \code{lmer} or \code{glmer}). Repeatabilites are calculated for the response variable, while one or
 #' more grouping factors of interest can be assigned as random effects in the form (1|group) and
 #' have to be specified with the \code{grname} argument. This allows to estimate adjusted
 #' repeatabilities (controlling for fixed effects) and the estimation of multiple variance 
 #' components simulatneously (multiple random effects). All variables have to be columns 
 #' in a \code{data.frame} given in the \code{data} argument. The \code{link} argument specifies
-#' the link function for a given non-gaussian distribtion. Finally, all computation can be 
+#' the link function for a given non-gaussian distribtion. 
+#' 
+#' All computation can be 
 #' parallelized with the \code{parallel} argument, which enhances computation speed for larger
 #' computations.
 #' 
-#' @author Holger Schielzeth (holger.schielzeth@@ebc.uu.se), Shinichi Nakagawa
-#'   (shinichi.nakagawa@@otago.ac.nz), Martin Stoffel (martin.adam.stoffel@@gmail.com)
+#' @author Holger Schielzeth (holger.schielzeth@@uni-jena.de), Shinichi Nakagawa
+#'   (s.nakagawa@unsw.edu.au) & Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'   
-#' @references Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
+#' @references Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
 #'   non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #'   
 #' @docType package
