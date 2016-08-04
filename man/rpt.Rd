@@ -76,7 +76,7 @@ md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale,
 
 # gaussian data
 rpt(BodyL ~ (1|Population), grname="Population", data=BeetlesBody, 
-nboot=0, npermut=0, datatype = "Gaussian"
+nboot=0, npermut=0, datatype = "Gaussian")
 
 # poisson data
 rpt(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
