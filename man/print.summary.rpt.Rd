@@ -16,8 +16,8 @@ Displays the summary of an rpt object (i.e. the result of a rpt function call) i
 extended form.
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
-        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+Holger Schielzeth  (holger.schielzeth@uni-jena.de), 
+        Shinichi Nakagawa (s.nakagawa@unsw.edu.au),
         Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{

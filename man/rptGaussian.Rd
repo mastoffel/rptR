@@ -23,13 +23,13 @@ and \code{grname} arguments.}
 
 \item{CI}{Width of the required confidence interval (defaults to 0.95).}
 
-\item{nboot}{Number of parametric bootstraps for interval estimation.
-Defaults to 1000. Larger numbers of bootstraps give a better
+\item{nboot}{Number of parametric bootstraps for interval estimation 
+(defaults to 1000). Larger numbers of bootstraps give a better
 asymtotic CI, but may be very time-consuming (in particular of some variance component 
 is low). Bootstrapping can be switch off by setting \code{nboot = 0}.}
 
-\item{npermut}{Number of permutations used when calculating asymptotic \emph{P} 
-values (defaults to 1000). Larger numbers of permutations give a better
+\item{npermut}{Number of permutations used when calculating asymptotic p-values 
+(defaults to 0). Larger numbers of permutations give a better
 asymtotic CI, but may be very time-consuming (in particular of some variance component 
 is low). Permutaton tests can be switch off by setting \code{npermut = 0}.}
 
@@ -40,7 +40,7 @@ all cores but one are used.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 
-\item{call}{Function call}
+\item{call}{Function call.}
 \item{datatype}{Response distribution (here: 'Gaussian').}
 \item{CI}{Coverage of the confidence interval as specified by the \code{CI} argument.}
 \item{R}{\code{data.frame} with point estimates for repeatabilities for each grouping factor
@@ -50,7 +50,7 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
      in which case the \emph{se} is less informative.}
 \item{CI_emp}{\code{data.frame} containing the (empirical) confidence intervals for the repeatabilities 
      estiamted based parametric bootstrapping. Each row represents a grouping factor of interest.}
-\item{P}{\code{data.frame} with approximate p-values based on likelihood-ratio tests
+\item{P}{\code{data.frame} with p-values based on likelihood-ratio tests
      (first column) and permutation tests (second column). Each row represents a grouping factor 
      of interest.}
 \item{R_boot}{Vector(s) of parametric bootstrap samples for \emph{R}. Each \code{list}
@@ -58,7 +58,7 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{R_permut}{Vector(s) of permutation samples for \emph{R}. Each \code{list}
       element represents a grouping factor.}
 \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-     \emph{P} value(s) and degrees of freedom for the likelihood-ratio test.} 
+     p-value(s) and degrees of freedom for the likelihood-ratio test.} 
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
@@ -86,17 +86,17 @@ rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Popul
 
 }
 \author{
-Holger Schielzeth  (holger.schielzeth@ebc.uu.se),
-        Shinichi Nakagawa (shinichi.nakagawa@otago.ac.nz) &
+Holger Schielzeth  (holger.schielzeth@uni-jena.de),
+        Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
         Martin Stoffel (martin.adam.stoffel@gmail.com)
 }
 \references{
-Carrasco, J. L. and Jover, L.  (2003). \emph{Estimating the generalized 
+Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
 concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
 
-Faraway, J. J. (2006). \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
+Faraway, J. J. (2006) \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
 
-Nakagawa, S. and Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
+Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
 \seealso{
