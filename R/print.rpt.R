@@ -77,12 +77,13 @@ print.rpt <- function(x, ...) {
                          "Link scale repeatabilities:", 
                          "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se["se_link", grname], 3),
                           "\n", "CI = [", round(x$CI_emp$CI_link[grname, 1], 3), ", ",  round(x$CI_emp$CI_link[grname, 2], 3), "]", "\n", 
-                          "P  = ", signif(x$P[grname,  "P_permut_link"], 3), " [", "Permutation", "]", "\n\n", 
-                    
+                          "P  = ", signif(x$P[grname,  "P_permut_link"], 3), " [", "Permutation", "]", "\n",
+                        "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n",               
+                        
                         "Original scale repeatabilities:",
                         "\n", "R  = ", round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se["se_org", grname], 3), "\n", 
                         "CI = [", round(x$CI_emp$CI_org[grname, 1], 3), ", ", round(x$CI_emp$CI_org[grname, 2], 3), "]", "\n", 
-                        "P  = ", signif(x$P[grname,  "P_permut_org"], 3), " [", "Permutation", "]", "\n\n",
+                        "P  = ", signif(x$P[grname,  "P_permut_org"], 3), " [", "Permutation", "]", "\n",
                         "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n", sep = "")
                     
     }
