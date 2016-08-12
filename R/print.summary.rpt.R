@@ -24,7 +24,7 @@ print.summary.rpt <- function(x, ...) {
     
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion" ) {
             cat("\n", "Repeatability calculation using glmer ",  "\n\n", 
-                    "Call = ", deparse(x$call), "\n", "Data: ", x$nobs, " observations", sep = "")
+                    "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n", "Data: ", x$nobs, " observations", sep = "")
             cat("\n")
             cat("----------------------------------------")
             for (i in 1:ncol(x$R)) {
@@ -41,7 +41,7 @@ print.summary.rpt <- function(x, ...) {
                     cat("\n", "Likelihood ratio test: ", "\n", "logLik full model = ", (x$LRT[["LRT_mod"]]), 
                             "\n", "logLik red. model = ", (x$LRT[["LRT_red"]][i]), "\n", "D  = ", 
                             signif((x$LRT[["LRT_D"]][i]), 3), ", ", "df = ", unname(x$LRT[["LRT_df"]]), 
-                            ", ", "P_val  = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
+                            ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
                     cat("\n")
                     cat("----------------------------------------")
                     cat("\n\n")
@@ -50,7 +50,7 @@ print.summary.rpt <- function(x, ...) {
     
     if (x$datatype == "Gaussian") {
         cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-            "Call = ", deparse(x$call), "\n", "Data: ", x$nobs, " observations", sep = "")
+            "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n", "Data: ", x$nobs, " observations", sep = "")
         cat("\n")
         cat("----------------------------------------")
         for (i in 1:length(x$R)) {
@@ -64,7 +64,7 @@ print.summary.rpt <- function(x, ...) {
             cat("\n", "Likelihood ratio test: ", "\n", "logLik full model = ", (x$LRT[["LRT_mod"]]), 
                 "\n", "logLik red. model = ", (x$LRT[["LRT_red"]][i]), "\n", "D  = ", 
                 signif((x$LRT[["LRT_D"]][i]), 3), ", ", "df = ", unname(x$LRT[["LRT_df"]]), 
-                ", ", "P_val  = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
+                ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
             cat("\n")
             cat("----------------------------------------")
             cat("\n\n")

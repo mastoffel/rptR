@@ -40,9 +40,14 @@ summary.rpt <- function(object, ...) {
         
         if(object$datatype=="Gaussian") {
                 for(i in 1:length(object$R)) {
-                      
-                        object$rpt[[i]]    <- structure(data.frame(object$R[i], unlist(object$se)[[i]], as.numeric(matrix(object$CI_emp, ncol = 2)[i, 1]), 
-                                                        as.numeric(matrix(object$CI_emp, ncol = 2)[i, 2]), 
+                        if (any(is.na(object$CI_emp))) {
+                                CI_1 <- NA
+                                CI_2 <- NA
+                        } else {
+                                CI_1 <- as.numeric(object$CI_emp[i, 1])
+                                CI_2 <- as.numeric(object$CI_emp[i, 2])
+                        }
+                        object$rpt[[i]]    <- structure(data.frame(object$R[i], unlist(object$se)[[i]],  CI_1, CI_2, 
                                                         unname(object$P[i, 2]), round(unname(object$P[i, 1]), 3)), 
                                                         names = c("R", "SE", names(object$CI_emp)[1], names(object$CI_emp)[2],
                                                         names(object$P)[2],  names(object$P)[1]), 
