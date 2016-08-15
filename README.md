@@ -11,4 +11,6 @@ rptR
 ``` r
     # install.packages("devtools")
     devtools::install_github("mastoffel/rptR", build_vignettes = TRUE)
+    # tutorial
+    browseVignettes("rptR")
 ```
