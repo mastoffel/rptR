@@ -205,7 +205,7 @@ plot(rep8, grname="Container", scale="link", cex.main=0.8)
 plot(rep8, grname="Container", scale="original", cex.main=0.8)
 ```
 
-<<<<<<< HEAD
+
 ## Repeatabilities for Proportion data
 =======
 It is typical to see the spike at zero and an extended right tail if variances are low. Most randomization will result in estimates that are indistinguishable from zero, while in some cases, randomization will happen to produce combinations of data that produce estimates that escape being captured by zero.
