@@ -21,34 +21,30 @@
 #' 
 #' 
 print.rpt <- function(x, ...) {
-    # rpt.corr, rpt.mcmcLMM
-#         if (x$datatype == "Gaussian") {
-#                         #  rpt.remlLMM.adj with one group factor
-#                         cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
-#                                 "R  = ", round(x$R, 3), "\n", "SE = ", round(x$se, 3), "\n", "CI = [", round(x$CI.R[1], 
-#                                         3), ", ", round(x$CI.R[2], 3), "]", "\n", "P  = ", signif(x$P[1], 3), 
-#                                 " [",names(x$P[1]), "]", "\n", "     ", signif(x$P[2], 3), " [", 
-#                                 x$P[2], "]", "\n\n", sep = "")     
-#                 }
-    
-    # if (x$datatype == "Gaussian") {
-    #     cat("\n", "Repeatability calculation using the glmm method", "\n\n")
-    #     for (i in 1:length(x$R)) {
-    #         cat("Repeatability for ", names(x$R)[i], "\n",
-    #              "R  = ", round(unlist(x$R[i]), 3), "\n",
-    #              "SE = ", round(unlist(x$se[i, ]), 3), "\n",
-    #              "CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n",
-    #               "P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
-    #               "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
-    #     }
-    # }
         
+if (x$ratio == TRUE) {
+        header_gaussian <- "Repeatability calculation using the glmm method"
+        header_nongaussian <- "Repeatability calculation using the glmm method and"
+        header2 <- "Repeatability for "
+        PE <- "R  = "
+        subheader_link <- "Link scale repeatabilities:"
+        subheader_org <- "Original scale repeatabilities:"
+} else if (x$ratio == FALSE) {
+        header_gaussian <- "Variance estimation using the glmm method"
+        header_nongaussian <- "Variance estimation using the glmm method and"
+        header2 <- "Estimated Variance for "
+        PE <- "Var  = "
+        subheader_link <- "Link scale variance:"
+        subheader_org <- "Original scale variance:"
+}
+
         
         if (x$datatype == "Gaussian") {
-                cat("\n", "Repeatability calculation using the glmm method", "\n\n")
+                cat("\n\n")
+                cat(header_gaussian, "\n\n")
                 for (i in 1:length(x$R)) {
-                        cat("Repeatability for ", names(x$R)[i], "\n",
-                                "R  = ", round(unlist(x$R[i]), 3), "\n", sep = "")
+                        cat(header2, names(x$R)[i], "\n",
+                                PE, round(unlist(x$R[i]), 3), "\n", sep = "")
                         if (is.na(unlist(x$se)[1])){ # check if permutations have been done
                         cat("SE = ", x$se, "\n")
                         } else {
@@ -67,30 +63,31 @@ print.rpt <- function(x, ...) {
         
         
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion") {
-            cat("\n", "Repeatability calculation using the glmm method and", x$link, 
+            cat("\n\n")
+            cat(header_nongaussian, x$link, 
                     "link", "\n\n") 
             # grnames <- names(x$R)
             for (i in 1:ncol(x$R)) {
                     grname <- names(x$R)[i]
-                    cat("Repeatability for ", names(x$R)[i], "\n",
+                    cat(header2, names(x$R)[i], "\n",
                          "--------------------------------", "\n",
-                         "Link scale repeatabilities:", 
-                         "\n", "R  = ", round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se["se_link", grname], 3),
+                         subheader_link, 
+                         "\n", PE, round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se["se_link", grname], 3),
                           "\n", "CI = [", round(x$CI_emp$CI_link[grname, 1], 3), ", ",  round(x$CI_emp$CI_link[grname, 2], 3), "]", "\n", 
                           "P  = ", signif(x$P[grname,  "P_permut_link"], 3), " [", "Permutation", "]", "\n",
                         "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n",               
                         
-                        "Original scale repeatabilities:",
-                        "\n", "R  = ", round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se["se_org", grname], 3), "\n", 
+                        subheader_org,
+                        "\n", PE, round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se["se_org", grname], 3), "\n", 
                         "CI = [", round(x$CI_emp$CI_org[grname, 1], 3), ", ", round(x$CI_emp$CI_org[grname, 2], 3), "]", "\n", 
                         "P  = ", signif(x$P[grname,  "P_permut_org"], 3), " [", "Permutation", "]", "\n",
                         "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n", sep = "")
                     
     }
-        
-        
-
     }
-        
 }
+
+        
+        
+        
  
