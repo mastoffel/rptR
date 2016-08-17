@@ -23,6 +23,12 @@
 #' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores but one are used.
+#' @param ratio Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
+#'        will be used for all further calculations. The resulting point estimate(s), 
+#'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
+#'        itself rather than to the repeatability (i.e. ratio of variances).
+#'   
+#' 
 #' 
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -80,12 +86,18 @@
 #'                    data=BeetlesBody, nboot=5, npermut=5)
 #'                
 #' 
+#' # 
+#' rptGaussian(formula = BodyL ~ (1|Population), grname="Population", 
+#'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
+#' 
+#' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
+#'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 #' 
 #' @export
 #' 
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -111,6 +123,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 var_a <- as.numeric(VarComps[grname])
                 names(var_a) <- grname
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
+                
+                if (ratio == FALSE) { # return variance instead of repeatability
+                        R <- as.data.frame(t(var_a))
+                        names(R) <- grname
+                        return(R)
+                }
+                
                 R <- var_a/var_p
                 R <- as.data.frame(t(R))
                 names(R) <- grname
@@ -278,7 +297,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod)
+                nobs = nrow(data), mod = mod, ratio = ratio)
         class(res) <- "rpt"
         return(res)
 } 
