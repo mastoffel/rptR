@@ -23,13 +23,13 @@
 print.summary.rpt <- function(x, ...) {
         
         if (x$ratio == TRUE) {
-                header_gaussian <- "Repeatability calculation using the "
-                header_nongaussian <- "Repeatability calculation using glmer "
-                PE <- "Repeatability overview:"
+                header_gaussian <- "Repeatability estimation using the "
+                header_nongaussian <- "Repeatability estimation using glmer "
+                PE <- "Repeatability estimation overview:"
         } else if (x$ratio == FALSE) {
-                header_gaussian <- "Variance calculation using the "
-                header_nongaussian <- "Variance calculation using glmer "
-                PE <- "Variance estimate overview:"
+                header_gaussian <- "Variance estimation using the "
+                header_nongaussian <- "Variance estimation using glmer "
+                PE <- "Variance estimation overview:"
                 x$rpt <- lapply(x$rpt, function(x){
                         names(x)[1] <- "Var"
                         x
