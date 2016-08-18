@@ -21,16 +21,31 @@
 #' 
 #' 
 print.summary.rpt <- function(x, ...) {
+        
+        if (x$ratio == TRUE) {
+                header_gaussian <- "Repeatability calculation using the "
+                header_nongaussian <- "Repeatability calculation using glmer "
+                PE <- "Repeatability overview:"
+        } else if (x$ratio == FALSE) {
+                header_gaussian <- "Variance calculation using the "
+                header_nongaussian <- "Variance calculation using glmer "
+                PE <- "Variance estimate overview:"
+                x$rpt <- lapply(x$rpt, function(x){
+                        names(x)[1] <- "Var"
+                        x
+                })
+        }
+        
     
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion" ) {
-            cat("\n", "Repeatability calculation using glmer ",  "\n\n", 
+            cat("\n",  header_nongaussian,  "\n\n", 
                     "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n", "Data: ", x$nobs, " observations", sep = "")
             cat("\n")
             cat("----------------------------------------")
             for (i in 1:ncol(x$R)) {
                     cat("\n\n")
                     cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
-                    cat("Repeatability overview:", "\n")
+                    cat(PE, "\n")
                     print(format(x$rpt[[i]], digits = 3, width = 6))
                     cat("\n\n")
                     cat("Bootstrapping:", "\n")
@@ -49,14 +64,14 @@ print.summary.rpt <- function(x, ...) {
     }
     
     if (x$datatype == "Gaussian") {
-        cat("\n", "Repeatability calculation using the ", x$method, " method", "\n\n", 
+        cat("\n", header_gaussian, x$method, " method", "\n\n", 
             "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n", "Data: ", x$nobs, " observations", sep = "")
         cat("\n")
         cat("----------------------------------------")
         for (i in 1:length(x$R)) {
             cat("\n\n")
             cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
-            cat("Repeatability:", "\n")
+            cat(PE, "\n")
             print(format(x$rpt[[i]], digits = 3, width = 6), row.names = FALSE)
             cat("\n")
             cat("Bootstrapping and Permutation test:", "\n")
