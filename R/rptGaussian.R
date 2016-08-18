@@ -99,27 +99,49 @@
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
         
-        # missing values
+        # delete rows with missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
         if (sum(!no_NA_vals ) > 0 ){
                 warning(paste0(sum(!no_NA_vals), " rows containing missing values were removed"))
                 data <- data[no_NA_vals, ]
         } 
         
+        # fit model
         mod <- lme4::lmer(formula, data = data)
+        # extract variance components
         VarComps <- as.data.frame(lme4::VarCorr(mod))
         
+        # checks for bootstraps and permutations
         if (nboot == 1) {
                 warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
                 nboot <- 0
         }
-        
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
-        # point estimates of R
+        
+        # check wether Residuals are selected
+        output_resid <- FALSE
+        if (any(grname == "Residual")){
+                output_resid <- TRUE
+                # save original grname vector as it will be changed for the permutations
+                grname_org <- grname
+        }
+        # predefine residual variance vector
+        var_e <- NA
+        
+        # point estimates of R or var
         R_pe <- function(formula, data, grname) {
+                # model
                 mod <- lme4::lmer(formula, data)
                 VarComps <- lme4::VarCorr(mod)
+                
+                # check if Residual is selected
+                if (output_resid) {
+                        var_e <- attr(VarComps, "sc")^2
+                        names(var_e) <- "Residual"
+                        grname <- grname[-which(grname == "Residual")]
+                }
+                
                 var_a <- as.numeric(VarComps[grname])
                 names(var_a) <- grname
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
@@ -127,12 +149,22 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 if (ratio == FALSE) { # return variance instead of repeatability
                         R <- as.data.frame(t(var_a))
                         names(R) <- grname
+                        # if residual is selected, add residual variation to the output
+                        if (output_resid){
+                                R$Residual <- var_e
+                        } 
                         return(R)
                 }
                 
                 R <- var_a/var_p
                 R <- as.data.frame(t(R))
                 names(R) <- grname
+                
+                # check whether to give out non-repeatability
+                if(output_resid){
+                        non_R <- 1-sum(R)
+                        R$Residual <- non_R
+                }
                 return(R)
         }
         
@@ -185,7 +217,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         } else  {
                 for (i in 1:length(grname)) {
                         boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
-                       
                 }
                 # CI 
                 CI_emp <- as.data.frame(t(as.data.frame(lapply(boot, calc_CI))))
@@ -193,6 +224,12 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
               
+        }
+        
+        # delete "Residual" element of grname vector for the permutations
+        
+        if(output_resid){
+                grname <- grname[-which(grname == "Residual")]
         }
         
         # significance test by permutation of residuals
@@ -284,6 +321,16 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         P <- cbind(LRT_P, P_permut)
     
         row.names(P) <- grname
+        
+
+         # if(output_resid){
+         #  grname <- grname_org
+         #  
+         #  # P <- rbind(P, NA)
+         #  # row.names(P)[nrow(P)] <- "Residual"
+         # }
+         # 
+        
         
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
