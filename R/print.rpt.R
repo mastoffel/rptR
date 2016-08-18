@@ -32,7 +32,7 @@ if (x$ratio == TRUE) {
 } else if (x$ratio == FALSE) {
         header_gaussian <- "Variance estimation using the glmm method"
         header_nongaussian <- "Variance estimation using the glmm method and"
-        header2 <- "Estimated Variance for "
+        header2 <- "Variance of "
         PE <- "Var  = "
         subheader_link <- "Link scale variance:"
         subheader_org <- "Original scale variance:"
