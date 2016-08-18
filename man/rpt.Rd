@@ -6,7 +6,8 @@
 \usage{
 rpt(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion",
   "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95,
-  nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL)
+  nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
+  ratio = TRUE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -45,6 +46,11 @@ is low). Permutaton tests can be switch off by setting \code{npermut = 0}.}
 
 \item{ncores}{Specify number of cores to use for parallelization. On default,
 all cores but one are used.}
+
+\item{ratio}{Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
+will be used for all further calculations. The resulting point estimate(s), 
+uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
+itself rather than to the repeatability (i.e. ratio of variances).}
 }
 \value{
 Returns an object of class \code{rpt}. See details for specific functions.
