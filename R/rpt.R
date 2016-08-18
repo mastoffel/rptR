@@ -31,6 +31,11 @@
 #' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
 #' @param ncores Specify number of cores to use for parallelization. On default,
 #'        all cores but one are used.
+#' @param ratio Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
+#'        will be used for all further calculations. The resulting point estimate(s), 
+#'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
+#'        itself rather than to the repeatability (i.e. ratio of variances).
+#'   
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rptGaussian},
 #'          for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
@@ -86,18 +91,18 @@
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion", 
     "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
-    parallel = FALSE, ncores = NULL) {
+    parallel = FALSE, ncores = NULL, ratio = TRUE) {
         
     if (datatype == "Gaussian") {
-            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores))
+            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio))
     }
     if (datatype == "Binary") {
-            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
     }
     if (datatype == "Proportion") {
-            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
     }
     if (datatype == "Poisson") {
-            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores))
+            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
     }
 } 
