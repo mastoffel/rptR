@@ -90,8 +90,8 @@
 #' rptGaussian(formula = BodyL ~ (1|Population), grname="Population", 
 #'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 #' 
-#' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
-#'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
+#' rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Residual", "Overdispersion"), 
+#'                    data=BeetlesBody, nboot=5, npermut=5)
 #' 
 #' @export
 #' 
@@ -119,64 +119,91 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         
-        # check wether Residuals are selected
+        # save the original grname
+        grname_org <- grname
         output_resid <- FALSE
-        if (any(grname == "Residual")){
-                output_resid <- TRUE
-                # save original grname vector as it will be changed for the permutations
-                grname_org <- grname
-        }
-        # predefine residual variance vector
-        var_e <- NA
+        output_overdisp <- FALSE
         
         # point estimates of R or var
         R_pe <- function(formula, data, grname) {
+                
                 # model
                 mod <- lme4::lmer(formula, data)
                 VarComps <- lme4::VarCorr(mod)
                 
-                # check if Residual is selected
-                if (output_resid) {
-                        var_e <- attr(VarComps, "sc")^2
-                        names(var_e) <- "Residual"
+                # Check whether Residual is selected
+                if (any(grname == "Residual")){
+                        output_resid <- TRUE
+                        # # delete Residual element
                         grname <- grname[-which(grname == "Residual")]
                 }
                 
+                # Check whether Residual is selected
+                if (any(grname == "Overdispersion")){
+                        output_overdisp <- TRUE
+                        grname <- grname[-which(grname == "Overdispersion")]
+                }
+                
+                # Residual variance
+                var_e <- attr(VarComps, "sc")^2
+                names(var_e) <- "Residual"
+                
+                # Overdispersion 
+                var_o <- var_e
+                names(var_o) <- "Overdispersion"
+                
+                # group variances
                 var_a <- as.numeric(VarComps[grname])
                 names(var_a) <- grname
+                
+                # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
                 
-                if (ratio == FALSE) { # return variance instead of repeatability
+                # return variance instead of repeatability
+                if (ratio == FALSE) { 
                         R <- as.data.frame(t(var_a))
                         names(R) <- grname
+                        
                         # if residual is selected, add residual variation to the output
                         if (output_resid){
                                 R$Residual <- var_e
                         } 
+                        if (output_overdisp){
+                                R$Overdisperion <- var_o
+                        }
                         return(R)
                 }
                 
+                # Repeatability
                 R <- var_a/var_p
                 R <- as.data.frame(t(R))
                 names(R) <- grname
                 
+                
                 # check whether to give out non-repeatability
+                non_R <- 1-sum(R)
                 if(output_resid){
-                        non_R <- 1-sum(R)
                         R$Residual <- non_R
                 }
+                if(output_overdisp){
+                        R$Overdispersion <- non_R
+                }
+                
                 return(R)
         }
         
         R <- R_pe(formula, data, grname) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
+        # simulate matrix from which to draw y
         if (nboot > 0)  Ysim <- as.matrix(stats::simulate(mod, nsim = nboot))
         
+        # bootstrapping function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
+        
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
                         ncores <- parallel::detectCores() - 1
@@ -189,20 +216,19 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
         }
+        
         if (nboot > 0 & parallel == FALSE) {
                 R_boot <- unname(apply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
                         grname = grname))
         }
         if (nboot == 0) {
-                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
-                #                 R_boot <- list(structure(as.data.frame(matrix(rep(NA, 2*length(grname)), nrow = 2)),
-                #                           names = grname, row.names = c("R_org", "R_link")))
                 R_boot <- NA
         }
         
         # transform bootstrapping repeatabilities into vectors
         boot <- as.list(rep(NA, length(grname)))
         names(boot) <- grname
+        
         # CI function
         calc_CI <- function(x) {
                 out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
@@ -215,22 +241,33 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                        CI_emp <- calc_CI(NA)
                 }
         } else  {
-                for (i in 1:length(grname)) {
-                        boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
-                }
+                # for (i in 1:length(grname)) {
+                #         boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
+                # }
+                boot <- do.call(rbind, R_boot)
                 # CI 
-                CI_emp <- as.data.frame(t(as.data.frame(lapply(boot, calc_CI))))
-                # se
+                CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
               
         }
         
-        # delete "Residual" element of grname vector for the permutations
         
-        if(output_resid){
+        
+        if (any(grname == "Residual")){
+                output_resid <- TRUE
+                # # delete Residual element
                 grname <- grname[-which(grname == "Residual")]
         }
+        if (any(grname == "Overdispersion")){
+                output_overdisp <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Overdispersion")]
+        }
+        
+        
+        output_resid <- FALSE
+        output_overdisp <- FALSE
         
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
@@ -268,8 +305,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
                                 mod_red <- stats::lm(formula_red, data = data)
                         } else if (length(randterms) > 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                        ")"))))
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
                                 mod_red <- lme4::lmer(formula_red, data = data)
                         }
                         
@@ -286,12 +322,12 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                 P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                         } else if (parallel == FALSE) {
                                 R_permut[i, ] <- c(R[i], as.numeric(unlist(replicate(npermut - 1, permut(formula=formula, data = data, 
-                                        mod_red=mod_red, dep_var=dep_var, grname=grname, i=i), simplify = TRUE))))
+                                        mod_red=mod_red, dep_var=dep_var, grname=grname, i=i)))))
                                 P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                         }
                 }
         }
-                
+        # name R_permut and P_permut
         row.names(R_permut) <- grname
         names(P_permut) <- grname
   
@@ -319,18 +355,26 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         P <- cbind(LRT_P, P_permut)
-    
         row.names(P) <- grname
         
-
-         # if(output_resid){
-         #  grname <- grname_org
-         #  
-         #  # P <- rbind(P, NA)
-         #  # row.names(P)[nrow(P)] <- "Residual"
-         # }
-         # 
         
+        # add Residual = NA for S3 functions to work
+         if(any(grname_org == "Residual")){
+                  # grname <- grname_org
+                  P <- rbind(P, NA)
+                  row.names(P)[nrow(P)] <- "Residual"
+                  R_permut <- rbind(R_permut, NA)
+                  row.names(R_permut)[nrow(R_permut)] <- "Residual"
+         }
+        
+        # add Overdisp = NA for S3 functions to work
+        if(any(grname_org == "Overdispersion")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Overdispersion"
+                R_permut <- rbind(R_permut, NA)
+                row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
+        }
         
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
