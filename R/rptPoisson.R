@@ -171,6 +171,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
+                # variances instead of ratios
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
@@ -189,26 +190,29 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 if (link == "sqrt") {
                         R_link <- var_a/(var_a + var_e + 0.25)
                         R_org <- NA
-                        # # calculate ratio for Residual and Overdisp
-                        # R_e <- var_e / sum(var_a + var_e + 0.25)
+                        # # calculate ratio for Residual 
+                        R_e <- var_e / sum(var_a + var_e + 0.25)
                 }
                 if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
                         R_link = var_a /(var_a + var_e +  estdv)
                         EY <- exp(beta0 + (var_e + var_a)/2)
                         R_org <- EY * (exp(var_a) - 1)/(EY * (exp(var_e + var_a) - 1) + 1)
+                        
+                        # # calculate ratio for Residual 
+                        R_e <- var_e / sum(var_a + var_e +  estdv)
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
                 
                 
                 # check whether to give out non-repeatability and overdispersion repeatability
-                # if (output_resid){
-                #         R$Residual <- c(NA, var_e) # add NA for R_org
-                # } 
-                # if (output_overdisp){
-                #         R$Overdisperion <- c(NA, var_o) # add NA for R_org
-                # }
+                if (output_resid){
+                        R$Residual <- c(NA, R_e) # add NA for R_org
+                }
+                if (output_overdisp){
+                        R$Overdispersion <- c(NA, NA) # add NA for R_org
+                }
                 
                 return(R)
         }
@@ -260,6 +264,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         }
                 }
         } else  {
+               
                 for (i in 1:length(grname)) {
                         boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
                         boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
