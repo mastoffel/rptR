@@ -91,6 +91,8 @@
 #' rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
 #' nboot=5, npermut=5, ratio = FALSE)
 #'
+#' test <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , grname=c("Container", "Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
+#' nboot=5, npermut=5, ratio = TRUE)
 #' @export
 #' 
 
@@ -115,14 +117,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
          mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link))
          VarComps <- as.data.frame(lme4::VarCorr(mod))
-# 
-#         # check if all variance components are 0
-#         if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-#                 nboot <- 0
-#                 npermut <- 0
-#                 warning("all variance components are 0, bootstrapping and permutation skipped")
-#         }
-#        
+
          if (nboot == 1) {
                  warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
                  nboot <- 0
@@ -130,31 +125,72 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
+        
+        # save the original grname
+        grname_org <- grname
+        output_resid <- FALSE
+        output_overdisp <- FALSE
+        
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link)))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
+                
+                
+                # Check whether Residual is selected
+                if (any(grname == "Residual")){
+                        output_resid <- TRUE
+                        # # delete Residual element
+                        grname <- grname[-which(grname == "Residual")]
+                }
+                
+                # Check whether Residual is selected
+                if (any(grname == "Overdispersion")){
+                        output_overdisp <- TRUE
+                        grname <- grname[-which(grname == "Overdispersion")]
+                }
+                
                 # groups random effect variances
                 var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
                 names(var_a) <- grname
+                
+                # olre variance (Residual variance)
+                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                
+                # Overdispersion variance
+                if (link == "sqrt") {
+                        var_o <- var_e + 0.25
+                }
+                if (link == "log") {
+                        estdv <- log(1/exp(beta0)+1)
+                        var_o <- var_e + estdv
+                }
+                
+                # intercept on link scale
+                beta0 <- unname(lme4::fixef(mod)[1])
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
                         R <- as.data.frame(rbind(R_org, R_link))
+                        # if residual is selected, add residual variation to the output
+                        if (output_resid){
+                                R$Residual <- c(NA, var_e) # add NA for R_org
+                        } 
+                        if (output_overdisp){
+                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
+                        }
                         return(R)
                 }
                 
-                # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
-                # intercept on link scale
-                beta0 <- unname(lme4::fixef(mod)[1])
-                
+                # Repeatability
                 if (link == "sqrt") {
                         R_link <- var_a/(sum(VarComps[,"vcov"]) + 0.25)
                         R_org <- NA
+                        # # calculate ratio for Residual and Overdisp
+                        # R_e <- var_e / sum(var_a + var_e + 0.25)
                 }
                 if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
@@ -164,6 +200,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
+                
+                
+                # check whether to give out non-repeatability and overdispersion repeatability
+                # if (output_resid){
+                #         R$Residual <- c(NA, var_e) # add NA for R_org
+                # } 
+                # if (output_overdisp){
+                #         R$Overdisperion <- c(NA, var_o) # add NA for R_org
+                # }
+                
                 return(R)
         }
         
@@ -236,6 +282,29 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 names(se_link) <- "se_link"
         }
 
+        
+        
+        # delete from grname
+        
+        if (any(grname == "Residual")){
+                output_resid <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Residual")]
+        }
+        if (any(grname == "Overdispersion")){
+                output_overdisp <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Overdispersion")]
+        }
+        
+        
+        output_resid <- FALSE
+        output_overdisp <- FALSE
+        
+        
+        
+        
+        
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -344,6 +413,25 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
   
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
+        
+        
+        # add Residual = NA for S3 functions to work
+        if(any(grname_org == "Residual")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Residual"
+                permut_link$Residual <- rep(NA, length(permut_link[[1]]))
+                permut_org$Residual <- rep(NA, length(permut_org[[1]]))
+        }
+        
+        # add Overdisp = NA for S3 functions to work
+        if(any(grname_org == "Overdispersion")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Overdispersion"
+                permut_link$Overdispersion <- rep(NA, length(permut_link[[1]]))
+                permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
+        }
         
      
         res <- list(call = match.call(), 

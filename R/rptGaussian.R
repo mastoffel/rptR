@@ -185,6 +185,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 if(output_resid){
                         R$Residual <- non_R
                 }
+                # and Overdispersion
                 if(output_overdisp){
                         R$Overdispersion <- non_R
                 }
