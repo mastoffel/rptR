@@ -146,12 +146,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 beta0 <- unname(lme4::fixef(mod)[1])
   
                 if (link == "logit") {
-                        R_link <- var_a/(var_a + var_e + (pi^2)/3)
+                        R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
                         P <- exp(beta0) / (1 + exp(beta0))
-                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / (((var_a + var_e) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
+                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
+                                 ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
                 }
                 if (link == "probit") {
-                        R_link <- var_a/(var_a + var_e + 1)
+                        R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
                         R_org <- NA
                         
                 }
