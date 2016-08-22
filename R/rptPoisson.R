@@ -86,14 +86,18 @@
 #' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
+#' # one random effect
 #' rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
 #' nboot=0, npermut=0)
 #' 
+#' # one random effect, variance
 #' rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
 #' nboot=5, npermut=5, ratio = FALSE)
 #'
-#' test <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , grname=c("Container", "Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
-#' nboot=5, npermut=5, ratio = TRUE)
+#' test <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
+#' grname=c("Container", "Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
+#' nboot=5, npermut=5, ratio = FALSE)
+#' 
 #' @export
 #' 
 

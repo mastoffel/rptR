@@ -44,7 +44,11 @@ print.summary.rpt <- function(x, ...) {
             cat("----------------------------------------")
             for (i in 1:ncol(x$R)) {
                     cat("\n\n")
-                    cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
+                    if (!is.na(x$ngroups[i])) {
+                            cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
+                    } else {
+                            cat(names(x$R)[i] , "\n\n",sep = "")
+                    }
                     cat(PE, "\n")
                     print(format(x$rpt[[i]], digits = 3, width = 6))
                     cat("\n\n")
@@ -70,7 +74,11 @@ print.summary.rpt <- function(x, ...) {
         cat("----------------------------------------")
         for (i in 1:length(x$R)) {
             cat("\n\n")
-            cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
+            if (!is.na(x$ngroups[i])) {
+                cat(names(x$R)[i], " (", x$ngroups[i], " groups)", "\n\n", sep = "")
+            } else {
+                cat(names(x$R)[i] , "\n\n",sep = "")
+            }
             cat(PE, "\n")
             print(format(x$rpt[[i]], digits = 3, width = 6), row.names = FALSE)
             cat("\n")

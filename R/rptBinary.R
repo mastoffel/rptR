@@ -121,40 +121,95 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
+        
+        # save the original grname
+        grname_org <- grname
+        output_resid <- FALSE
+        output_overdisp <- FALSE
+        
         # point estimates of R
         R_pe <- function(formula, data, grname) {
                 suppressWarnings(mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
+                
+                # Check whether Residual is selected
+                if (any(grname == "Residual")){
+                        output_resid <- TRUE
+                        # # delete Residual element
+                        grname <- grname[-which(grname == "Residual")]
+                }
+                
+                # Check whether Residual is selected
+                if (any(grname == "Overdispersion")){
+                        output_overdisp <- TRUE
+                        grname <- grname[-which(grname == "Overdispersion")]
+                }
+                
                 # groups random effect variances
                 var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
                 names(var_a) <- grname
+                
+                # olre variance
+                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                # intercept on link scale
+                beta0 <- unname(lme4::fixef(mod)[1])
+                
+                # Overdispersion variance
+                if (link == "logit") {
+                        var_o <- var_e + ((pi^2)/3)
+                }
+                if (link == "probit") {
+                        var_o <- var_e + 1
+                }
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
                         R <- as.data.frame(rbind(R_org, R_link))
+                        
+                        # if residual is selected, add residual variation to the output
+                        if (output_resid){
+                                R$Residual <- c(NA, var_e) # add NA for R_org
+                        } 
+                        if (output_overdisp){
+                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
+                        }
                         return(R)
                 }
-                # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
-                # intercept on link scale
-                beta0 <- unname(lme4::fixef(mod)[1])
+                
+          
                 
                 if (link == "logit") {
                         R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
                         P <- exp(beta0) / (1 + exp(beta0))
                         R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
                                 ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
+                        
+                        # repeatability of Residual and Overdispersion variance
+                        R_e <- var_e / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
+                        R_o <- var_o / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
                 }
                 
                 if (link == "probit") {
                         R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
                         R_org <- NA
+                        
+                        R_e <- var_e / (sum(VarComps[,"vcov"]) + 1)
+                        R_o <- var_o / (sum(VarComps[,"vcov"]) + 1)
                 
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
+                
+                # check whether to give out non-repeatability and overdispersion repeatability
+                if (output_resid){
+                        R$Residual <- c(NA, R_e) # add NA for R_org
+                }
+                if (output_overdisp){
+                        R$Overdispersion <- c(NA, R_o) # add NA for R_org
+                }
+                
                 return(R)
         }
         
@@ -231,6 +286,24 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 names(se_org) <- "se_org"
                 names(se_link) <- "se_link"
         }
+        
+        
+        # delete from grname
+        
+        if (any(grname == "Residual")){
+                output_resid <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Residual")]
+        }
+        if (any(grname == "Overdispersion")){
+                output_overdisp <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Overdispersion")]
+        }
+        
+        
+        output_resid <- FALSE
+        output_overdisp <- FALSE
         
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
@@ -348,7 +421,26 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
-
+        
+        
+        # add Residual = NA for S3 functions to work
+        if(any(grname_org == "Residual")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Residual"
+                permut_link$Residual <- rep(NA, length(permut_link[[1]]))
+                permut_org$Residual <- rep(NA, length(permut_org[[1]]))
+        }
+        
+        # add Overdisp = NA for S3 functions to work
+        if(any(grname_org == "Overdispersion")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Overdispersion"
+                permut_link$Overdispersion <- rep(NA, length(permut_link[[1]]))
+                permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
+        }
+        
         res <- list(call = match.call(), 
                 datatype = "Binary", 
                 link = link,
