@@ -106,6 +106,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 data <- data[no_NA_vals, ]
         } 
         
+        # check whether grnames just contain "Residual" or "Overdispersion"
+        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        
         # fit model
         mod <- lme4::lmer(formula, data = data)
         # extract variance components

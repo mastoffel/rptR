@@ -101,6 +101,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 data <- data[no_NA_vals, ]
         } 
         
+        # check whether grnames just contain "Residual" or "Overdispersion"
+        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
