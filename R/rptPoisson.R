@@ -95,7 +95,7 @@
 #' nboot=5, npermut=5, ratio = FALSE)
 #'
 #' test <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-#' grname=c("Residual", "Overdispersion"), data = BeetlesFemale,
+#' grname=c("Container", "Residual", "Overdispersion"), data = BeetlesFemale,
 #' nboot=5, npermut=5, ratio = FALSE)
 #' 
 #' @export

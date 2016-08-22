@@ -85,12 +85,12 @@
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
 #'                    data=BeetlesBody, nboot=5, npermut=5)
 #'                
-#' 
 #' # 
 #' rptGaussian(formula = BodyL ~ (1|Population), grname="Population", 
 #'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 #' 
-#' rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Residual", "Overdispersion"), 
+#' rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), 
+#' grname=c("Container", "Population", "Residual", "Overdispersion"), 
 #'                    data=BeetlesBody, nboot=5, npermut=5)
 #' 
 #' @export
