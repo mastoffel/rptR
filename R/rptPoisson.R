@@ -61,6 +61,7 @@
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
+#' 
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -159,6 +160,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # olre variance (Residual variance)
                 var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
                 
+                # intercept on link scale
+                beta0 <- unname(lme4::fixef(mod)[1])
+                
                 # Overdispersion variance
                 if (link == "sqrt") {
                         var_o <- var_e + 0.25
@@ -168,8 +172,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         var_o <- var_e + estdv
                 }
                 
-                # intercept on link scale
-                beta0 <- unname(lme4::fixef(mod)[1])
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
@@ -190,25 +192,29 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         R_link <- var_a/(sum(VarComps[,"vcov"]) + 0.25)
                         R_org <- NA
                         # # calculate ratio for Residual and Overdisp
-                        # R_e <- var_e / sum(var_a + var_e + 0.25)
+                        R_e <- var_e / (sum(VarComps[,"vcov"]) + 0.25)
+                        R_o <- var_o / (sum(VarComps[,"vcov"]) + 0.25)
                 }
                 if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
                         R_link = var_a /(sum(VarComps[,"vcov"]) +  estdv)
                         EY <- exp(beta0 + (sum(VarComps[,"vcov"]))/2)
                         R_org <- EY * (exp(var_a) - 1)/(EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1)
+                        # # calculate ratio for Residual and Overdisp
+                        R_e <- var_e / (sum(VarComps[,"vcov"]) +  estdv)
+                        R_o <- var_o / (sum(VarComps[,"vcov"]) +  estdv)
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
                 
                 
                 # check whether to give out non-repeatability and overdispersion repeatability
-                # if (output_resid){
-                #         R$Residual <- c(NA, var_e) # add NA for R_org
-                # } 
-                # if (output_overdisp){
-                #         R$Overdisperion <- c(NA, var_o) # add NA for R_org
-                # }
+                if (output_resid){
+                        R$Residual <- c(NA, R_e) # add NA for R_org
+                }
+                if (output_overdisp){
+                        R$Overdispersion <- c(NA, R_o) # add NA for R_org
+                }
                 
                 return(R)
         }

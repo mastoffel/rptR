@@ -101,6 +101,9 @@ nboot=5, npermut=5)
 rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
 nboot=5, npermut=5, ratio = FALSE)
 
+test <- rptProportion(formula = cbind(Dark, Reddish) ~ (1|Population), grname=c("Population", "Residual", "Overdispersion"), data=md,
+nboot=5, npermut=5, ratio = TRUE)
+
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@uni-jena.de),
