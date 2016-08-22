@@ -87,6 +87,9 @@
 #' 
 #' rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
 #' data=BeetlesMale, nboot=5, npermut=5, ratio = FALSE)
+#' 
+#' rptBinary(formula = Colour ~ (1|Population) + (1|Habitat), grname=c("Population", "Habitat", "Residual", "Overdispersion"), 
+#' data=BeetlesMale, nboot=5, npermut=5, ratio = FALSE)
 #'      
 #' @export
 #' 
@@ -121,23 +124,64 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
+        
+        
+        ####### save the original grname
+        grname_org <- grname
+        output_resid <- FALSE
+        output_overdisp <- FALSE
+        
+        
         # point estimates of R
         R_pe <- function(formula, data, grname) {
                 suppressWarnings(mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
+                
+                ####### Check whether Residual is selected
+                if (any(grname == "Residual")){
+                        output_resid <- TRUE
+                        # # delete Residual element
+                        grname <- grname[-which(grname == "Residual")]
+                }
+                
+                ####### Check whether Residual is selected
+                if (any(grname == "Overdispersion")){
+                        output_overdisp <- TRUE
+                        grname <- grname[-which(grname == "Overdispersion")]
+                }
+                
                 # groups random effect variances
                 var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
                 names(var_a) <- grname
+                
+                # olre variance
+                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                
+                # Overdispersion variance
+                if (link == "sqrt") {
+                        var_o <- var_e + 0.25
+                }
+                if (link == "log") {
+                        estdv <- log(1/exp(beta0)+1)
+                        var_o <- var_e + estdv
+                }
+                
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
                         R <- as.data.frame(rbind(R_org, R_link))
+                        # if residual is selected, add residual variation to the output
+                        if (output_resid){
+                                R$Residual <- c(NA, var_e) # add NA for R_org
+                        } 
+                        if (output_overdisp){
+                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
+                        }
                         return(R)
                 }
-                # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 

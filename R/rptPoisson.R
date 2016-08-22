@@ -126,7 +126,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         
-        # save the original grname
+        ####### save the original grname
         grname_org <- grname
         output_resid <- FALSE
         output_overdisp <- FALSE
@@ -192,6 +192,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         R_org <- NA
                         # # calculate ratio for Residual 
                         R_e <- var_e / sum(var_a + var_e + 0.25)
+                        R_o <- var_o / sum(var_a + var_o)
                 }
                 if (link == "log") {
                         estdv = log(1/exp(beta0)+1)
@@ -201,6 +202,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         
                         # # calculate ratio for Residual 
                         R_e <- var_e / sum(var_a + var_e +  estdv)
+                        R_o <- var_o / sum(var_a)
                 }
                 # check whether that works for any number of var
                 R <- as.data.frame(rbind(R_org, R_link))
