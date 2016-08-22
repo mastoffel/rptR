@@ -51,7 +51,11 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                 
             }
         }
-        }
+    }
+    
+    if (x$ratio == FALSE) {
+            if (scale == "original") stop("No Variance Estimates for bootstrapping or permutation tests on the ")
+    }
     
     
     # make bootstrap histogram
