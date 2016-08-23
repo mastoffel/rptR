@@ -149,7 +149,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
             if (is.null(main)) {
                     if (type == "boot") {
                             if (scale == "link") {
-                                    if (ratio == FALSE){
+                                    if (x$ratio == FALSE){
                                             main <- paste("Bootstrap variance estimates \nfor", grname)   
                                     } else {
                                             main <- paste("Bootstrap repeatabilities \nfor", grname)
@@ -158,7 +158,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
              
                     } else if (type == "permut") {
                             if (grname == "Residual" | grname == "Overdispersion") stop("No permutation tests for Residual or Overdispersion")
-                            if (ratio == FALSE){
+                            if (x$ratio == FALSE){
                                     main <- paste("Permutation variance estimates \nfor", grname)   
                             } else {
                                     main <- paste("Permutation repeatabilities \nfor", grname)

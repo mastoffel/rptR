@@ -265,7 +265,7 @@ The quantification of the distribution-specific variance of Poisson models requi
 
 Bates, D., M. Maechler, B. Bolker & S. Walker (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software 67: 1-48.
 
-Nakagawa, S. & H. Schielzeth (2010). Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists. Biological Reviews 85: 935–956.
+Nakagawa, S. & H. Schielzeth (2010). Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists. Biological Reviews 85: 935-956.
 
 Nakagawa, S. & H. Schielzeth (2013). A general and simple method for obtaining $R^2$ from generalized linear mixed-effects models. Methods in Ecology and Evolution 4: 133-142.
 
