@@ -50,21 +50,6 @@ test_that("rpt estimation works for one random effect, no boot, permut, no paral
         
 })
 
-# # run with one random effect, boot, permut
-# R_est_4 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
-#                       nboot=2, npermut=2)
-# 
-# test_that("rpt estimation works for one random effect, boot, permut, no parallelisation, logit link", {
-# 
-#         # original scale
-#         expect_equal(R_est_4$P$P_permut_org, 0.5, tolerance = 0.001)
-#         # link scale
-#         expect_equal(R_est_4$P$P_permut_link, 0.5, tolerance = 0.001)
-#         
-#         
-# 
-# })
-
 
 
 
@@ -118,6 +103,21 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
 })
 
 
-# testing parallel computing or rpt.
-# R_est_1 <- rptGaussian(BodyL ~ (1|Population), grname="Population", data=BeetlesBody, nboot=5,
-#         npermut=5, parallel = TRUE)
+# Run with Variance, Residual and Overdisp
+R_est_1 <- rptGaussian(BodyL ~ (1|Container) + (1|Population), 
+        grname=c("Container", "Population", "Residual", "Overdispersion"), data=BeetlesBody, nboot=3,
+        npermut=3, ratio = FALSE)
+
+test_that("Variance estimation works for two random effects with residual and overdispersion and boot and permut", {
+        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        # 1st random effect
+        expect_equal(R_est_1$R[[1]], 2.205629, tolerance = 0.001)
+        # 2nd random effect
+        expect_equal(R_est_1$R[[2]],  1.181269, tolerance = 0.001)
+        
+        # test bootstraps
+        expect_equal(R_est_1$CI_emp["Container", "2.5%"], 1.772372, tolerance = 0.001)
+        expect_equal(R_est_1$CI_emp["Population", "2.5%"],  1.296191, tolerance = 0.001)
+        expect_equal(R_est_1$CI_emp["Residual", "2.5%"], 1.227603, tolerance = 0.001)
+        expect_equal(R_est_1$CI_emp["Overdispersion", "2.5%"],  1.227603, tolerance = 0.001)
+})

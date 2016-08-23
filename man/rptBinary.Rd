@@ -17,7 +17,11 @@ repeatabilities.}
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-and terms have to be set in quotation marks.}
+and terms have to be set in quotation marks.Add "Residual" or "Overdispersion"  to
+the character vector to estimate the respective variances. This is most useful
+in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
+variance. With \code{ratio = TRUE} the overdispersion variance reflects the
+non-repeatability.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
@@ -87,11 +91,12 @@ data(BeetlesMale)
 # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
 # for the real analysis.
 
+# one random effect
 rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
-data=BeetlesMale, nboot=5, npermut=5)
+data=BeetlesMale, nboot=2, npermut=2)
 
-rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
-data=BeetlesMale, nboot=5, npermut=5, ratio = FALSE)
+rptBinary(formula = Colour ~ (1|Population), grname=c("Population", "Residual", "Overdispersion"), 
+data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
      
 }
 \author{

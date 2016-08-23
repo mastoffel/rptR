@@ -17,7 +17,11 @@ repeatabilities.}
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-and terms have to be set in quotation marks.}
+and terms have to be set in quotation marks.Add "Residual" or "Overdispersion"  to
+the character vector to estimate the respective variances. This is most useful
+in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
+variance. With \code{ratio = TRUE} the overdispersion variance reflects the
+non-repeatability.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
@@ -89,16 +93,19 @@ data(BeetlesFemale)
 # for the real analysis.
 
 # one random effect
-rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container", "Overdispersion"), data = BeetlesFemale,
-nboot=5, npermut=5)
-
-# one random effect, variance
 rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
-nboot=5, npermut=5, ratio = FALSE)
+nboot=2, npermut=2)
 
-test <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-grname=c("Container", "Residual", "Overdispersion"), data = BeetlesFemale,
-nboot=5, npermut=5, ratio = FALSE)
+# two random effects
+rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
+data = BeetlesFemale, nboot=2, npermut=2)
+
+# two random effects, variance estimation of random effects plus residual and overdispersion
+Var_est <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
+grname=c("Container","Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
+nboot=2, npermut=2, ratio = FALSE)
+
+summary(Var_est)
 
 }
 \author{

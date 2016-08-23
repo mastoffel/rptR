@@ -16,7 +16,11 @@ repeatabilities.}
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-and terms have to be set in quotation marks.}
+and terms have to be set in quotation marks. Add "Residual" or "Overdispersion"  to
+the character vector to estimate the respective variances. This is most useful
+in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
+variance. With \code{ratio = TRUE} the overdispersion variance reflects the
+non-repeatability.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
@@ -80,20 +84,22 @@ data(BeetlesBody)
 # for the real analysis.
 
 # one random effect
-rptGaussian(BodyL ~ (1|Population), grname="Population", 
+rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population", 
                    data=BeetlesBody, nboot=5, npermut=5)
 
 # two random effects
 rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
                    data=BeetlesBody, nboot=5, npermut=5)
                
-# 
-rptGaussian(formula = BodyL ~ (1|Population), grname="Population", 
+# two random effects, estimation of variance (instead repeatability)
+rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), grname= c("Population", "Container"),
                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 
-rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), 
+
+# two random effects, estimation of random effect variances plus residual and overdispersion
+test <- rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), 
 grname=c("Container", "Population", "Residual", "Overdispersion"), 
-                   data=BeetlesBody, nboot=5, npermut=5)
+                   data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 
 }
 \author{

@@ -95,15 +95,14 @@ md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale,
 # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
 # for the real analysis.
 
-rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
-nboot=5, npermut=5)
+# one random effect
+rptProportion(cbind(Dark, Reddish) ~ (1|Population) , 
+grname=c("Population"), data=md, nboot=2, npermut=2)
 
-rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
-nboot=5, npermut=5, ratio = FALSE)
+# one random effect, variance estimation with Residual and Overdispersion
+Var_est <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
+grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=2, npermut=2, ratio = FALSE)
 
-test <- rptProportion(formula = cbind(Dark, Reddish) ~ (1|Population), 
-grname=c("Population", "Residual", "Overdispersion"), data=md,
-nboot=5, npermut=5, ratio = TRUE)
 
 }
 \author{

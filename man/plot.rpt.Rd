@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{rpt}(x, grname = names(x$ngroups), scale = c("link",
   "original"), type = c("boot", "permut"), main = NULL, breaks = "FD",
-  xlab = "Repeatability estimates", ...)
+  xlab = NULL, ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions.}

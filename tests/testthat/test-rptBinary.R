@@ -114,7 +114,7 @@ test_that("rpt estimation works for two random effect, boot, no permut, no paral
 
 
 
-# run with one random effect, no boot, permut
+# run with two random effects, no boot, permut
 R_est_3 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, nboot=0, npermut=2)
 
 test_that("rpt estimation works for two random effect, no boot, permut, no parallelisation, logit link", {
@@ -126,3 +126,16 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
         expect_equal(R_est_3$P$P_permut_link[2], 0.5, tolerance = 0.001)
         
 })
+
+
+# variance estimation with boot and permut and residual/overdispersion
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Overdispersion"), 
+        data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
+
+test_that("Variance estimation works for two random effects, boot, permut,Residual and Overdispersion", {
+        expect_equal(R_est_1$R$Container[2], 0, tolerance = 0.001)
+        expect_equal(R_est_1$R$Population[2], 0.9458128 , tolerance = 0.001)
+        expect_equal(R_est_1$R$Residual[2], 0 , tolerance = 0.001)
+        expect_equal(R_est_1$R$Overdispersion[2], 3.289868, tolerance = 0.001)
+})
+

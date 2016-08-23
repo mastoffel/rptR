@@ -26,10 +26,18 @@
 #' 
 #' 
 plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original"), type = c("boot", "permut"), 
-        main = NULL, breaks = "FD", xlab = "Repeatability estimates", ...) {
+        main = NULL, breaks = "FD", xlab = NULL, ...) {
     
     # save ellipsis args
     dots <- list(...)
+    
+    if (is.null(xlab)) {
+            if (x$ratio==TRUE){  
+                    xlab = "Repeatability estimates" 
+            } else {
+                    xlab = "Variance estimates"
+            }
+    }
         
     # initialising
     if (length(type) != 1) type <- type[1]
@@ -39,23 +47,32 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
     if (x$datatype != "Gaussian") {
         if (is.null(main)) {
             if (type == "boot") {
-                if (scale == "link") 
-                  main <- paste("Link scale bootstrap \nrepeatabilities for", grname)
-                if (scale == "original") 
-                  main <- paste("Original scale bootstrap \nrepeatabilities for", grname)
+                if (scale == "link") {
+                        if (x$ratio == FALSE){
+                                main <- paste("Link scale bootstrap \nvariance estimates for", grname)
+                        } else {
+                                main <- paste("Link scale bootstrap \nrepeatabilities for", grname)
+                        }
+                }
+                if (scale == "original") {
+                        if (x$ratio == FALSE) stop("No original scale estimates for Variances. Change to scale = 'link'")
+                         main <- paste("Original scale bootstrap \nrepeatabilities for", grname)
+                }
             } else if (type == "permut") {
-                if (scale == "link") 
-                  main <- paste("Link scale permutation test \nrepeatabilities for", grname)
-                if (scale == "original") 
-                  main <- paste("Original scale permutation test \nrepeatabilities for", grname)
+                    if (grname == "Residual" | grname == "Overdispersion") stop("No permutation tests for Residual or Overdispersion")
+                if (scale == "link") {
+                        main <- paste("Link scale permutation test \nrepeatabilities for", grname)   
+                }
+                if (scale == "original") {
+                        if (x$ratio == FALSE) stop("There are no variance estimates on the original scale. Change to scale = 'link'")
+                        main <- paste("Original scale permutation test \nrepeatabilities for", grname)
+                }
+                 
                 
             }
         }
     }
     
-    if (x$ratio == FALSE) {
-            if (scale == "original") stop("No Variance Estimates for bootstrapping or permutation tests on the ")
-    }
     
     
     # make bootstrap histogram
@@ -71,8 +88,14 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         graphics::arrows(CI.l, v.pos * 1.15, CI.u, v.pos * 1.15, length = 0.05, angle = 90, code = 3, 
             lwd = 1.5, col = "black")
         graphics::points(R, v.pos * 1.15, cex = 1.1, pch = 19, col = "cornflowerblue")
-        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("cornflowerblue"), c("Repeatability with CI"), 
-            box.lty = 0)
+        if(x$ratio == FALSE){
+                graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("cornflowerblue"), c("Variance estimate with CI"), 
+                        box.lty = 0)      
+        } else {
+                graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("cornflowerblue"), c("Repeatability with CI"), 
+                        box.lty = 0)
+        }
+    
     }
     
     permut_hist <- function(R, R.permut, xlab. = xlab, CI = x$CI, breaks. = breaks, main. = main, 
@@ -93,7 +116,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
         graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
         graphics::points(R, v.pos * 1.3, cex = 1.1, pch = 19, col = "cornflowerblue")
         graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with CI", 
-            "Observed repeatability"), box.lty = 0)
+                "Observed repeatability"), box.lty = 0)
     }
     
     
@@ -125,10 +148,21 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
     if (x$datatype == "Gaussian") {
             if (is.null(main)) {
                     if (type == "boot") {
-                            if (scale == "link") 
-                            main <- paste("Bootstrap repeatabilities \nfor", grname)
+                            if (scale == "link") {
+                                    if (ratio == FALSE){
+                                            main <- paste("Bootstrap variance estimates \nfor", grname)   
+                                    } else {
+                                            main <- paste("Bootstrap repeatabilities \nfor", grname)
+                                    }
+                            }
+             
                     } else if (type == "permut") {
-                            main <- paste("Permutation repeatabilities \nfor", grname)
+                            if (grname == "Residual" | grname == "Overdispersion") stop("No permutation tests for Residual or Overdispersion")
+                            if (ratio == FALSE){
+                                    main <- paste("Permutation variance estimates \nfor", grname)   
+                            } else {
+                                    main <- paste("Permutation repeatabilities \nfor", grname)
+                            }
                     }
             }      
             
