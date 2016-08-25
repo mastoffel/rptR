@@ -71,8 +71,17 @@ test_that("LRTs works", {
         expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
         expect_equal(R_est_1$P[1, "LRT_P"], 2.292582e-138, tolerance = 0.001)
         expect_equal(R_est_1$P[2, "LRT_P"], 2.156259e-07, tolerance = 0.001)
+
 })
 
+
+# variance components sum up to one
+R_est_1 <- rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Overdispersion"), data=BeetlesBody, nboot=0,
+        npermut=0)
+
+test_that("random effect components sum to up to one", {
+        expect_equal(sum(R_est_1$R), 1)
+})
 
 # run with one random effect, boot, no permut
 R_est_2 <- rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data=BeetlesBody, nboot=2,
@@ -121,3 +130,5 @@ test_that("Variance estimation works for two random effects with residual and ov
         expect_equal(R_est_1$CI_emp["Residual", "2.5%"], 1.227603, tolerance = 0.001)
         expect_equal(R_est_1$CI_emp["Overdispersion", "2.5%"],  1.227603, tolerance = 0.001)
 })
+
+

@@ -88,6 +88,14 @@ test_that("LRTs works", {
 })
 
 
+# Variance components sum up to one
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion"), 
+        data=BeetlesMale, nboot=0, npermut=0)
+
+test_that("random effect components sum to up to one", {
+        expect_equal(sum(R_est_1$R["R_link", ]), 1)
+})
+
 # run with one random effect, boot, no permut
 R_est_2 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, nboot=2, npermut=0)
 
