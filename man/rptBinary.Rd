@@ -95,8 +95,8 @@ data(BeetlesMale)
 rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
 data=BeetlesMale, nboot=2, npermut=2)
 
-rptBinary(formula = Colour ~ (1|Population), grname=c("Population", "Residual", "Overdispersion"), 
-data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
+rptBinary(formula = Colour ~ (1|Population) + (1|Container) , grname=c("Population", "Container", "Residual", "Overdispersion"), 
+data=BeetlesMale, nboot=2, npermut=2, ratio = TRUE)
      
 }
 \author{

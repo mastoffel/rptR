@@ -8,7 +8,7 @@
 \description{
 A collection of functions for calculating point estimates, interval estimates and 
   significance tests of the repeatability (intra-class correlation coefficient). 
-  The function \link{rpt} is a the core functions that calls more specialised functions as
+  The function \link{rpt} is a wrapper function that calls more specialised functions as
   required. Specialised functions can also be called directly (see \link{rpt} for details). All
   functions return lists of values. The function \link{summary.rpt} produces summaries in a
   detailed format and \link{plot.rpt} plots bootstraps or permutation results.

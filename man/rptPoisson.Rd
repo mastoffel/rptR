@@ -100,6 +100,10 @@ nboot=2, npermut=2)
 rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
 data = BeetlesFemale, nboot=2, npermut=2)
 
+test <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Container", "Population"), 
+data = BeetlesFemale, nboot=100, npermut=100)
+
+
 # two random effects, variance estimation of random effects plus residual and overdispersion
 Var_est <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
 grname=c("Container","Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,

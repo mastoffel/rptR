@@ -65,7 +65,8 @@
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
-#' 
+#' \item{all_warnings}{\code{list} with two elements. "warnings_boot" and "warnings_permut" contain
+#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -97,6 +98,10 @@
 #' # two random effects
 #' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
 #' data = BeetlesFemale, nboot=2, npermut=2)
+#' 
+#' test <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Container", "Population"), 
+#' data = BeetlesFemale, nboot=100, npermut=100)
+#' 
 #'
 #' # two random effects, variance estimation of random effects plus residual and overdispersion
 #' Var_est <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
@@ -149,7 +154,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link)))
+                # mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link)))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
+                
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 
@@ -244,6 +251,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 R_pe(formula, data, grname)
         }
         
+        warnings_boot <- withWarnings({
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
                         ncores <- parallel::detectCores() - 1
@@ -263,7 +271,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (nboot == 0) {
                 R_boot <- NA
         }
-        
+        })
         # transform bootstrapping repeatabilities into vectors
         boot_org <- as.list(rep(NA, length(grname)))
         boot_link <- as.list(rep(NA, length(grname)))
@@ -363,7 +371,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # for likelihood ratio and permutation test
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-    
+        
+        warnings_permut <- withWarnings({
          if (npermut > 1){
                  for (i in 1:length(grname)) {
                          if (length(randterms) > 1) {
@@ -394,7 +403,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                  R_permut <- c(list(R), R_permut)
                  }
          }
-                 
+        })
+        
         # equal to boot
         permut_org <- as.list(rep(NA, length(grname)))
         permut_link <- as.list(rep(NA, length(grname)))
@@ -453,7 +463,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
         }
         
-     
+        
+        
         res <- list(call = match.call(), 
                 datatype = "Poisson", 
                 link = link,
@@ -469,7 +480,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                 LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod, ratio = ratio)
+                nobs = nrow(data), mod = mod, ratio = ratio, 
+                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
 } 

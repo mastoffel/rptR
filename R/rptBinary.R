@@ -90,8 +90,8 @@
 #' rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
 #' data=BeetlesMale, nboot=2, npermut=2)
 #' 
-#' rptBinary(formula = Colour ~ (1|Population), grname=c("Population", "Residual", "Overdispersion"), 
-#' data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
+#' rptBinary(formula = Colour ~ (1|Population) + (1|Container) , grname=c("Population", "Container", "Residual", "Overdispersion"), 
+#' data=BeetlesMale, nboot=2, npermut=2, ratio = TRUE)
 #'      
 #' @export
 #' 
@@ -137,7 +137,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # point estimates of R
         R_pe <- function(formula, data, grname) {
+                
                 suppressWarnings(mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
+                
+               # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 
