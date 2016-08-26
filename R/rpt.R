@@ -82,7 +82,7 @@
 #' 
 #' # binary data
 #' rpt(Colour ~ (1|Population), grname=c("Population"), 
-#' data=BeetlesMale, nboot=5, npermut=0, datatype = "Binary")
+#' data=BeetlesMale, nboot=0, npermut=0, datatype = "Binary")
 #' 
 #' # proportion data
 #' rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,

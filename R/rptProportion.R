@@ -30,6 +30,7 @@
 #'        will be used for all further calculations. The resulting point estimate(s), 
 #'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
 #'        itself rather than to the repeatability (i.e. ratio of variances).
+#'
 #'         
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -63,6 +64,8 @@
 #' \item{nobs}{Number of observations.}
 #' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
+#' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -87,16 +90,16 @@
 #' BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
 #' md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
 #' 
-#' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+#' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
 #' # one random effect
 #' rptProportion(cbind(Dark, Reddish) ~ (1|Population) , 
-#' grname=c("Population"), data=md, nboot=2, npermut=2)
+#' grname=c("Population"), data=md, nboot=3, npermut=3)
 #' 
 #' # one random effect, variance estimation with Residual and Overdispersion
-#' Var_est <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-#' grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=2, npermut=2, ratio = FALSE)
+#' rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
+#' grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' 
 #' @export
@@ -153,7 +156,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 
@@ -248,6 +251,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_pe(formula, data, grname)
         }
         
+        warnings_boot <- withWarnings({
+                
         # to do: preallocate R_boot
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -269,6 +274,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
                 R_boot <- NA
         }
+        })
         
         # transform bootstrapping repeatabilities into vectors
         boot_org <- as.list(rep(NA, length(grname)))
@@ -381,6 +387,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
+        warnings_permut <- withWarnings({
+                
         if (npermut > 1){
                 for (i in 1:length(grname)) {
                         if (length(randterms) > 1) {
@@ -411,6 +419,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_permut <- c(list(R), R_permut)
                 }
         }
+        })
         
         # equal to boot
         permut_org <- as.list(rep(NA, length(grname)))
@@ -495,7 +504,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio)
+                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio,
+                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
 } 

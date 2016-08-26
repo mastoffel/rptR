@@ -65,8 +65,8 @@
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
-#' \item{all_warnings}{\code{list} with two elements. "warnings_boot" and "warnings_permut" contain
-#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.
+#' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -88,27 +88,22 @@
 #' # load data
 #' data(BeetlesFemale)
 #' 
-#' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+#' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
-#' # one random effect
-#' rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
-#' nboot=2, npermut=2)
 #' 
-#' # two random effects
+#' # estimating adjusted repeatabilities for two random effects
+#' 
 #' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
-#' data = BeetlesFemale, nboot=2, npermut=2)
+#' data = BeetlesFemale, nboot=3, npermut=3)
 #' 
-#' test <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Container", "Population"), 
-#' data = BeetlesFemale, nboot=100, npermut=100)
 #' 
-#'
-#' # two random effects, variance estimation of random effects plus residual and overdispersion
-#' Var_est <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-#' grname=c("Container","Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
-#' nboot=2, npermut=2, ratio = FALSE)
+#' # variance estimation of random effects, residual and overdispersion 
 #' 
-#' summary(Var_est)
+#' rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
+#' grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
+#' nboot=3, npermut=3, ratio = FALSE)
+#' 
 #' 
 #' @export
 #' 
@@ -252,6 +247,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         }
         
         warnings_boot <- withWarnings({
+                
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
                         ncores <- parallel::detectCores() - 1
@@ -373,6 +369,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
         warnings_permut <- withWarnings({
+                
          if (npermut > 1){
                  for (i in 1:length(grname)) {
                          if (length(randterms) > 1) {
@@ -482,6 +479,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod, ratio = ratio, 
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
+        
         class(res) <- "rpt"
         return(res)
 } 

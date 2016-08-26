@@ -81,6 +81,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -89,27 +91,22 @@ Estimates repeatability from a generalized linear mixed-effects models fitted by
 # load data
 data(BeetlesFemale)
 
-# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
-# one random effect
-rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = BeetlesFemale,
-nboot=2, npermut=2)
 
-# two random effects
+# estimating adjusted repeatabilities for two random effects
+
 rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
-data = BeetlesFemale, nboot=2, npermut=2)
-
-test <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Container", "Population"), 
-data = BeetlesFemale, nboot=100, npermut=100)
+data = BeetlesFemale, nboot=3, npermut=3)
 
 
-# two random effects, variance estimation of random effects plus residual and overdispersion
-Var_est <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-grname=c("Container","Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
-nboot=2, npermut=2, ratio = FALSE)
+# variance estimation of random effects, residual and overdispersion 
 
-summary(Var_est)
+rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
+grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
+nboot=3, npermut=3, ratio = FALSE)
+
 
 }
 \author{

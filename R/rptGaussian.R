@@ -58,6 +58,8 @@
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
+#' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -78,26 +80,23 @@
 #' 
 #' data(BeetlesBody)
 #' 
-#' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+#' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
 #' # one random effect
 #' rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population", 
-#'                    data=BeetlesBody, nboot=5, npermut=5)
+#'                    data=BeetlesBody, nboot=3, npermut=3)
 #' 
 #' # two random effects
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
-#'                    data=BeetlesBody, nboot=5, npermut=5)
+#'                    data=BeetlesBody, nboot=3, npermut=3)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
-#' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), grname= c("Population", "Container"),
-#'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
+#' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
+#'             grname= c("Population", "Container", "Residual"),
+#'             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' 
-#' # two random effects, estimation of random effect variances plus residual and overdispersion
-#' test <- rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), 
-#' grname=c("Container", "Population", "Residual", "Overdispersion"), 
-#'                    data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 #' 
 #' @export
 #' 
@@ -214,6 +213,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 R_pe(formula, data, grname)
         }
         
+        warnings_boot <- withWarnings({
+                
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
                         ncores <- parallel::detectCores() - 1
@@ -234,6 +235,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (nboot == 0) {
                 R_boot <- NA
         }
+                
+        })
         
         # transform bootstrapping repeatabilities into vectors
         boot <- as.list(rep(NA, length(grname)))
@@ -309,6 +312,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
+        warnings_permut <- withWarnings({
+                
         if (npermut > 1){
                 for (i in 1:length(grname)) {
                         if (length(randterms) == 1) {
@@ -337,6 +342,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         }
                 }
         }
+                
+        })
         # name R_permut and P_permut
         row.names(R_permut) <- grname
         names(P_permut) <- grname
@@ -398,7 +405,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod, ratio = ratio)
+                nobs = nrow(data), mod = mod, ratio = ratio,
+                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
+        
         class(res) <- "rpt"
         return(res)
 } 

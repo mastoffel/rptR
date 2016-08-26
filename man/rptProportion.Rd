@@ -80,6 +80,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{nobs}{Number of observations.}
 \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 \item{mod}{Fitted model.}
+\item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -92,16 +94,16 @@ BeetlesMale$Dark <- BeetlesMale$Colour
 BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
 md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
 
-# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # one random effect
 rptProportion(cbind(Dark, Reddish) ~ (1|Population) , 
-grname=c("Population"), data=md, nboot=2, npermut=2)
+grname=c("Population"), data=md, nboot=3, npermut=3)
 
 # one random effect, variance estimation with Residual and Overdispersion
-Var_est <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=2, npermut=2, ratio = FALSE)
+rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
+grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=3, npermut=3, ratio = FALSE)
 
 
 }

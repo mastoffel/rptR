@@ -81,6 +81,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -88,15 +90,14 @@ Estimates repeatability from a generalized linear mixed-effects models fitted by
 \examples{
 data(BeetlesMale)
 
-# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # one random effect
 rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
-data=BeetlesMale, nboot=2, npermut=2)
+data=BeetlesMale, nboot=3, npermut=3)
 
-rptBinary(formula = Colour ~ (1|Population) + (1|Container) , grname=c("Population", "Container", "Residual", "Overdispersion"), 
-data=BeetlesMale, nboot=2, npermut=2, ratio = TRUE)
+
      
 }
 \author{

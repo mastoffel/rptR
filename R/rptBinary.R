@@ -64,6 +64,8 @@
 #' \item{ngroups}{Number of groups.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
+#' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -83,15 +85,14 @@
 #' @examples 
 #' data(BeetlesMale)
 #' 
-#' # Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+#' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
 #' # one random effect
 #' rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
-#' data=BeetlesMale, nboot=2, npermut=2)
+#' data=BeetlesMale, nboot=3, npermut=3)
 #' 
-#' rptBinary(formula = Colour ~ (1|Population) + (1|Container) , grname=c("Population", "Container", "Residual", "Overdispersion"), 
-#' data=BeetlesMale, nboot=2, npermut=2, ratio = TRUE)
+#' 
 #'      
 #' @export
 #' 
@@ -138,7 +139,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # point estimates of R
         R_pe <- function(formula, data, grname) {
                 
-                suppressWarnings(mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link)))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 
                # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
@@ -234,6 +235,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 R_pe(formula, data, grname)
         }
         
+        warnings_boot <- withWarnings({
+                
         # to do: preallocate R_boot
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -255,6 +258,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
                 R_boot <- NA
         }
+                
+        })
         
         # transform bootstrapping repeatabilities into vectors
         boot_org <- as.list(rep(NA, length(grname)))
@@ -363,6 +368,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
+        warnings_permut <- withWarnings({
+                
         if (npermut > 1){
                 for (i in 1:length(grname)) {
                         if (length(randterms) > 1) {
@@ -392,6 +399,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 R_permut <- c(list(R), R_permut)
                 }
         }
+        })
         
 
         # equal to boot
@@ -467,7 +475,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod, ratio = ratio)
+                nobs = nrow(data), mod = mod, ratio = ratio,
+                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
 } 

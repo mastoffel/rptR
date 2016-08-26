@@ -71,6 +71,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
+warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates the repeatability from a general linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -80,26 +82,23 @@ Estimates the repeatability from a general linear mixed-effects models fitted by
 
 data(BeetlesBody)
 
-# Note: nboot and npermut are set to 5 for speed reasons. Use larger numbers
+# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # one random effect
 rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population", 
-                   data=BeetlesBody, nboot=5, npermut=5)
+                   data=BeetlesBody, nboot=3, npermut=3)
 
 # two random effects
 rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
-                   data=BeetlesBody, nboot=5, npermut=5)
+                   data=BeetlesBody, nboot=3, npermut=3)
                
 # two random effects, estimation of variance (instead repeatability)
-rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), grname= c("Population", "Container"),
-                   data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
+rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
+            grname= c("Population", "Container", "Residual"),
+            data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 
 
-# two random effects, estimation of random effect variances plus residual and overdispersion
-test <- rptGaussian(formula = BodyL ~ (1|Container) + (1|Population), 
-grname=c("Container", "Population", "Residual", "Overdispersion"), 
-                   data=BeetlesBody, nboot=5, npermut=5, ratio = FALSE)
 
 }
 \author{
