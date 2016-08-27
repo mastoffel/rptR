@@ -122,13 +122,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         # observational level random effect
-        obsid <- factor(1:nrow(data))
-        data <- cbind(data, obsid)
+        Overdispersion <- factor(1:nrow(data))
+        data <- cbind(data, Overdispersion)
         
-        formula <- stats::update(formula,  ~ . + (1|obsid))
+        formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
-        obsind_id <- which(VarComps[["grp"]] == "obsid")
+        obsind_id <- which(VarComps[["grp"]] == "Overdispersion")
         overdisp <- VarComps$vcov[obsind_id]
         
         # check if all variance components are 0
@@ -151,15 +151,14 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
-        output_overdisp <- FALSE
-        
+
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
-                
+                rownames(VarComps) = VarComps$grp                
                 
                 # Check whether Residual is selected
                 if (any(grname == "Residual")){
@@ -168,27 +167,21 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                         grname <- grname[-which(grname == "Residual")]
                 }
                 
-                # Check whether Residual is selected
-                if (any(grname == "Overdispersion")){
-                        output_overdisp <- TRUE
-                        grname <- grname[-which(grname == "Overdispersion")]
-                }
-                
                 # groups random effect variances
-                var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
+                var_a <- VarComps[grname, "vcov"]
                 names(var_a) <- grname
                 
                 # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                var_o <- VarComps["Overdispersion", "vcov"]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
                 # Overdispersion variance
                 if (link == "logit") {
-                        var_o <- var_e + ((pi^2)/3)
+                        var_r <- var_o + ((pi^2)/3)
                 }
                 if (link == "probit") {
-                        var_o <- var_e + 1
+                        var_r <- var_o + 1
                 }
                 
                 if (ratio == FALSE) {
@@ -198,46 +191,39 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                         
                         # if residual is selected, add residual variation to the output
                         if (output_resid){
-                                R$Residual <- c(NA, var_e) # add NA for R_org
+                                R[,"Residual"] <- c(NA, var_r) # add NA for R_org
                         } 
-                        if (output_overdisp){
-                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
-                        }
                         return(R)
                 }
                 
-  
-                if (link == "logit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
-                        P <- exp(beta0) / (1 + exp(beta0))
-                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
-                                 ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
+                if (ratio == TRUE) {
+                        if (link == "logit") {
+                                R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
+                                P <- exp(beta0) / (1 + exp(beta0))
+                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
+                                        ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
                         
-                        # repeatability of Residual and Overdispersion variance
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                }
-                if (link == "probit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
-                        R_org <- NA
+                                # repeatability of Residual and Overdispersion variance
+                                R_r <- var_r / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
+                        }
+                        if (link == "probit") {
+                                R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
+                                R_org <- NA
                         
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + 1)
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + 1)
-                        
-                }
-                # check whether that works for any number of var
-                R <- as.data.frame(rbind(R_org, R_link))
+                                R_r <- var_r / (sum(VarComps[,"vcov"]) + 1)
+
+                        }
+                        # check whether that works for any number of var
+                        R <- as.data.frame(rbind(R_org, R_link))
                 
-                # check whether to give out non-repeatability and overdispersion repeatability
-                if (output_resid){
-                        R$Residual <- c(NA, R_e) # add NA for R_org
+                        # check whether to give out non-repeatability and overdispersion repeatability
+                        if (output_resid){
+                                R[,"Residual"] <- c(NA, R_r) # add NA for R_org
+                        }
+
+                        return(R)
                 }
-                if (output_overdisp){
-                        R$Overdispersion <- c(NA, R_o) # add NA for R_org
-                }
-                
-                return(R)
-                }
+        }
         
         R <- R_pe(formula, data, grname, peYN = FALSE)
         

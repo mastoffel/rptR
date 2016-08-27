@@ -90,7 +90,7 @@ test_that("LRTs works", {
 
 # variance components sum up to 1
 R_est_1 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), 
-        grname=c("Container", "Population", "Overdispersion"), data = md,
+        grname=c("Container", "Population", "Residual"), data = md,
         nboot=0, npermut=0))
 
 test_that("random effect components sum to up to one", {
