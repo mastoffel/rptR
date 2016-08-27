@@ -8,10 +8,10 @@
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-#'        and terms have to be set in quotation marks.Add "Residual" or "Overdispersion"  to
+#'        and terms have to be set in quotation marks. Add "Residual" or "Overdispersion"  to
 #'        the character vector to estimate the respective variances. This is most useful
 #'        in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
-#'        variance. With \code{ratio = TRUE} the overdispersion variance reflects the
+#'        variance. With \code{ratio = TRUE} the residual variance reflects the
 #'        non-repeatability.
 #' @param data A dataframe that contains the variables included in the \code{formula}
 #'        and \code{grname} arguments.
@@ -98,7 +98,7 @@
 #' 
 
 rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
+                      npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -114,14 +114,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         # observational level random effect
-        obsid <- factor(1:nrow(data))
-        data <- cbind(data, obsid)
+        Overdispersion <- factor(1:nrow(data))
+        data <- cbind(data, Overdispersion)
         
-        formula <- stats::update(formula,  ~ . + (1|obsid))
+        formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
-        VarComps <- as.data.frame(lme4::VarCorr(mod))
-#         obsind_id <- which(VarComps[["grp"]] == "obsid")
-#         overdisp <- VarComps$vcov[obsind_id]
+        #VarComps <- as.data.frame(lme4::VarCorr(mod))
+        #         obsind_id <- which(VarComps[["grp"]] == "Overdispersion")
+        #         overdisp <- VarComps$vcov[obsind_id]
         
         if (nboot == 1) {
                 warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
@@ -134,16 +134,16 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
-        output_overdisp <- FALSE
         
         # point estimates of R
         R_pe <- function(formula, data, grname) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 
-               # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
+                rownames(VarComps) = VarComps$grp
                 
                 # Check whether Residual is selected
                 if (any(grname == "Residual")){
@@ -152,27 +152,19 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         grname <- grname[-which(grname == "Residual")]
                 }
                 
-                # Check whether Residual is selected
-                if (any(grname == "Overdispersion")){
-                        output_overdisp <- TRUE
-                        grname <- grname[-which(grname == "Overdispersion")]
-                }
-                
                 # groups random effect variances
-                var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
+                var_a <- VarComps[grname, "vcov"]
                 names(var_a) <- grname
-                
-                # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
-                # Overdispersion variance
+                # Residual variance
                 if (link == "logit") {
-                        var_o <- var_e + ((pi^2)/3)
+                        var_r <- VarComps["Overdispersion", "vcov"] + ((pi^2)/3)
                 }
                 if (link == "probit") {
-                        var_o <- var_e + 1
+                        var_r <- VarComps["Overdispersion", "vcov"] + 1
                 }
                 
                 if (ratio == FALSE) {
@@ -182,47 +174,39 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         
                         # if residual is selected, add residual variation to the output
                         if (output_resid){
-                                R$Residual <- c(NA, var_e) # add NA for R_org
+                                R[,"Residual"] <- c(NA,var_r)   # add NA for R_org
                         } 
-                        if (output_overdisp){
-                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
-                        }
                         return(R)
                 }
                 
-          
-                
-                if (link == "logit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
-                        P <- exp(beta0) / (1 + exp(beta0))
-                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
-                                ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
+                if (ratio == TRUE) {
+                        if (link == "logit") {
+                                R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
+                                P <- exp(beta0) / (1 + exp(beta0))
+                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
+                                        ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
                         
-                        # repeatability of Residual and Overdispersion variance
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                }
-                
-                if (link == "probit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
-                        R_org <- NA
+                                # repeatability of Residual  variance
+                                R_r <- var_r / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
+                        }
                         
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + 1)
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + 1)
+                        if (link == "probit") {
+                                R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
+                                R_org <- NA
+                        
+                                R_r <- var_r / (sum(VarComps[,"vcov"]) + 1)
+                        
+                        }
+                        # check whether that works for any number of var
+                        R <- as.data.frame(rbind(R_org, R_link))
                 
-                }
-                # check whether that works for any number of var
-                R <- as.data.frame(rbind(R_org, R_link))
+                        # check whether to give out non-repeatability and overdispersion repeatability
+                        if (output_resid){
+                                R[,"Residual"] <- c(NA, R_r) # add NA for R_org
+                        }
                 
-                # check whether to give out non-repeatability and overdispersion repeatability
-                if (output_resid){
-                        R$Residual <- c(NA, R_e) # add NA for R_org
+                        return(R)
                 }
-                if (output_overdisp){
-                        R$Overdispersion <- c(NA, R_o) # add NA for R_org
-                }
-                
-                return(R)
         }
         
         R <- R_pe(formula, data, grname) # no parametric bootstrap skipping atm
@@ -237,27 +221,27 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         warnings_boot <- withWarnings({
                 
-        # to do: preallocate R_boot
-        if (nboot > 0 & parallel == TRUE) {
-                if (is.null(ncores)) {
-                        ncores <- parallel::detectCores() - 1
-                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                # to do: preallocate R_boot
+                if (nboot > 0 & parallel == TRUE) {
+                        if (is.null(ncores)) {
+                                ncores <- parallel::detectCores() - 1
+                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                        }
+                        # start cluster
+                        cl <- parallel::makeCluster(ncores)
+                        parallel::clusterExport(cl, "R_pe", envir=environment())
+                        R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod, formula, 
+                                                            data, grname))
+                        parallel::stopCluster(cl)
                 }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod, formula, 
-                        data, grname))
-                parallel::stopCluster(cl)
-        }
-        if (nboot > 0 & parallel == FALSE) {
-                R_boot <- unname(apply(Ysim, 2, bootstr, mod, formula, data , 
-                        grname))
-        }
-        if (nboot == 0) {
-                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
-                R_boot <- NA
-        }
+                if (nboot > 0 & parallel == FALSE) {
+                        R_boot <- unname(apply(Ysim, 2, bootstr, mod, formula, data , 
+                                               grname))
+                }
+                if (nboot == 0) {
+                        # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
+                        R_boot <- NA
+                }
                 
         })
         
@@ -270,13 +254,13 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
                         for(i in c("se_org", "se_link")){
                                 assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname))), row.names = grname, names = i), 
-                                        envir = e1)   
+                                                                      nrow = length(grname))), row.names = grname, names = i), 
+                                       envir = e1)   
                         }
                         for(i in c("CI_org", "CI_link")){
                                 assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname), ncol = 2)), row.names = grname), 
-                                        envir = e1)   
+                                                                      nrow = length(grname), ncol = 2)), row.names = grname), 
+                                       envir = e1)   
                         }
                         
                 }
@@ -284,14 +268,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 for (i in 1:length(grname)) {
                         boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
                         boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
-                        }
-                        names(boot_org) <- grname
-                        names(boot_link) <- grname
-        
-                        calc_CI <- function(x) {
-                                out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-                        }
-        
+                }
+                names(boot_org) <- grname
+                names(boot_link) <- grname
+                
+                calc_CI <- function(x) {
+                        out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
+                }
+                
                 # CI into data.frame and transpose to have grname in rows
                 CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
                 CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
@@ -311,16 +295,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 # # delete Residual element
                 grname <- grname[-which(grname == "Residual")]
         }
-        if (any(grname == "Overdispersion")){
-                output_overdisp <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Overdispersion")]
-        }
-        
         
         output_resid <- FALSE
-        output_overdisp <- FALSE
-        
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -349,9 +326,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
-                          prob = inv_fun((trans_fun(stats::fitted(mod)) + 
-                                        sample(stats::resid(mod)))))
-               
+                                        prob = inv_fun((trans_fun(stats::fitted(mod)) + 
+                                                                sample(stats::resid(mod)))))
+                
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
@@ -362,7 +339,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
         P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
-                row.names = c("P_permut_org", "P_permut_link")), names = grname)
+                                         row.names = c("P_permut_org", "P_permut_link")), names = grname)
         
         # for likelihood ratio and permutation test
         terms <- attr(terms(formula), "term.labels")
@@ -370,38 +347,38 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         warnings_permut <- withWarnings({
                 
-        if (npermut > 1){
-                for (i in 1:length(grname)) {
-                        if (length(randterms) > 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                        ")"))))
-                                mod_red <- lme4::glmer(formula_red, data = data, family = stats::binomial(link = link))
-                        } else if (length(randterms) == 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                mod_red <- stats::glm(formula_red, data = data, family = stats::binomial(link = link))
+                if (npermut > 1){
+                        for (i in 1:length(grname)) {
+                                if (length(randterms) > 1) {
+                                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
+                                                                                                         ")"))))
+                                        mod_red <- lme4::glmer(formula_red, data = data, family = stats::binomial(link = link))
+                                } else if (length(randterms) == 1) {
+                                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+                                        mod_red <- stats::glm(formula_red, data = data, family = stats::binomial(link = link))
+                                }
+                                if(parallel == TRUE) {
+                                        if (is.null(ncores)) {
+                                                ncores <- parallel::detectCores()
+                                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                                        }
+                                        # start cluster
+                                        cl <- parallel::makeCluster(ncores)
+                                        parallel::clusterExport(cl, "R_pe", envir=environment())
+                                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
+                                                                        mod_red, dep_var, grname, data)
+                                        parallel::stopCluster(cl)
+                                        
+                                } else if (parallel == FALSE) {
+                                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
+                                }
+                                # adding empirical rpt 
+                                R_permut <- c(list(R), R_permut)
                         }
-                if(parallel == TRUE) {
-                        if (is.null(ncores)) {
-                                ncores <- parallel::detectCores()
-                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                        }
-                        # start cluster
-                        cl <- parallel::makeCluster(ncores)
-                        parallel::clusterExport(cl, "R_pe", envir=environment())
-                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
-                                mod_red, dep_var, grname, data)
-                        parallel::stopCluster(cl)
-                        
-                } else if (parallel == FALSE) {
-                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
                 }
-                # adding empirical rpt 
-                R_permut <- c(list(R), R_permut)
-                }
-        }
         })
         
-
+        
         # equal to boot
         permut_org <- as.list(rep(NA, length(grname)))
         permut_link <- as.list(rep(NA, length(grname)))
@@ -414,7 +391,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 names(permut_org) <- grname
                 names(permut_link) <- grname
         }
-
+        
         P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
         P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
         names(P_permut) <- names(permut_link)
@@ -428,9 +405,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         for (i in 1:length(grname)) {
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                        ")"))))
+                                                                                 ")"))))
                 LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = stats::binomial(link = link))))
+                                                                   family = stats::binomial(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
                 # LR <- as.numeric(-2*(logLik(lme4::lmer(stats::update(formula, eval(paste('. ~ . ',
@@ -451,32 +428,23 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 permut_org$Residual <- rep(NA, length(permut_org[[1]]))
         }
         
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Overdispersion")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Overdispersion"
-                permut_link$Overdispersion <- rep(NA, length(permut_link[[1]]))
-                permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
-        }
-        
         res <- list(call = match.call(), 
-                datatype = "Binary", 
-                link = link,
-                CI = CI, 
-                R = R, 
-                se = t(cbind(se_org,se_link)), 
-                CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
-                P = as.data.frame(P),
-                R_boot_link = boot_link, 
-                R_boot_org = boot_org,
-                R_permut_link = permut_link, 
-                R_permut_org = permut_org,
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
-                        LRT_P = LRT_P), 
-                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), mod = mod, ratio = ratio,
-                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
+                    datatype = "Binary", 
+                    link = link,
+                    CI = CI, 
+                    R = R, 
+                    se = t(cbind(se_org,se_link)), 
+                    CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
+                    P = as.data.frame(P),
+                    R_boot_link = boot_link, 
+                    R_boot_org = boot_org,
+                    R_permut_link = permut_link, 
+                    R_permut_org = permut_org,
+                    LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
+                               LRT_P = LRT_P), 
+                    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+                    nobs = nrow(data), mod = mod, ratio = ratio,
+                    all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
 } 

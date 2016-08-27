@@ -89,7 +89,7 @@ test_that("LRTs works", {
 
 
 # Variance components sum up to one
-R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion"), 
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual"), 
         data=BeetlesMale, nboot=0, npermut=0)
 
 test_that("random effect components sum to up to one", {
@@ -140,10 +140,10 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
 R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Overdispersion"), 
         data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
 
-test_that("Variance estimation works for two random effects, boot, permut,Residual and Overdispersion", {
+test_that("Variance estimation works for two random effects, boot, permut, Residual and Overdispersion", {
         expect_equal(R_est_1$R$Container[2], 0, tolerance = 0.001)
         expect_equal(R_est_1$R$Population[2], 0.9458128 , tolerance = 0.001)
-        expect_equal(R_est_1$R$Residual[2], 0 , tolerance = 0.001)
-        expect_equal(R_est_1$R$Overdispersion[2], 3.289868, tolerance = 0.001)
+        expect_equal(R_est_1$R$Overdispersion[2], 0 , tolerance = 0.001)
+        expect_equal(R_est_1$R$Residual[2], 3.289868, tolerance = 0.001)
 })
 
