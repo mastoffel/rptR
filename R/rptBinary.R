@@ -32,6 +32,10 @@
 #'        will be used for all further calculations. The resulting point estimate(s), 
 #'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
 #'        itself rather than to the repeatability (i.e. ratio of variances).
+#' @param adjusted Defaults to TRUE. If TRUE, the variances explained by fixed effects (if any) will not
+#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+#'        be added to the denominator.
 #' 
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -98,7 +102,7 @@
 #' 
 
 rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-                      npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
+                      npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -108,7 +112,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         } 
         
         # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # link
         if (length(link) > 1) link <- "logit"
@@ -134,6 +138,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
+        output_fixed <- FALSE
         
         # point estimates of R
         R_pe <- function(formula, data, grname) {
@@ -152,6 +157,13 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         grname <- grname[-which(grname == "Residual")]
                 }
                 
+                # Check whether Fixed is selected
+                if (any(grname == "Fixed")){
+                        output_fixed <- TRUE
+                        # # delete Fixed element
+                        grname <- grname[-which(grname == "Fixed")]
+                }
+
                 # groups random effect variances
                 var_a <- VarComps[grname, "vcov"]
                 names(var_a) <- grname
@@ -167,6 +179,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         var_r <- VarComps["Overdispersion", "vcov"] + 1
                 }
                 
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
+                
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
@@ -176,26 +191,35 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if (output_resid){
                                 R[,"Residual"] <- c(NA,var_r)   # add NA for R_org
                         } 
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(NA,var_f)   # add NA for R_org
+                        } 
                         return(R)
                 }
                 
                 if (ratio == TRUE) {
                         if (link == "logit") {
-                                R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
+                                # link scale
+                                var_p_link <- sum(VarComps[,"vcov"]) + (pi^2)/3
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link <- var_a/ var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f <- var_f / var_p_link                                
+                                # origial scale
                                 P <- exp(beta0) / (1 + exp(beta0))
-                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
-                                        ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
-                        
-                                # repeatability of Residual  variance
-                                R_r <- var_r / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
+                                var_p_org <- (sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P))
+                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / var_p_org
                         }
                         
                         if (link == "probit") {
-                                R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
+                                # link scale
+                                var_p_link <- sum(VarComps[,"vcov"]) + 1
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link <- var_a / var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f <- var_f / var_p_link                                
+                                # origial scale
                                 R_org <- NA
-                        
-                                R_r <- var_r / (sum(VarComps[,"vcov"]) + 1)
-                        
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
@@ -204,7 +228,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if (output_resid){
                                 R[,"Residual"] <- c(NA, R_r) # add NA for R_org
                         }
-                
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(NA,R_f) # add NA for R_org
+                        }
+                        
                         return(R)
                 }
         }
