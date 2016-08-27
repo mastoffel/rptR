@@ -32,7 +32,10 @@
 #'        will be used for all further calculations. The resulting point estimate(s), 
 #'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
 #'        itself rather than to the repeatability (i.e. ratio of variances).
-#' 
+#' @param adjusted Defaults to TRUE. If TRUE, the variances explained by fixed effects (if any) will not
+#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+#'        be added to the denominator.
 #' 
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -109,7 +112,7 @@
 #' 
 
 rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -119,7 +122,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         } 
         
         # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # link
         if (length(link) > 1) link <- "log" 
@@ -129,14 +132,12 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         Overdispersion <- factor(1:nrow(data))
         data <- cbind(data, Overdispersion)
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
-        
         mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link))
-        #VarComps <- as.data.frame(lme4::VarCorr(mod))
 
-         if (nboot == 1) {
-                 warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
-                 nboot <- 0
-         }
+        if (nboot == 1) {
+                warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
+                nboot <- 0
+        }
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
@@ -144,7 +145,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
-
+        output_fixed <- FALSE
+        
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
@@ -160,6 +162,13 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         output_resid <- TRUE
                         # # delete Residual element
                         grname <- grname[-which(grname == "Residual")]
+                }
+
+                # Check whether Fixed is selected
+                if (any(grname == "Fixed")){
+                        output_fixed <- TRUE
+                        # # delete fixed element
+                        grname <- grname[-which(grname == "Fixed")]
                 }
                 
                 # groups random effect variances
@@ -178,7 +187,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         var_r <- VarComps["Overdispersion", "vcov"] + estdv
                 }
                 
-                
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
+
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
@@ -187,34 +198,49 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         if (output_resid){
                                 R[,"Residual"] <- c(NA,var_r)  # add NA for R_org
                         } 
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(NA,var_f)  # add NA for R_org
+                        } 
                         return(R)
                 }
                 
                 # Repeatability
                 if (ratio == TRUE) {
                         if (link == "sqrt") {
-                                R_link <- var_a/(sum(VarComps[,"vcov"]) + 0.25)
+                                # link scale
+                                var_p_link <- sum(VarComps[,"vcov"]) + 0.25
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link <- var_a / var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f <- var_f / var_p_link
+                                # origial scale
                                 R_org <- NA
-                                # # calculate ratio for Residual
-                                R_r <- var_r / (sum(VarComps[,"vcov"]) + 0.25)
                         }
                         if (link == "log") {
+                                # link scale
                                 estdv = log(1/exp(beta0)+1)
-                                R_link = var_a /(sum(VarComps[,"vcov"]) +  estdv)
+                                var_p_link <- sum(VarComps[,"vcov"]) +  estdv
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link = var_a / var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f <- var_f / var_p_link
+                                # origial scale
                                 EY <- exp(beta0 + (sum(VarComps[,"vcov"]))/2)
-                                R_org <- EY * (exp(var_a) - 1)/(EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1)
-                                # # calculate ratio for Residual and Overdisp
-                                R_r <- var_r / (sum(VarComps[,"vcov"]) +  estdv)
+                                var_p_org <- EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1
+                                if(!adjusted) var_p_org <- var_p_org + var_f
+                                R_org <- EY * (exp(var_a) - 1)/ var_p_org       
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
-                
                 
                         # check whether to give out non-repeatability and overdispersion repeatability
                         if (output_resid){
                                 R[,"Residual"] <- c(NA,R_r) # add NA for R_org
                         }
-
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(NA,R_f) # add NA for R_org
+                        }
+                        
                         return(R)
                 }
         }
@@ -290,18 +316,21 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 names(se_link) <- "se_link"
         }
 
-        
-        
         # delete from grname
-        
         if (any(grname == "Residual")){
                 output_resid <- TRUE
                 # # delete Residual element
                 grname <- grname[-which(grname == "Residual")]
         }
-
+        if (any(grname == "Fixed")){
+                output_fixed <- TRUE
+                # # delete Residual element
+                grname <- grname[-which(grname == "Fixed")]
+        }
+        
         output_resid <- FALSE
-
+        output_fixed <- FALSE
+        
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -413,7 +442,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
         
-        
         # add Residual = NA for S3 functions to work
         if(any(grname_org == "Residual")){
                 # grname <- grname_org
@@ -421,6 +449,14 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 row.names(P)[nrow(P)] <- "Residual"
                 permut_link$Residual <- rep(NA, length(permut_link[[1]]))
                 permut_org$Residual <- rep(NA, length(permut_org[[1]]))
+        }
+        # add Fixed = NA for S3 functions to work
+        if(any(grname_org == "Fixed")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Fixed"
+                permut_link$Fixed <- rep(NA, length(permut_link[[1]]))
+                permut_org$Fixed <- rep(NA, length(permut_org[[1]]))
         }
         
         res <- list(call = match.call(), 

@@ -6,7 +6,7 @@
 \usage{
 rptPoisson(formula, grname, data, link = c("log", "sqrt"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
-  ratio = TRUE)
+  ratio = TRUE, adjusted = TRUE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -49,6 +49,11 @@ all cores but one are used.}
 will be used for all further calculations. The resulting point estimate(s), 
 uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
 itself rather than to the repeatability (i.e. ratio of variances).}
+
+\item{adjusted}{Defaults to TRUE. If TRUE, the variances explained by fixed effects (if any) will not
+be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+be added to the denominator.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 
