@@ -119,7 +119,7 @@ rptGaussian2 <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # fit model
         mod <- lme4::lmer(formula, data = data)
         # extract variance components
-        VarComps <- as.data.frame(lme4::VarCorr(mod))
+        # VarComps <- as.data.frame(lme4::VarCorr(mod))
         
         # checks for bootstraps and permutations
         if (nboot == 1) {
