@@ -39,7 +39,10 @@
 #'        will be used for all further calculations. The resulting point estimate(s), 
 #'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
 #'        itself rather than to the repeatability (i.e. ratio of variances).
-#'   
+#' @param adjusted Defaults to TRUE. If TRUE, the variances explained by fixed effects (if any) will not
+#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+#'        be added to the denominator.
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rptGaussian},
 #'          for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
@@ -95,18 +98,18 @@
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion", 
     "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
-    parallel = FALSE, ncores = NULL, ratio = TRUE) {
+    parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
     if (datatype == "Gaussian") {
-            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio))
+            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
     }
     if (datatype == "Binary") {
-            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
+            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
     }
     if (datatype == "Proportion") {
-            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
+            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
     }
     if (datatype == "Poisson") {
-            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio))
+            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
     }
 } 
