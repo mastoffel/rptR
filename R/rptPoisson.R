@@ -201,7 +201,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R[,"Residual"] <- c(NA,var_r)  # add NA for R_org
                         } 
                         if (output_fixed){
-                                R[,"Fixed"] <- c(NA,var_f)  # add NA for R_org
+                                R[,"Fixed"] <- c(NA, var_f)  # add NA for R_org
                         } 
                         return(R)
                 }
@@ -214,9 +214,10 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link
-                                R_f <- var_f / var_p_link
+                                R_f_link <- var_f / var_p_link
                                 # origial scale
                                 R_org <- NA
+                                R_f_org <- NA
                         }
                         if (link == "log") {
                                 # link scale
@@ -225,12 +226,13 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link = var_a / var_p_link
                                 R_r <- var_r / var_p_link
-                                R_f <- var_f / var_p_link
+                                R_f_link <- var_f / var_p_link
                                 # origial scale
                                 EY <- exp(beta0 + (sum(VarComps[,"vcov"]))/2)
                                 var_p_org <- EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1
                                 if(!adjusted) var_p_org <- var_p_org + var_f
-                                R_org <- EY * (exp(var_a) - 1)/ var_p_org       
+                                R_org <- EY * (exp(var_a) - 1)/ var_p_org
+                                R_f_org <- EY * (exp(var_f) - 1)/ var_p_org
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
@@ -240,7 +242,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R[,"Residual"] <- c(NA,R_r) # add NA for R_org
                         }
                         if (output_fixed){
-                                R[,"Fixed"] <- c(NA,R_f) # add NA for R_org
+                                R[,"Fixed"] <- c(R_f_org, R_f_link) 
                         }
                         
                         return(R)

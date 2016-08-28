@@ -225,11 +225,12 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a/ var_p_link
                                 R_r <- var_r / var_p_link
-                                R_f <- var_f / var_p_link                                
+                                R_f_link <- var_f / var_p_link                                
                                 # origial scale
                                 P <- exp(beta0) / (1 + exp(beta0))
                                 var_p_org <- (sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P))
                                 R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / var_p_org
+                                R_f_org <- ( (var_f * P^2) / ((1 + exp(beta0))^2)) / var_p_org
                         }
                         if (link == "probit") {
                                 # link scale
@@ -237,9 +238,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link
-                                R_f <- var_f / var_p_link                                
+                                R_f_link <- var_f / var_p_link                                
                                 # origial scale
                                 R_org <- NA
+                                R_f_org <- NA
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
@@ -249,7 +251,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 R[,"Residual"] <- c(NA, R_r) # add NA for R_org
                         }
                         if (output_fixed){
-                                R[,"Fixed"] <- c(NA, R_f) # add NA for R_org
+                                R[,"Fixed"] <- c(R_f_org, R_f_link)
                         }
                         
                         return(R)
