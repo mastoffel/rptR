@@ -94,19 +94,21 @@
 #' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
-#' 
 #' # estimating adjusted repeatabilities for two random effects
+#' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+#'                    grname=c("Container", "Population"), 
+#'                    data = BeetlesFemale, nboot=3, npermut=3)
 #' 
-#' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
-#' data = BeetlesFemale, nboot=3, npermut=3)
-#' 
-#' 
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+#'                    grname=c("Container", "Population", "Fixed"), 
+#'                    data=BeetlesFemale, nboot=3, npermut=3, adjusted=FALSE)
+#'                ' 
 #' # variance estimation of random effects, residual and overdispersion 
-#' 
-#' rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-#' grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
-#' nboot=3, npermut=3, ratio = FALSE)
-#' 
+#' rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
+#'                    grname=c("Container","Population","Residual", "Overdispersion"), 
+#'                    data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' @export
 #' 
@@ -327,10 +329,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # # delete Residual element
                 grname <- grname[-which(grname == "Fixed")]
         }
-        
-        output_resid <- FALSE
-        output_fixed <- FALSE
-        
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         

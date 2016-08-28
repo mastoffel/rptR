@@ -92,28 +92,6 @@ warnings from the lme4 model fitting of bootstrap and permutation samples, respe
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 }
-\examples{
-# load data
-data(BeetlesFemale)
-
-# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
-# for the real analysis.
-
-
-# estimating adjusted repeatabilities for two random effects
-
-rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
-data = BeetlesFemale, nboot=3, npermut=3)
-
-
-# variance estimation of random effects, residual and overdispersion 
-
-rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
-nboot=3, npermut=3, ratio = FALSE)
-
-
-}
 \author{
 Holger Schielzeth  (holger.schielzeth@uni-jena.de),
         Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &

@@ -92,13 +92,17 @@
 #' # two random effects
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
 #'                    data=BeetlesBody, nboot=3, npermut=3)
+#'                    
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
+#'                    grname=c("Container", "Population", "Fixed"), 
+#'                    data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
 #' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
 #'             grname= c("Population", "Container", "Residual"),
 #'             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
-#' 
-#' 
 #' 
 #' @export
 #' 
@@ -182,7 +186,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
                 if(!adjusted) var_p <- var_p + var_f
-                
+
                 # return variance instead of repeatability
                 if (ratio == FALSE) { 
                         R <- as.data.frame(t(var_a))
@@ -304,11 +308,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # # delete Fixed element
                 grname <- grname[-which(grname == "Fixed")]
         }
-        
-        
-        output_resid <- FALSE
-        output_overdisp <- FALSE
-        output_fixed <- FALSE
         
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))

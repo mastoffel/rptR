@@ -97,13 +97,19 @@
 #' # for the real analysis.
 #' 
 #' # one random effect
-#' rptProportion(cbind(Dark, Reddish) ~ (1|Population) , 
-#' grname=c("Population"), data=md, nboot=3, npermut=3)
-#' 
-#' # one random effect, variance estimation with Residual and Overdispersion
 #' rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-#' grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=3, npermut=3, ratio = FALSE)
+#'                    grname=c("Population"), data=md, nboot=3, npermut=3)
 #' 
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
+#'                    grname=c("Population", "Fixed"), 
+#'                    data=md, nboot=3, npermut=3, adjusted=FALSE)
+#'                    
+#' # variance estimation of random effects, residual and overdispersion 
+#' rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population) , 
+#'                    grname=c("Container","Population","Residual", "Overdispersion"), 
+#'                    data = md, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' @export
 #' 
@@ -342,12 +348,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # # delete Residual element
                 grname <- grname[-which(grname == "Overdispersion")]
         }
-        
-        
-        output_resid <- FALSE
-        output_overdisp <- FALSE
-        
-        
+        # Check whether Fixed is selected
+        if (any(grname == "Fixed")){
+                output_fixed <- TRUE
+                # # delete Fixed element
+                grname <- grname[-which(grname == "Fixed")]
+        }
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         

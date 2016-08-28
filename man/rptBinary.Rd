@@ -99,10 +99,19 @@ data(BeetlesMale)
 # for the real analysis.
 
 # one random effect
-rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
+rptBinary(Colour ~ (1|Population), grname=c("Population"), 
 data=BeetlesMale, nboot=3, npermut=3)
 
-
+# unadjusted repeatabilities with  fixed effects and 
+# estimation of the fixed effect variance
+rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
+                   grname=c("Container", "Population", "Fixed"), 
+                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+                   
+# variance estimation of random effects, residual and overdispersion 
+rptBinary(Colour ~ Treatment + (1|Container) + (1|Population) , 
+                   grname=c("Container","Population","Residual", "Overdispersion"), 
+                   data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
      
 }
 \author{

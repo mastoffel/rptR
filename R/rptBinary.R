@@ -93,10 +93,19 @@
 #' # for the real analysis.
 #' 
 #' # one random effect
-#' rptBinary(formula = Colour ~ (1|Population), grname=c("Population"), 
+#' rptBinary(Colour ~ (1|Population), grname=c("Population"), 
 #' data=BeetlesMale, nboot=3, npermut=3)
 #' 
-#' 
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
+#'                    grname=c("Container", "Population", "Fixed"), 
+#'                    data=BeetlesMale, nboot=3, npermut=3, adjusted=FALSE)
+#'                    
+#' # variance estimation of random effects, residual and overdispersion 
+#' rptBinary(Colour ~ Treatment + (1|Container) + (1|Population) , 
+#'                    grname=c("Container","Population","Residual", "Overdispersion"), 
+#'                    data = BeetlesMale, nboot=3, npermut=3, ratio = FALSE)
 #'      
 #' @export
 #' 
@@ -316,15 +325,18 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         
         # delete from grname
-        
         if (any(grname == "Residual")){
                 output_resid <- TRUE
                 # # delete Residual element
                 grname <- grname[-which(grname == "Residual")]
         }
+        # Check whether Fixed is selected
+        if (any(grname == "Fixed")){
+                output_fixed <- TRUE
+                # # delete Fixed element
+                grname <- grname[-which(grname == "Fixed")]
+        }
         
-        output_resid <- FALSE
-
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
