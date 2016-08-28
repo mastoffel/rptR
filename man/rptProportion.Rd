@@ -2,7 +2,7 @@
 % Please edit documentation in R/rptProportion.R
 \name{rptProportion}
 \alias{rptProportion}
-\title{GLMM-based Repeatability Using REML for Proportion data}
+\title{GLMM-based Repeatability Estimation for Proportion Data}
 \usage{
 rptProportion(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
@@ -19,7 +19,9 @@ repeatabilities.}
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-and terms have to be set in quotation marks.}
+and terms have to be set in quotation marks. The reseved terms "Residual", 
+"Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
+variance and variance explained by fixed effects, respectively.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
@@ -28,27 +30,28 @@ and \code{grname} arguments.}
 
 \item{CI}{Width of the required confidence interval (defaults to 0.95).}
 
-\item{nboot}{Number of parametric bootstraps for interval estimation.
+\item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
-asymtotic CI, but may be very time-consuming (in particular of some variance component 
-is low). Bootstrapping can be switch off by setting \code{nboot = 0}.}
+asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
+\code{nboot = 0}.}
 
 \item{npermut}{Number of permutations used when calculating asymptotic p-values 
 (defaults to 0). Larger numbers of permutations give a better
-asymtotic CI, but may be very time-consuming (in particular of some variance component 
-is low). Permutaton tests can be switch off by setting \code{npermut = 0}.}
+asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
+are specified). Permutaton tests can be switch off by setting \code{npermut = 0}.}
 
-\item{parallel}{If TRUE, bootstraps and permutations will be distributed across multiple cores.}
+\item{parallel}{Boolean to express if parallel computing should be applied (defaults to FALSE). 
+If TRUE, bootstraps and permutations will be distributed across multiple cores.}
 
-\item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores but one are used.}
+\item{ncores}{Specifying the number of cores to use for parallelization. On default,
+all but one of the available cores are used.}
 
-\item{ratio}{Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
-will be used for all further calculations. The resulting point estimate(s), 
-uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
-itself rather than to the repeatability (i.e. ratio of variances).}
+\item{ratio}{Boolean to express if variances or ratios of variance should be estimated. 
+If FALSE, the variance(s) are returned without forming ratios. If TRUE (the default) ratios 
+of variances (i.e. repeatabilities) are estimated.}
 
-\item{adjusted}{Defaults to TRUE. If TRUE, the variances explained by fixed effects (if any) will not
+\item{adjusted}{Boolean to express if adjusted or unadjusted repeatabilities should be estimated. 
+If TRUE (the default), the variances explained by fixed effects (if any) will not
 be part of the denominator, i.e. repeatabilities are calculated after controlling for 
 variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
 be added to the denominator.}
@@ -81,12 +84,12 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
       element is a grouping factor.}
 \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
-\item{ngroups}{Number of groups.}
+\item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 \item{mod}{Fitted model.}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
-warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
+     warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -97,25 +100,25 @@ data(BeetlesMale)
 # prepare proportion data
 BeetlesMale$Dark <- BeetlesMale$Colour
 BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
-md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
+BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, data=BeetlesMale, FUN=sum)
 
 # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
-# one random effect
+# repeatability with one grouping level
 rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-                   grname=c("Population"), data=md, nboot=3, npermut=3)
+                   grname=c("Population"), data=BeetlesColour, nboot=3, npermut=3)
 
 # unadjusted repeatabilities with  fixed effects and 
 # estimation of the fixed effect variance
 rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Population", "Fixed"), 
-                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+                   data=BeetlesColour, nboot=3, npermut=3, adjusted=FALSE)
                    
 # variance estimation of random effects, residual and overdispersion 
 rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population) , 
                    grname=c("Container","Population","Residual", "Overdispersion"), 
-                   data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
+                   data = BeetlesColour, nboot=3, npermut=3, ratio = FALSE)
 
 }
 \author{
