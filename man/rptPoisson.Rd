@@ -103,9 +103,9 @@ data = BeetlesFemale, nboot=3, npermut=3)
 
 # variance estimation of random effects, residual and overdispersion 
 
-rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
-nboot=3, npermut=3, ratio = FALSE)
+#rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
+#grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
+#nboot=3, npermut=3, ratio = FALSE)
 
 
 }
