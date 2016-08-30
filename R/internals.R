@@ -9,7 +9,7 @@
 #' @keywords internal
 
 
-withWarnings <- function(expr) {
+.with_warnings <- function(expr) {
         myWarnings <- NULL
         wHandler <- function(w) {
                 myWarnings <<- c(myWarnings, list(w))
