@@ -104,15 +104,23 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Pro
     parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
     if (datatype == "Gaussian") {
-            return(rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
+            out_gaussian <- rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_gaussian$call <- match.call()
+            return(out_gaussian)
     }
     if (datatype == "Binary") {
-            return(rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
+            out_binary <- rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_binary$call <- match.call()
+            return(out_binary)
     }
     if (datatype == "Proportion") {
-            return(rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
+            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_proportion$call <- match.call()
+            return(out_proportion)
     }
     if (datatype == "Poisson") {
-            return(rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted))
+            out_poisson <- rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_poisson$call <- match.call()
+            return(out_poisson)
     }
 } 

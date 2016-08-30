@@ -2,7 +2,7 @@
 % Please edit documentation in R/rptPoisson.R
 \name{rptPoisson}
 \alias{rptPoisson}
-\title{GLMM-based Repeatability Estimation for Possoin-distributed Data}
+\title{GLMM-based Repeatability Estimation for Poisson-distributed Data}
 \usage{
 rptPoisson(formula, grname, data, link = c("log", "sqrt"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
@@ -26,7 +26,8 @@ and \code{grname} arguments.}
 
 \item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
@@ -85,11 +86,39 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+\item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
      warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
+}
+\examples{
+# load data
+data(BeetlesFemale)
+
+# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
+# for the real analysis.
+
+# estimating adjusted repeatabilities for two random effects
+rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+                   grname=c("Container", "Population"), 
+                   data = BeetlesFemale, nboot=3, npermut=3)
+
+# unadjusted repeatabilities with  fixed effects and 
+# estimation of the fixed effect variance
+rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+                   grname=c("Container", "Population", "Fixed"), 
+                   data=BeetlesFemale, nboot=3, npermut=3, adjusted=FALSE)
+                
+               
+# variance estimation of random effects, residual and overdispersion 
+
+rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
+                   grname=c("Container","Population","Residual", "Overdispersion"), 
+                   data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
+
 }
 \author{
 Holger Schielzeth  (holger.schielzeth@uni-jena.de),

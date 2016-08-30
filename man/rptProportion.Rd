@@ -9,9 +9,7 @@ rptProportion(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
   ratio = TRUE, adjusted = TRUE)
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{lmer}. In the case of Porportion data, the left-hand
-side of the formula represented to vectors with counts of successes and failures, 
-respectively, connected by \code{cbind}. The grouping factor(s) of
+\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
 interest needs to be included as a random effect, e.g. '(1|groups)'.
 Covariates and additional random effects can be included to estimate adjusted 
 repeatabilities.}
@@ -28,7 +26,8 @@ and \code{grname} arguments.}
 
 \item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
@@ -88,6 +87,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{nobs}{Number of observations.}
 \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 \item{mod}{Fitted model.}
+\item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+\item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
      warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
@@ -100,25 +101,26 @@ data(BeetlesMale)
 # prepare proportion data
 BeetlesMale$Dark <- BeetlesMale$Colour
 BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
-BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, data=BeetlesMale, FUN=sum)
+BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, 
+     data=BeetlesMale, FUN=sum)
 
 # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # repeatability with one grouping level
 rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-                   grname=c("Population"), data=BeetlesColour, nboot=3, npermut=3)
+     grname=c("Population"), data=BeetlesColour, nboot=3, npermut=3)
 
 # unadjusted repeatabilities with  fixed effects and 
 # estimation of the fixed effect variance
 rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
-                   grname=c("Population", "Fixed"), 
-                   data=BeetlesColour, nboot=3, npermut=3, adjusted=FALSE)
+     grname=c("Population", "Fixed"), 
+     data=BeetlesColour, nboot=3, npermut=3, adjusted=FALSE)
                    
 # variance estimation of random effects, residual and overdispersion 
-rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population) , 
-                   grname=c("Container","Population","Residual", "Overdispersion"), 
-                   data = BeetlesColour, nboot=3, npermut=3, ratio = FALSE)
+rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
+     grname=c("Container","Population","Residual", "Overdispersion"), 
+     data = BeetlesColour, nboot=3, npermut=3, ratio = FALSE)
 
 }
 \author{

@@ -1,42 +1,8 @@
 #' GLMM-based Repeatability Estimation for Proportion Data
 #' 
 #' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
-#' @param formula Formula as used e.g. by \link{lmer}. In the case of Porportion data, the left-hand
-#'        side of the formula represented to vectors with counts of successes and failures, 
-#'        respectively, connected by \code{cbind}. The grouping factor(s) of
-#'        interest needs to be included as a random effect, e.g. '(1|groups)'.
-#'        Covariates and additional random effects can be included to estimate adjusted 
-#'        repeatabilities.
-#' @param grname A character string or vector of character strings giving the
-#'        name(s) of the grouping factor(s), for which the repeatability should
-#'        be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-#'        and terms have to be set in quotation marks. The reseved terms "Residual", 
-#'        "Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
-#'        variance and variance explained by fixed effects, respectively.
-#' @param data A dataframe that contains the variables included in the \code{formula}
-#'        and \code{grname} arguments.
+#' @inheritParams rpt
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
-#' @param CI Width of the required confidence interval (defaults to 0.95).
-#' @param nboot Number of parametric bootstraps for interval estimation 
-#'        (defaults to 1000). Larger numbers of bootstraps give a better
-#'        asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
-#'        \code{nboot = 0}.
-#' @param npermut Number of permutations used when calculating asymptotic p-values 
-#'        (defaults to 0). Larger numbers of permutations give a better
-#'        asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
-#'        are specified). Permutaton tests can be switch off by setting \code{npermut = 0}. 
-#' @param parallel Boolean to express if parallel computing should be applied (defaults to FALSE). 
-#'        If TRUE, bootstraps and permutations will be distributed across multiple cores. 
-#' @param ncores Specifying the number of cores to use for parallelization. On default,
-#'        all but one of the available cores are used.
-#' @param ratio Boolean to express if variances or ratios of variance should be estimated. 
-#'        If FALSE, the variance(s) are returned without forming ratios. If TRUE (the default) ratios 
-#'        of variances (i.e. repeatabilities) are estimated.
-#' @param adjusted Boolean to express if adjusted or unadjusted repeatabilities should be estimated. 
-#'        If TRUE (the default), the variances explained by fixed effects (if any) will not
-#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
-#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
-#'        be added to the denominator.
 #'         
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -70,6 +36,8 @@
 #' \item{nobs}{Number of observations.}
 #' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
+#' \item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+#' \item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 #' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
 #'      warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
@@ -274,7 +242,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- withWarnings({
+        warnings_boot <- .with_warnings({
                 
         # to do: preallocate R_boot
         if (nboot > 0 & parallel == TRUE) {
@@ -411,7 +379,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
-        warnings_permut <- withWarnings({
+        warnings_permut <- .with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {
@@ -528,7 +496,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio,
+                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)

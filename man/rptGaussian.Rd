@@ -18,13 +18,13 @@ name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
 and terms have to be set in quotation marks. The reseved terms "Residual", 
 "Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
-variance and variance explained by fixed effects, respectively. Note that "Overdispersion" 
-and "Residual" are identical in the case auf Gaussian models.}
+variance and variance explained by fixed effects, respectively.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
@@ -76,6 +76,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+\item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
 warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
