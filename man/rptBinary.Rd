@@ -26,7 +26,8 @@ and \code{grname} arguments.}
 
 \item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better

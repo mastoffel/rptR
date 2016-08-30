@@ -9,9 +9,7 @@ rptProportion(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
   ratio = TRUE, adjusted = TRUE)
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{lmer}. In the case of Porportion data, the left-hand
-side of the formula represented to vectors with counts of successes and failures, 
-respectively, connected by \code{cbind}. The grouping factor(s) of
+\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
 interest needs to be included as a random effect, e.g. '(1|groups)'.
 Covariates and additional random effects can be included to estimate adjusted 
 repeatabilities.}
@@ -28,7 +26,8 @@ and \code{grname} arguments.}
 
 \item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better

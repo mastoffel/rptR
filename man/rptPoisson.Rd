@@ -2,7 +2,7 @@
 % Please edit documentation in R/rptPoisson.R
 \name{rptPoisson}
 \alias{rptPoisson}
-\title{GLMM-based Repeatability Estimation for Possoin-distributed Data}
+\title{GLMM-based Repeatability Estimation for Poisson-distributed Data}
 \usage{
 rptPoisson(formula, grname, data, link = c("log", "sqrt"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
@@ -26,7 +26,8 @@ and \code{grname} arguments.}
 
 \item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
-\item{CI}{Width of the required confidence interval (defaults to 0.95).}
+\item{CI}{Width of the required confidence interval between 0 and 1 (defaults to 
+0.95).}
 
 \item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
