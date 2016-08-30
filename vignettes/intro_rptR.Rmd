@@ -313,11 +313,8 @@ plot(rep11, grname="Residual", scale="link", cex.main=0.8)
 
 Evidently, it is pointless to test for the statistical significance of residual variance againt a null hypothesis of no residual variance and we therefore omit this test. But for non-Gaussian models it is worthwhile testing if there is statistically significant overdispersion and we have therefore implemented this test. Note, however, that each grouping level specified in `grname` will be tested in separate iterations if a permutation test is required. Hence it is recommened to be careful with the use of `npermut` in combination with multiple grouping levels.
 
-```{r binary-overdispersion-test, warning=1, fig.width=7, fig.height=4}
-=======
 
 ```{r binary-overdisperion-test, warning=1, fig.width=7, fig.height=4}
->>>>>>> d2171b240b0e4e8f6c1f5240b1b1ed1da29d8736
 rep12 <- rpt(Egg ~ (1|Container) + (1|Population),  grname=c("Population", "Overdispersion"), data=BeetlesFemale, datatype="Poisson", nboot=0, npermut=19, ratio=FALSE)
 print(rep12)
 ```
