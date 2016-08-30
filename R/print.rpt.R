@@ -27,15 +27,15 @@ if (x$ratio == TRUE) {
         header_nongaussian <- "Repeatability calculation using the glmm method and"
         header2 <- "Repeatability for "
         PE <- "R  = "
-        subheader_link <- "Link scale repeatabilities:"
-        subheader_org <- "Original scale repeatabilities:"
+        subheader_link <- "Link-scale approximation:"
+        subheader_org <- "Original-scale approximation:"
 } else if (x$ratio == FALSE) {
         header_gaussian <- "Variance estimation using the lmm method"
         header_nongaussian <- "Variance estimation using the glmm method and"
         header2 <- "Variance of "
         PE <- "Var = "
-        subheader_link <- "Link scale variance:"
-        subheader_org <- "Original scale variance:"
+        subheader_link <- "Link-scale approximation:"
+        subheader_org <- "Original-scale approximation:"
 }
 
         

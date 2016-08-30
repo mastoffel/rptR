@@ -39,7 +39,7 @@ print.summary.rpt <- function(x, ...) {
     
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion" ) {
             cat("\n",  header_nongaussian,  "\n\n", 
-                    "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n", "Data: ", x$nobs, " observations", sep = "")
+                    "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n\n", "Data: ", x$nobs, " observations", sep = "")
             cat("\n")
             cat("----------------------------------------")
             for (i in 1:ncol(x$R)) {
@@ -68,7 +68,7 @@ print.summary.rpt <- function(x, ...) {
     
     if (x$datatype == "Gaussian") {
         cat("\n", header_gaussian, "\n\n", 
-            "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n", "Data: ", x$nobs, " observations", sep = "")
+            "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n\n", "Data: ", x$nobs, " observations", sep = "")
         cat("\n")
         cat("----------------------------------------")
         for (i in 1:length(x$R)) {
