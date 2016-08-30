@@ -23,24 +23,24 @@
 print.rpt <- function(x, ...) {
         
 if (x$ratio == TRUE) {
-        header_gaussian <- "Repeatability calculation using the glmm method"
+        header_gaussian <- "Repeatability calculation using the lmm method"
         header_nongaussian <- "Repeatability calculation using the glmm method and"
         header2 <- "Repeatability for "
         PE <- "R  = "
         subheader_link <- "Link scale repeatabilities:"
         subheader_org <- "Original scale repeatabilities:"
 } else if (x$ratio == FALSE) {
-        header_gaussian <- "Variance estimation using the glmm method"
+        header_gaussian <- "Variance estimation using the lmm method"
         header_nongaussian <- "Variance estimation using the glmm method and"
         header2 <- "Variance of "
         PE <- "Var = "
-        subheader_link <- "Link scale variance:"
-        subheader_org <- "Original scale variance:"
+        subheader_link <- "Estimated using link-scale approximation::"
+        subheader_org <- "Estimated using original-scale approximation:"
 }
 
         
         if (x$datatype == "Gaussian") {
-                cat("\n\n")
+                cat("\n")
                 cat(header_gaussian, "\n\n")
                 for (i in 1:length(x$R)) {
                         cat(header2, names(x$R)[i], "\n",
@@ -55,15 +55,15 @@ if (x$ratio == TRUE) {
                         } else {
                         cat("CI = [", round(x$CI_emp[i, 1], 3), ", ", round(x$CI_emp[i, 2], 3), "]", "\n", sep = "")
                         }
-                        cat("P  = ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n",
-                        "     ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n\n", sep = "")
+                        cat("P  = ", signif(x$P[i, 1], 3), " [", "LRT", "]", "\n",
+                        "     ", signif(x$P[i, 2], 3), " [", "Permutation", "]", "\n\n", sep = "")
                 }
         }
         
         
         
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion") {
-            cat("\n\n")
+            cat("\n")
             cat(header_nongaussian, x$link, 
                     "link", "\n\n") 
             # grnames <- names(x$R)
@@ -74,15 +74,15 @@ if (x$ratio == TRUE) {
                          subheader_link, 
                          "\n", PE, round(x$R["R_link", grname], 3), "\n", "SE = ", round(x$se["se_link", grname], 3),
                           "\n", "CI = [", round(x$CI_emp$CI_link[grname, 1], 3), ", ",  round(x$CI_emp$CI_link[grname, 2], 3), "]", "\n", 
-                          "P  = ", signif(x$P[grname,  "P_permut_link"], 3), " [", "Permutation", "]", "\n",
-                        "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n",  sep = "")              
+                          "P  = ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n",
+                        "     ", signif(x$P[grname,  "P_permut_link"], 3), " [", "Permutation", "]", "\n\n",  sep = "")              
                         
                           if (x$ratio == TRUE) {
                                   cat(subheader_org,
                                   "\n", PE, round(x$R["R_org", grname], 3), "\n", "SE = ", round(x$se["se_org", grname], 3), "\n", 
                                   "CI = [", round(x$CI_emp$CI_org[grname, 1], 3), ", ", round(x$CI_emp$CI_org[grname, 2], 3), "]", "\n", 
-                                  "P  = ", signif(x$P[grname,  "P_permut_org"], 3), " [", "Permutation", "]", "\n",
-                                  "     ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n\n", sep = "")   
+                                  "P  = ", signif(x$P[grname,  "LRT_P"], 3), " [", "LRT", "]", "\n",
+                                  "     ", signif(x$P[grname,  "P_permut_org"], 3), " [", "Permutation", "]", "\n\n", sep = "")   
                           }
                  
                     

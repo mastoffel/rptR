@@ -49,23 +49,23 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
             if (type == "boot") {
                 if (scale == "link") {
                         if (x$ratio == FALSE){
-                                main <- paste("Link scale bootstrap \nvariance estimates for", grname)
+                                main <- paste("Link-scale approximation bootstrap \nvariance estimates for", grname)
                         } else {
-                                main <- paste("Link scale bootstrap \nrepeatabilities for", grname)
+                                main <- paste("Link-scale approximation bootstrap \nrepeatabilities for", grname)
                         }
                 }
                 if (scale == "original") {
-                        if (x$ratio == FALSE) stop("No original scale estimates for Variances. Change to scale = 'link'")
-                         main <- paste("Original scale bootstrap \nrepeatabilities for", grname)
+                        if (x$ratio == FALSE) stop("No original-scale approximation for Variances. Change to scale = 'link'")
+                         main <- paste("Original-scale approximation \nrepeatabilities for", grname)
                 }
             } else if (type == "permut") {
                     if (grname == "Residual" | grname == "Overdispersion") stop("No permutation tests for Residual or Overdispersion")
                 if (scale == "link") {
-                        main <- paste("Link scale permutation test \nrepeatabilities for", grname)   
+                        main <- paste("Link-scale approximation permutation test \nrepeatabilities for", grname)   
                 }
                 if (scale == "original") {
-                        if (x$ratio == FALSE) stop("There are no variance estimates on the original scale. Change to scale = 'link'")
-                        main <- paste("Original scale permutation test \nrepeatabilities for", grname)
+                        if (x$ratio == FALSE) stop("No original-scale approximation for Variances. Change to scale = 'link'")
+                        main <- paste("Original-scale approximation permutation test \nrepeatabilities for", grname)
                 }
                  
                 
@@ -115,7 +115,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
             angle = 90, code = 3, lwd = 1.5, col = "black")
         graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
         graphics::points(R, v.pos * 1.3, cex = 1.1, pch = 19, col = "cornflowerblue")
-        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with CI", 
+        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with 95% percentiles", 
                 "Observed repeatability"), box.lty = 0)
     }
     

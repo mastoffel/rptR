@@ -111,9 +111,9 @@ plot(rep3, grname="Container", type="boot", cex.main=0.8)
 plot(rep3, grname="Population", type="boot", cex.main=0.8)
 ```
 
-In our example, containers are nested within populations in the sense that samples from the same population are spread over multiple containers, but each container houses individuals from only a single population. In principle it might have been possible to design sampling of containers crossed with populations, such that samples from the same population are spread across contains while each container houses samples from multiple populations. Crossed designs are usually preferred, but there might be constraint as in the case of beetles where it is not possible to follow individuals (and consequently population identities) across ecdysis, because all external markings are lost.
+In our example, containers are nested within populations in the sense that samples from the same population are spread over multiple containers, but each container houses individuals from only a single population. In principle it might have been possible to design sampling of containers crossed with populations, such that samples from the same population are spread across contains while each container houses samples from multiple populations. Crossed designs are usually preferred, but there might be constraint as in the case of beetles where it is not possible to follow individuals (and consequently population identities) across the pupal stage, because all external markings are lost.
 
-Nested sampling has consequences for how variances are interpreted. In our example, the population level repeatability captures all variation among populations (arising for genetic and environmental reasons) over all other variance components. But the container-level variance with population included in the model captures only among-container variance after controlling for variation among populations and is hence foremost environmental in origin. The population x container interaction variance, however, will appear as part of the container repeatability. The interaction variance might, in this case, arise from genotype-environment interactions (or early environmental times late environment interactions, see Schielzeth & Nakagawa 2013 for a more detailed discussion of nesting). 
+Nested sampling has consequences for how variances are interpreted. In our example, the population level repeatability captures all variation among populations (arising for genetic and environmental reasons) over all other variance components. But the container-level variance with population included in the model captures only among-container variance after controlling for variation among populations and is hence foremost environmental in origin. The population x container interaction variance, however, will appear as part of the container repeatability. The interaction variance might, in this case, arise from genotype-environment interactions or early environmental times late environment interactions (see Schielzeth & Nakagawa 2013 for a more detailed discussion of nesting). 
 
 One might argue that the full container variance should contain the population variance. It is here possible to estimate the repeatability at the container-level without controlling for population and the results turn out to be almost equivalent to adding the population-level variance to the container-level variance.
 
@@ -124,21 +124,45 @@ print(rep4)
 
 ## Adjusted repeatabilities for Gaussian data
 
-All repeatabilities so far were raw repeatabilities in the sense that they represent the group-level variance over the sum of all other variance components. This changes when fixed effects come into play. Fixed effects explain part of the variances in the data and the variance assigned to fixed effects in the model will not appear in the denominator of the repeatability as it is implemented in `rptR`. It is still possible to fit fixed effects in `rptR`, but the repeatability has then to be interpreted as the repeatability after controlling for fixed effects. This can be thought of as the repeatability when all observations are shifted along the slopes of the fixed effects covariates till they reach the ordinate. An equivalent estimate would have been derived if all data had been collected at the point where all covariates are zero. Since the procedure involves statistically adjustments, we have called this the _adjusted repeatability_ (Nakagawa & Schielzeth 2010).
+All repeatabilities so far were raw repeatabilities in the sense that they represent the group-level variance over the sum of all other variance components. This changes when fixed effects come into play. Fixed effects explain part of the variances in the data and the variance assigned to fixed effects in the model will not appear in the denominator of the repeatability as is the default in `rptR`. It is still possible to fit fixed effects in `rptR`, but the repeatability has then to be interpreted as the repeatability after controlling for fixed effects. This can be thought of as the repeatability when all observations are shifted along the slopes of the fixed effects covariates till they reach the ordinate. An equivalent estimate would have been derived if all data had been collected at the point where all covariates are zero. Since the procedure involves statistically adjustments, we have called this the _adjusted repeatability_ (Nakagawa & Schielzeth 2010).
 
-Estimating adjusted repeatability is facilitated in `rprR` by the `formula` argument. As in any `lmer` formula, fixed effect covariates can be included. We will here include treatment and sex as covariates. Note that the treatment was artificially applied, hence it potentially introduces excess variation to the sample that we might want to control for statistically. 'Sex' is a more controversial example, because it represents part of the natural variation, but often we want to know the (adjusted) repeatabilities given that the sexual identities of the individuals are known (and assuming that repeatabilities are identical across the sexes).
+Estimating adjusted repeatability is facilitated in `rprR` by the `formula` argument. As in any `lmer` formula, fixed effect covariates can be included. We will here include `Treatment` and `Sex` as covariates. Note that the treatment was artificially applied, hence it potentially introduces excess variation to the sample that we might want to control for statistically. 'Sex' is a more controversial example, because it represents part of the natural variation, but often we want to know the (adjusted) repeatabilities given that the sexual identities of the individuals are known (and assuming that repeatabilities are identical across the sexes).
 ```{r gaussian-adjusted}
 rep5 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
 ```
 The results can be viewed and plotted as before and the significance of the fixed effect can be assessed from the fitted model.
 ```{r gaussian-adjusted-plot, fig.show='hold', fig.width=3.2}
 print(rep5)
-summary(rep5$mod)
 plot(rep5, type="boot", grname="Container", cex.main=0.8)
 plot(rep5, type="boot", grname="Population", cex.main=0.8)
 ```
 
 It turns out that most of the variance among containers was cased by sexual dimorphism (females are larger as can be seen from the slope of `SexMale` in the fitted model `rep5$mod`), albeit some significant container repeatability remains even after controlling for sexual dimorphism.
+
+## Estimating enhanced unadjusted repeatabilities
+
+It is sometimes desiarable to fit models with fixed effects without loosing the variance explained by fixed effects from the denominator. We have therefore introduced the argument `adjusted` to allow this and we here call this the enhanced unadjusted repeatability, because it allows to fit an improved model without loosing the variance from the repeatability denominator of the repeatabiliy.
+
+The argument `adjusted` defaults to `TRUE` which means that adjusted repeatabilities are estimated for nothing else is specified. With `adjusted = FALSE` the variance explained by fixed effects will be calculated by the variance in the linear predictor (on the link scale for non-Gaussian data). This variance is added to the denominator of the repeatability equation just as other variance components (provided that `ratio = TRUE`).
+
+```{r gaussian-enhanced-unadjusted}
+rep5.2 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0, adjusted=FALSE)
+print(rep5.2)
+```
+
+In our example it turns out that the fixed effects explain a substantial amount of phenotypic variance and this reduces the relative contribution of `Population` and `Container`. We will see below that the change is entirely explained by the fraction explained by fixed effects. We here examplify the estimation of enhanded unadjusted repeatabilities for Gaussian data, but it works equally for the non-Gaussina models introduced below.
+
+## Estimating the coefficient of determination $R^2$ for fixed effects
+
+To complete the circle of variance components to be estimated by `rptR`, we have introduced a reserved term to the `grname` argument that is `Fixed`. The argument allows the explicit estimation of the variance explained by fixed effects, including its uncertainty as determined by parametric bootstrapping. In combination with `ratio = FALSE`, `Fixed` will return the variance in the linear predictor on the latent scale. In combination with `ratio = TRUE`, `Fixed` will return the fraction of the total variance that is explained by variance in the linear predictor, i.e. by fixed effects. Incidently, the combination `grname = "Fixed", ratio = TRUE` estimates a form of the coefficient of determination $R^2$ that we have called the marginal $R^2$ of mixed effects models (Nakagawa & Schielzeth 2013). While we do provide a quantification of uncertainty for the variance explained by fixed effects and for marginal $R^2$, we haven't implemented significance tested for the fixed effect variance. This should be quantified by other means.
+
+```{r gaussian-r2, fig.width=7, fig.height=4}
+rep5.3 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0, adjusted=FALSE)
+print(rep5.3)
+plot(rep5.3, grname="Fixed", type="boot")
+```
+
+The variances explained by container and population are evidently unchanged, but it is now visible that the fixed effects alone explain almost 40% of the phenotypic variance in BodyL in our example. A big part of this is simply sexual dimorphism. This serves as an example. In this particular case, we would probably be more interested in the adjusted repeatability controlling for `Treatment` and `Sex`.
 
 ## Repeatabilities for Poisson-distributed count data
 
@@ -177,6 +201,13 @@ plot(rep6, grname="Container", scale="original", cex.main=0.8)
 plot(rep6, grname="Population", scale="original", cex.main=0.8)
 ```
 
+As with Gaussian models it is possible to estimate enhanced unadjusted repeatabilities as well as the proportion of variances explained by fixed effects. In this case the treatment effect explained about 9% of the variance and including this fraction to the denomionator of the repeatability calculation gives marginally reduced repeatability estimates for population and container:
+
+```{r poisson-enhanced-unadjusted}
+rep6.2 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"),  data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, adjusted=FALSE)
+print(rep6.2)
+```
+
 ## Repeatabilities for Binary data
 
 Binary data are sets of single observations with failure/success status (coded 0/1). They are a special case of proportion data (see below) with a sample size of 1 per observation. Because of a number of specificities, repeatabilities for binary and proportion data are separately coded in `rptR`. Binary data are handed over to `rpt` as a single vector of 0's and 1's.
@@ -195,14 +226,17 @@ rep7 <- rpt(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Pop
 print(rep7)
 ```
 
-For a check of robustness, we still estimate the adjusted repeatabilities controlling for the treatment manipulation, but it turns out that this change to the model does hardly affect the repeatability estimates (due to the low explanatory power of the treatment).
-```{r binary-with-covariate, fig.width=3.2, fig.show='hold'}
-rep8 <- rpt(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", nboot=19, npermut=0)
+For a check of robustness, we still estimate the enhanced unadjusted repeatabilities controlling for the treatment manipulation, but it turns out that this change to the model does hardly affect the repeatability estimates due to the low explanatory power of the treatment.
+
+```{r binary-enhaned-unadjusted, fig.width=3.2, fig.show='hold'}
+rep8 <- rpt(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesMale, datatype="Binary", nboot=19, npermut=0, adjusted=FALSE)
 print(rep8)
 plot(rep8, grname="Population", scale="link", cex.main=0.8)
 plot(rep8, grname="Population", scale="original", cex.main=0.8)
 plot(rep8, grname="Container", scale="link", cex.main=0.8)
 plot(rep8, grname="Container", scale="original", cex.main=0.8)
+plot(rep8, grname="Fixed", scale="link", cex.main=0.8)
+plot(rep8, grname="Fixed", scale="original", cex.main=0.8)
 ```
 
 ## Repeatabilities for Proportion data
@@ -219,7 +253,9 @@ print(rep9)
 
 ## Multiplicative and additive overdispersion models
 
-There are two alternative ways of modelling overdispersion in Poisson and binary/proportion models. In the current implementation of `rptR` we use the underlying `glmer` model fits for estimating additive overdispersion as excess variation at the latent level (excess beyond variability arising from the sampling distribution alone). This variation is added to the distribution-specific variance in the denominator of the repeatability. Multiplicative overdispersion, on the contrary, models overdispersion as a parameter (conveniently labelled $\omega$) that multiplies the distribution-specific variance. $\omega = 1$ is thus equivalent to no overdispersion beyond what is expected from the distribution. See Nakagawa & Schielzeth (2010) for details on additive and multiplicative overdispersion.
+There are two alternative ways of modelling overdispersion in Poisson and binary/proportion models. In the current implementation of `rptR` we use the underlying `glmer` model fits for estimating additive overdispersion as excess variation at the latent level (excess beyond variability arising from the sampling distribution alone). It is implemented as an addtional random effect term (named `Overdispersion`) with as many levels as there are observations. This variation is added to the distribution-specific variance in the denominator of the repeatability. 
+
+Multiplicative overdispersion, on the contrary, models overdispersion as a parameter (conveniently labelled $\omega$) that multiplies the distribution-specific variance. $\omega = 1$ is thus equivalent to no overdispersion beyond what is expected from the distribution. See Nakagawa & Schielzeth (2010) for details on additive and multiplicative overdispersion.
 
 The choice of additive versus multiplicative overdispersion is a matter of convenience. The data for the toy example was simulated as additive overdispersion and it happens that the powerful `glmer` function implements additive overdispersion. We have previously used `glmmPQL` for fitting multiplicative overdispersion models, but do not maintain this option any longer.
 
@@ -237,7 +273,7 @@ print(rep6a) # sqrt link
 ###Binary models###
 ```{r biary-model-link comparison, warning=FALSE}
 print(rep7) # logit link
-rep7a <- rpt(Colour ~ (1|Population), grname=c("Population"), data=BeetlesMale, datatype="Binary", link="probit", nboot=19, npermut=0)
+rep7a <- rpt(Colour ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", link="probit", nboot=19, npermut=0)
 print(rep7a) # probit link
 ```
 
@@ -266,30 +302,27 @@ plot(rep10, grname="Container", scale="link", cex.main=0.8)
 
 Evidently, the significance of the random effect terms won't change no matter whether they are presented as variances or as variances devided by the phenotypic variance. If we are intereted in inspecting variances, we are often also interested in quantifying the amount of residuals variance and its uncertainty, too. We have therefore introduced to reserved terms for the `grname` argument to allow this. `Residual` will allow estimating the residual variance, which in the case of non-Gaussian models is the overdispersion on the latent scale plus the distribution-specific variance. `Overdispersion` will allow estimating the overdispersion variance and the latent scale, which in the case of Gaussian models (with implicit identity link) is equal to the residual estimated by `Residual`. 
 
-It is currently necessary to specify at least one additional grouping level in the `grname` argument along with `Overdispersion` and/or `Residual`.
+It is currently necessary to specify at least one additional grouping level in the `grname` argument along with `Overdispersion` and/or `Residual`. The results for `Container` and `Popualtion` are unaffaected and are the same as above (`rep6`). In our example there is significant overdispersion, meaning that besides treatment effects and variation among populations and among containers within populations there is more unexplained variation than expected from the Poisson distribution alone.
+
 ```{r binary-residual-model, warning=1,  fig.show='hold', fig.width=3.2}
-rep11 <- rpt(Egg ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion", "Residual"), data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, ratio=FALSE)
+rep11 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion", "Residual"), data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, ratio=FALSE)
 print(rep11)
 plot(rep11, grname="Overdispersion", scale="link", cex.main=0.8)
 plot(rep11, grname="Residual", scale="link", cex.main=0.8)
 ```
+
 Evidently, it is pointless to test for the statistical significance of residual variance againt a null hypothesis of no residual variance and we therefore omit this test. But for non-Gaussian models it is worthwhile testing if there is statistically significant overdispersion and we have therefore implemented this test. Note, however, that each grouping level specified in `grname` will be tested in separate iterations if a permutation test is required. Hence it is recommened to be careful with the use of `npermut` in combination with multiple grouping levels.
+
 ```{r binary-overdispersion-test, warning=1, fig.width=7, fig.height=4}
+=======
+
+```{r binary-overdisperion-test, warning=1, fig.width=7, fig.height=4}
+>>>>>>> d2171b240b0e4e8f6c1f5240b1b1ed1da29d8736
 rep12 <- rpt(Egg ~ (1|Container) + (1|Population),  grname=c("Population", "Overdispersion"), data=BeetlesFemale, datatype="Poisson", nboot=0, npermut=19, ratio=FALSE)
 print(rep12)
 ```
 
 It is indeed possible to use both `Overdisperion` and `Residual` in combination with `ratio = FALSE` or with `ratio = TRUE`. The ratio of the residual variance to the total variance should then be interpreted as the 'non-repeatability'. We assume that the combination of these two terms with `ratio = FALSE` will be more commonly used.
-
-## Estimating re-unadjusted repeatabilities
-
-If fixed effects are fitted in a model, they necessarily explain some of the phenotypic variance in the sample. When calculating repeatabilities from the random effect variance components alone, then this variance is lost from the repeatability and we have called this adjusted repeatabilities (Nakagawa & Schielzeth 2010), because systematic variation across the range of the covariate(s) is statistically controlled for. However, it is sometimes desiarable to fit models with fixed effects without loosing the variance explained by fixed effects from the denominator. We have therefore introduced the argument `adjusted` to allow this.
-
-Adjusted defaults to `TRUE` which means that adjusted repeatabilities are estimated for nothing else is specified. With `adjusted = FALSE` the variance explained by fixed effects will be calculated by the variance in the linear predictor on the link scale. This variance is added to the denominator of the repeatability equation just as other variance components (provided that `ratio = TRUE`).
-
-## Estimating re-unadjusted repeatabilities
-
-To complete the circle of variance components to be estimated by `rptR`, we have introduced a third reserved term to the `grname` argument (besides `Overdispersion` and `Residual` as introduced above) that is `Fixed`. The argument allows the explicit estimation of the variance explained by fixed effects, including its uncertainty as determined by parametric bootstrapping. In combination with `ratio = FALSE`, `Fixed` will return the variance in the linear predictor on the latent scale. In combination with `ratio = TRUE`, `Fixed` will return the fraction of the total variance that is explained by variance in the linear predictor, i.e. by fixed effects. Incidently, the combination `grname = "Fixed", ratio = TRUE` estimates a form of the coefficient of determination $R^2$ that we have called the marginal $R^2$ of mixed effects models (Nakagawa & Schielzeth 2013). While we do provide a quantification of uncertainty for the variance explained by fixed effects and for marginal $R^2$, we haven't implemented significance tested for the fixed effect variance. This should be quantified by other means.
 
 ## Conclusing remarks
 

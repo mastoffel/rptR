@@ -23,12 +23,12 @@
 print.summary.rpt <- function(x, ...) {
         
         if (x$ratio == TRUE) {
-                header_gaussian <- "Repeatability estimation using the lmer"
-                header_nongaussian <- "Repeatability estimation using glmer "
+                header_gaussian <- "Repeatability estimation using the lmm method"
+                header_nongaussian <- "Repeatability estimation using glmer method"
                 PE <- "Repeatability estimation overview:"
         } else if (x$ratio == FALSE) {
-                header_gaussian <- "Variance estimation using the lmer"
-                header_nongaussian <- "Variance estimation using glmer "
+                header_gaussian <- "Variance estimation using the lmm method"
+                header_nongaussian <- "Variance estimation using glmer method"
                 PE <- "Variance estimation overview:"
                 x$rpt <- lapply(x$rpt, function(x){
                         names(x)[1] <- "Var"
@@ -39,7 +39,7 @@ print.summary.rpt <- function(x, ...) {
     
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion" ) {
             cat("\n",  header_nongaussian,  "\n\n", 
-                    "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n", "Data: ", x$nobs, " observations", sep = "")
+                    "Call = ", gsub("^\\s+", "", deparse(x$call)), "\n\n", "Data: ", x$nobs, " observations", sep = "")
             cat("\n")
             cat("----------------------------------------")
             for (i in 1:ncol(x$R)) {
@@ -63,13 +63,12 @@ print.summary.rpt <- function(x, ...) {
                             ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
                     cat("\n\n")
                     cat("----------------------------------------")
-                    #cat("\n\n")
             }
     }
     
     if (x$datatype == "Gaussian") {
-        cat("\n", header_gaussian, x$method, " method", "\n\n", 
-            "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n", "Data: ", x$nobs, " observations", sep = "")
+        cat("\n", header_gaussian, "\n\n", 
+            "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n\n", "Data: ", x$nobs, " observations", sep = "")
         cat("\n")
         cat("----------------------------------------")
         for (i in 1:length(x$R)) {
@@ -90,7 +89,6 @@ print.summary.rpt <- function(x, ...) {
                 ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
             cat("\n\n")
             cat("----------------------------------------")
-            # cat("\n\n")
         }
     }
     
