@@ -2,11 +2,11 @@
 % Please edit documentation in R/rptPoisson.R
 \name{rptPoisson}
 \alias{rptPoisson}
-\title{GLMM-based Repeatability Using REML for Possoin-distributed data}
+\title{GLMM-based Repeatability Estimation for Possoin-distributed Data}
 \usage{
 rptPoisson(formula, grname, data, link = c("log", "sqrt"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
-  ratio = TRUE)
+  ratio = TRUE, adjusted = TRUE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -17,38 +17,42 @@ repeatabilities.}
 \item{grname}{A character string or vector of character strings giving the
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-and terms have to be set in quotation marks.Add "Residual" or "Overdispersion"  to
-the character vector to estimate the respective variances. This is most useful
-in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
-variance. With \code{ratio = TRUE} the overdispersion variance reflects the
-non-repeatability.}
+and terms have to be set in quotation marks. The reseved terms "Residual", 
+"Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
+variance and variance explained by fixed effects, respectively.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}
 
-\item{link}{Link function. \code{log} and \code{sqrt} are allowed, defaults to \code{log}.}
+\item{link}{Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.}
 
 \item{CI}{Width of the required confidence interval (defaults to 0.95).}
 
-\item{nboot}{Number of parametric bootstraps for interval estimation
+\item{nboot}{Number of parametric bootstraps for interval estimation 
 (defaults to 1000). Larger numbers of bootstraps give a better
-asymtotic CI, but may be very time-consuming (in particular of some variance component 
-is low). Bootstrapping can be switch off by setting \code{nboot = 0}.}
+asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
+\code{nboot = 0}.}
 
 \item{npermut}{Number of permutations used when calculating asymptotic p-values 
 (defaults to 0). Larger numbers of permutations give a better
-asymtotic CI, but may be very time-consuming (in particular of some variance component 
-is low). Permutaton tests can be switch off by setting \code{npermut = 0}.}
+asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
+are specified). Permutaton tests can be switch off by setting \code{npermut = 0}.}
 
-\item{parallel}{If TRUE, bootstraps and permutations will be distributed across multiple cores.}
+\item{parallel}{Boolean to express if parallel computing should be applied (defaults to FALSE). 
+If TRUE, bootstraps and permutations will be distributed across multiple cores.}
 
-\item{ncores}{Specify number of cores to use for parallelization. On default,
-all cores but one are used.}
+\item{ncores}{Specifying the number of cores to use for parallelization. On default,
+all but one of the available cores are used.}
 
-\item{ratio}{Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
-will be used for all further calculations. The resulting point estimate(s), 
-uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
-itself rather than to the repeatability (i.e. ratio of variances).}
+\item{ratio}{Boolean to express if variances or ratios of variance should be estimated. 
+If FALSE, the variance(s) are returned without forming ratios. If TRUE (the default) ratios 
+of variances (i.e. repeatabilities) are estimated.}
+
+\item{adjusted}{Boolean to express if adjusted or unadjusted repeatabilities should be estimated. 
+If TRUE (the default), the variances explained by fixed effects (if any) will not
+be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+be added to the denominator.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -78,11 +82,11 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
       element is a grouping factor.}
 \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
-\item{ngroups}{Number of groups.}
+\item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
-warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
+     warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }
 \description{
 Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
@@ -94,19 +98,23 @@ data(BeetlesFemale)
 # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 # for the real analysis.
 
-
 # estimating adjusted repeatabilities for two random effects
+rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+                   grname=c("Container", "Population"), 
+                   data = BeetlesFemale, nboot=3, npermut=3)
 
-rptPoisson(Egg ~ Treatment + (1|Container) + (1|Habitat), grname=c("Container", "Habitat"), 
-data = BeetlesFemale, nboot=3, npermut=3)
-
-
+# unadjusted repeatabilities with  fixed effects and 
+# estimation of the fixed effect variance
+rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
+                   grname=c("Container", "Population", "Fixed"), 
+                   data=BeetlesFemale, nboot=3, npermut=3, adjusted=FALSE)
+                
+               
 # variance estimation of random effects, residual and overdispersion 
 
-#rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) , 
-#grname=c("Container","Habitat","Residual", "Overdispersion"), data = BeetlesFemale,
-#nboot=3, npermut=3, ratio = FALSE)
-
+rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
+                   grname=c("Container","Population","Residual", "Overdispersion"), 
+                   data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
 
 }
 \author{

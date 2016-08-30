@@ -94,7 +94,7 @@ test_that("LRTs works", {
 
 # check that random effect components plus overdispersion variance sum up to one
 R_est_1 <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
-        grname=c("Container", "Population", "Overdispersion"), data = BeetlesFemale,
+        grname=c("Container", "Population", "Residual"), data = BeetlesFemale,
         nboot=0, npermut=0)
 
 test_that("random effect components sum to up to one", {
@@ -182,12 +182,42 @@ test_that("rpt estimation works for two random effect, no boot, no permut, no pa
 
 R_est_1 <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) ,
 grname=c("Container", "Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
-nboot=5, npermut=5, ratio = TRUE)
+nboot=5, npermut=5, ratio = FALSE)
 
 test_that("rpt estimation works for two random effects, estimation of Variance and Residual / Overdispersion", {
-        expect_true(is.na(R_est_1$R["R_org", "Residual"]))
         expect_true(is.na(R_est_1$R["R_org", "Overdispersion"]))
-        expect_equal(R_est_1$R["R_link", "Residual"], 0.1494634, tolerance = 0.001)
-        expect_equal(R_est_1$R["R_link", "Overdispersion"], 0.5133229, tolerance = 0.001)
+        expect_true(is.na(R_est_1$R["R_org", "Residual"]))
+        expect_equal(R_est_1$R["R_link", "Overdispersion"], 0.1004924, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_link", "Residual"], 0.3451351, tolerance = 0.001)
 })
+
+
+R_est_1 <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) ,
+        grname=c("Container", "Habitat", "Residual", "Overdispersion"), data = BeetlesFemale,
+        nboot=0, npermut=0, ratio = TRUE)
+R_est_2 <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) ,
+        grname=c("Container", "Habitat"), data = BeetlesFemale,
+        nboot=0, npermut=0, ratio = TRUE)
+
+
+# test whether repeatabilities are equal for grouping factors independent of residual and overdispersion specification
+
+test_that("repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
+        expect_equal(R_est_1$R$Habitat, R_est_2$R$Habitat)
+        expect_equal(R_est_1$R$Container, R_est_2$R$Container)
+})
+
+
+# check that grname sequence doesnt play a role
+R_est_3 <-  rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Habitat) ,
+        grname=c("Habitat", "Container"), data = BeetlesFemale,
+        nboot=0, npermut=0, ratio = TRUE)
+
+test_that("Repeatabilities are equal for different order in grname argument", {
+        expect_false(any(R_est_2$R$Container == R_est_3$R$Container) == FALSE)
+        expect_false(any(R_est_2$R$Habitat == R_est_3$R$Habitat) == FALSE)
+})
+
+
+
         

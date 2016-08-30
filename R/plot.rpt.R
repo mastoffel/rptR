@@ -9,7 +9,7 @@
 #' @param main Plot title
 #' @param breaks hist() argument
 #' @param xlab x-axis title
-#' @param \dots Additional arguments to the hist() function.
+#' @param \dots Additional arguments to the hist() function for customized plotting.
 #'
 #' @references 
 #' Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 

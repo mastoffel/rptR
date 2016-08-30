@@ -1,4 +1,4 @@
-#' GLMM-based Repeatability Using REML for Gaussian data
+#' LMM-based Repeatability Estimation for Gaussian Data
 #' 
 #' Estimates the repeatability from a general linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @param formula Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -8,31 +8,33 @@
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-#'        and terms have to be set in quotation marks. Add "Residual" or "Overdispersion"  to
-#'        the character vector to estimate the respective variances. This is most useful
-#'        in combination with \code{ratio = FALSE} to estimate the Residual or Overdispersion
-#'        variance. With \code{ratio = TRUE} the overdispersion variance reflects the
-#'        non-repeatability.
+#'        and terms have to be set in quotation marks. The reseved terms "Residual", 
+#'        "Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
+#'        variance and variance explained by fixed effects, respectively. Note that "Overdispersion" 
+#'        and "Residual" are identical in the case auf Gaussian models.
 #' @param data A dataframe that contains the variables included in the \code{formula}
 #'        and \code{grname} arguments.
 #' @param CI Width of the required confidence interval (defaults to 0.95).
 #' @param nboot Number of parametric bootstraps for interval estimation 
 #'        (defaults to 1000). Larger numbers of bootstraps give a better
-#'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
-#'        is low). Bootstrapping can be switch off by setting \code{nboot = 0}.
+#'        asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
+#'        \code{nboot = 0}.
 #' @param npermut Number of permutations used when calculating asymptotic p-values 
 #'        (defaults to 0). Larger numbers of permutations give a better
-#'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
-#'        is low). Permutaton tests can be switch off by setting \code{npermut = 0}. 
-#' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
-#' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores but one are used.
-#' @param ratio Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
-#'        will be used for all further calculations. The resulting point estimate(s), 
-#'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
-#'        itself rather than to the repeatability (i.e. ratio of variances).
-#'   
-#' 
+#'        asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
+#'        are specified). Permutaton tests can be switch off by setting \code{npermut = 0}. 
+#' @param parallel Boolean to express if parallel computing should be applied (defaults to FALSE). 
+#'        If TRUE, bootstraps and permutations will be distributed across multiple cores. 
+#' @param ncores Specifying the number of cores to use for parallelization. On default,
+#'        all but one of the available cores are used.
+#' @param ratio Boolean to express if variances or ratios of variance should be estimated. 
+#'        If FALSE, the variance(s) are returned without forming ratios. If TRUE (the default) ratios 
+#'        of variances (i.e. repeatabilities) are estimated.
+#' @param adjusted Boolean to express if adjusted or unadjusted repeatabilities should be estimated. 
+#'        If TRUE (the default), the variances explained by fixed effects (if any) will not
+#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+#'        be added to the denominator.
 #' 
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -55,7 +57,7 @@
 #'       element represents a grouping factor.}
 #' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
 #'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
-#' \item{ngroups}{Number of groups.}
+#' \item{ngroups}{Number of groups for each grouping level.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
 #' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
@@ -90,19 +92,23 @@
 #' # two random effects
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
 #'                    data=BeetlesBody, nboot=3, npermut=3)
+#'                    
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
+#'                    grname=c("Container", "Population", "Fixed"), 
+#'                    data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
 #' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
 #'             grname= c("Population", "Container", "Residual"),
 #'             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 #' 
-#' 
-#' 
 #' @export
 #' 
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
         # delete rows with missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -111,13 +117,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 data <- data[no_NA_vals, ]
         } 
         
-        # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        # check whether grnames just contain "Residual" or "Overdispersion" or "Fixed"
+        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # fit model
         mod <- lme4::lmer(formula, data = data)
         # extract variance components
-        VarComps <- as.data.frame(lme4::VarCorr(mod))
+        # VarComps <- as.data.frame(lme4::VarCorr(mod))
         
         # checks for bootstraps and permutations
         if (nboot == 1) {
@@ -131,6 +137,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         grname_org <- grname
         output_resid <- FALSE
         output_overdisp <- FALSE
+        output_fixed <- FALSE
         
         # point estimates of R or var
         R_pe <- function(formula, data, grname) {
@@ -146,12 +153,20 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         grname <- grname[-which(grname == "Residual")]
                 }
                 
-                # Check whether Residual is selected
+                # Check whether Overdispersion is selected
                 if (any(grname == "Overdispersion")){
                         output_overdisp <- TRUE
+                        # # delete OVerdispersion element
                         grname <- grname[-which(grname == "Overdispersion")]
                 }
                 
+                # Check whether Fixed is selected
+                if (any(grname == "Fixed")){
+                        output_fixed <- TRUE
+                        # # delete fixed element
+                        grname <- grname[-which(grname == "Fixed")]
+                }
+
                 # Residual variance
                 var_e <- attr(VarComps, "sc")^2
                 names(var_e) <- "Residual"
@@ -160,13 +175,18 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 var_o <- var_e
                 names(var_o) <- "Overdispersion"
                 
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
+                names(var_f) <- "Fixed"
+
                 # group variances
                 var_a <- as.numeric(VarComps[grname])
                 names(var_a) <- grname
                 
                 # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
-                
+                if(!adjusted) var_p <- var_p + var_f
+
                 # return variance instead of repeatability
                 if (ratio == FALSE) { 
                         R <- as.data.frame(t(var_a))
@@ -179,26 +199,33 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         if (output_overdisp){
                                 R$Overdispersion <- var_o
                         }
+                        if (output_fixed){
+                                R$Fixed <- var_f
+                        }
                         return(R)
                 }
                 
-                # Repeatability
-                R <- var_a/var_p
-                R <- as.data.frame(t(R))
-                names(R) <- grname
+                # return repeatability
+                if (ratio == TRUE) { 
+        
+                        R <- var_a/var_p
+                        R <- as.data.frame(t(R))
+                        names(R) <- grname
                 
-                
-                # check whether to give out non-repeatability
-                non_R <- 1-sum(R)
-                if(output_resid){
-                        R$Residual <- non_R
+                        # check whether to give out Residual
+                        if(output_resid){
+                                R$Residual <- var_e / var_p
+                        }
+                        # check whether to give out Overdispersion
+                        if(output_overdisp){
+                                R$Overdispersion <- var_e / var_p
+                        }
+                        # check whether to give out Fixed
+                        if(output_fixed){
+                                R$Fixed <- var_f / var_p
+                        }
+                        return(R)
                 }
-                # and Overdispersion
-                if(output_overdisp){
-                        R$Overdispersion <- non_R
-                }
-                
-                return(R)
         }
         
         R <- R_pe(formula, data, grname) # no bootstrap skipping at the moment
@@ -266,7 +293,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         
-        
         if (any(grname == "Residual")){
                 output_resid <- TRUE
                 # # delete Residual element
@@ -274,13 +300,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         if (any(grname == "Overdispersion")){
                 output_overdisp <- TRUE
-                # # delete Residual element
+                # # delete Overdispersion element
                 grname <- grname[-which(grname == "Overdispersion")]
         }
-        
-        
-        output_resid <- FALSE
-        output_overdisp <- FALSE
+        if (any(grname == "Fixed")){
+                output_fixed <- TRUE
+                # # delete Fixed element
+                grname <- grname[-which(grname == "Fixed")]
+        }
         
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
@@ -393,6 +420,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
         }
         
+        # add Overdisp = NA for S3 functions to work
+        if(any(grname_org == "Fixed")){
+                # grname <- grname_org
+                P <- rbind(P, NA)
+                row.names(P)[nrow(P)] <- "Fixed"
+                R_permut <- rbind(R_permut, NA)
+                row.names(R_permut)[nrow(R_permut)] <- "Fixed"
+        }
+
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
                 CI = CI, 
@@ -402,8 +438,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 P = as.data.frame(P),
                 R_boot = boot, 
                 R_permut = lapply(as.data.frame(t(R_permut)), function(x) return(x)),
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
-                        LRT_P = LRT_P), 
+                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, 
+                        LRT_D = LRT_D, LRT_df = LRT_df, LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod, ratio = ratio,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))

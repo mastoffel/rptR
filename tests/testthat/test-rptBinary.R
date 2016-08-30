@@ -7,7 +7,6 @@ data(BeetlesMale)
 # Set a seed for reproducibility of the randomization 
 set.seed(23)
 
-
 ########## checks for one random effect
 
 # run with one random effect, no boot, no permut
@@ -89,7 +88,7 @@ test_that("LRTs works", {
 
 
 # Variance components sum up to one
-R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion"), 
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual"), 
         data=BeetlesMale, nboot=0, npermut=0)
 
 test_that("random effect components sum to up to one", {
@@ -140,10 +139,39 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
 R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Overdispersion"), 
         data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
 
-test_that("Variance estimation works for two random effects, boot, permut,Residual and Overdispersion", {
+test_that("Variance estimation works for two random effects, boot, permut, Residual and Overdispersion", {
         expect_equal(R_est_1$R$Container[2], 0, tolerance = 0.001)
         expect_equal(R_est_1$R$Population[2], 0.9458128 , tolerance = 0.001)
-        expect_equal(R_est_1$R$Residual[2], 0 , tolerance = 0.001)
-        expect_equal(R_est_1$R$Overdispersion[2], 3.289868, tolerance = 0.001)
+        expect_equal(R_est_1$R$Overdispersion[2], 0 , tolerance = 0.001)
+        expect_equal(R_est_1$R$Residual[2], 3.289868, tolerance = 0.001)
 })
+
+
+# test whether repeatabilities are equal for grouping factors independent of residual and overdispersion specification
+
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Overdispersion"), 
+        data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE)
+R_est_2 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), 
+        data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE)
+
+
+test_that("Repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
+        expect_false(any(R_est_1$R$Container == R_est_2$R$Container) == FALSE)
+        expect_false(any(R_est_1$R$Population == R_est_2$R$Population) == FALSE)
+})
+
+# check that grname sequence doesnt play a role
+
+R_est_3 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Population", "Container"), 
+        data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE)
+
+test_that("Repeatabilities are equal for different order in grname argument", {
+     expect_equal(R_est_2$R$Container, R_est_3$R$Container)
+     expect_equal(R_est_2$R$Population, R_est_3$R$Population) 
+})
+
+
+
+
+
 

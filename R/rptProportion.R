@@ -1,4 +1,4 @@
-#' GLMM-based Repeatability Using REML for Proportion data
+#' GLMM-based Repeatability Estimation for Proportion Data
 #' 
 #' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @param formula Formula as used e.g. by \link{lmer}. In the case of Porportion data, the left-hand
@@ -10,27 +10,33 @@
 #' @param grname A character string or vector of character strings giving the
 #'        name(s) of the grouping factor(s), for which the repeatability should
 #'        be estimated. Spelling needs to match the random effect names as given in \code{formula} 
-#'        and terms have to be set in quotation marks.
+#'        and terms have to be set in quotation marks. The reseved terms "Residual", 
+#'        "Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
+#'        variance and variance explained by fixed effects, respectively.
 #' @param data A dataframe that contains the variables included in the \code{formula}
 #'        and \code{grname} arguments.
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
 #' @param CI Width of the required confidence interval (defaults to 0.95).
-#' @param nboot Number of parametric bootstraps for interval estimation.
+#' @param nboot Number of parametric bootstraps for interval estimation 
 #'        (defaults to 1000). Larger numbers of bootstraps give a better
-#'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
-#'        is low). Bootstrapping can be switch off by setting \code{nboot = 0}.
+#'        asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
+#'        \code{nboot = 0}.
 #' @param npermut Number of permutations used when calculating asymptotic p-values 
 #'        (defaults to 0). Larger numbers of permutations give a better
-#'        asymtotic CI, but may be very time-consuming (in particular of some variance component 
-#'        is low). Permutaton tests can be switch off by setting \code{npermut = 0}. 
-#' @param parallel If TRUE, bootstraps and permutations will be distributed across multiple cores. 
-#' @param ncores Specify number of cores to use for parallelization. On default,
-#'        all cores but one are used.
-#' @param ratio Defaults to TRUE. If FALSE, the variance(s) of the grouping factor(s) of interest
-#'        will be used for all further calculations. The resulting point estimate(s), 
-#'        uncertainty interval(s) and significance test(s) therefore refer to the estimated variance
-#'        itself rather than to the repeatability (i.e. ratio of variances).
-#'
+#'        asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
+#'        are specified). Permutaton tests can be switch off by setting \code{npermut = 0}. 
+#' @param parallel Boolean to express if parallel computing should be applied (defaults to FALSE). 
+#'        If TRUE, bootstraps and permutations will be distributed across multiple cores. 
+#' @param ncores Specifying the number of cores to use for parallelization. On default,
+#'        all but one of the available cores are used.
+#' @param ratio Boolean to express if variances or ratios of variance should be estimated. 
+#'        If FALSE, the variance(s) are returned without forming ratios. If TRUE (the default) ratios 
+#'        of variances (i.e. repeatabilities) are estimated.
+#' @param adjusted Boolean to express if adjusted or unadjusted repeatabilities should be estimated. 
+#'        If TRUE (the default), the variances explained by fixed effects (if any) will not
+#'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
+#'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
+#'        be added to the denominator.
 #'         
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -60,12 +66,12 @@
 #'       element is a grouping factor.}
 #' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
 #'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
-#' \item{ngroups}{Number of groups.}
+#' \item{ngroups}{Number of groups for each grouping level.}
 #' \item{nobs}{Number of observations.}
 #' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
 #' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
-#' warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
+#'      warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
@@ -88,25 +94,32 @@
 #' # prepare proportion data
 #' BeetlesMale$Dark <- BeetlesMale$Colour
 #' BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
-#' md <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
+#' BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, 
+#'      data=BeetlesMale, FUN=sum)
 #' 
 #' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
 #' # for the real analysis.
 #' 
-#' # one random effect
-#' rptProportion(cbind(Dark, Reddish) ~ (1|Population) , 
-#' grname=c("Population"), data=md, nboot=3, npermut=3)
-#' 
-#' # one random effect, variance estimation with Residual and Overdispersion
+#' # repeatability with one grouping level
 #' rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
-#' grname=c("Population", "Residual", "Overdispersion"), data=md, nboot=3, npermut=3, ratio = FALSE)
+#'      grname=c("Population"), data=BeetlesColour, nboot=3, npermut=3)
 #' 
+#' # unadjusted repeatabilities with  fixed effects and 
+#' # estimation of the fixed effect variance
+#' rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
+#'      grname=c("Population", "Fixed"), 
+#'      data=BeetlesColour, nboot=3, npermut=3, adjusted=FALSE)
+#'                    
+#' # variance estimation of random effects, residual and overdispersion 
+#' rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
+#'      grname=c("Container","Population","Residual", "Overdispersion"), 
+#'      data = BeetlesColour, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' @export
 #' 
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -116,19 +129,19 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         } 
         
         # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         # observational level random effect
-        obsid <- factor(1:nrow(data))
-        data <- cbind(data, obsid)
+        Overdispersion <- factor(1:nrow(data))
+        data <- cbind(data, Overdispersion)
         
-        formula <- stats::update(formula,  ~ . + (1|obsid))
+        formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         VarComps <- as.data.frame(lme4::VarCorr(mod))
-        obsind_id <- which(VarComps[["grp"]] == "obsid")
+        obsind_id <- which(VarComps[["grp"]] == "Overdispersion")
         overdisp <- VarComps$vcov[obsind_id]
         
         # check if all variance components are 0
@@ -151,7 +164,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
-        output_overdisp <- FALSE
+        output_fixed <- FALSE
         
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
@@ -159,7 +172,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
-                
+                rownames(VarComps) = VarComps$grp                
                 
                 # Check whether Residual is selected
                 if (any(grname == "Residual")){
@@ -167,29 +180,32 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                         # # delete Residual element
                         grname <- grname[-which(grname == "Residual")]
                 }
-                
-                # Check whether Residual is selected
-                if (any(grname == "Overdispersion")){
-                        output_overdisp <- TRUE
-                        grname <- grname[-which(grname == "Overdispersion")]
+                # Check whether Fixed is selected
+                if (any(grname == "Fixed")){
+                        output_fixed <- TRUE
+                        # # delete Fixed element
+                        grname <- grname[-which(grname == "Fixed")]
                 }
                 
                 # groups random effect variances
-                var_a <- VarComps[VarComps$grp %in% grname, "vcov"]
+                var_a <- VarComps[grname, "vcov"]
                 names(var_a) <- grname
                 
                 # olre variance
-                var_e <- VarComps[VarComps$grp %in% "obsid", "vcov"]
+                var_o <- VarComps["Overdispersion", "vcov"]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
                 # Overdispersion variance
                 if (link == "logit") {
-                        var_o <- var_e + ((pi^2)/3)
+                        var_r <- var_o + ((pi^2)/3)
                 }
                 if (link == "probit") {
-                        var_o <- var_e + 1
+                        var_r <- var_o + 1
                 }
+                
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
@@ -198,46 +214,53 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                         
                         # if residual is selected, add residual variation to the output
                         if (output_resid){
-                                R$Residual <- c(NA, var_e) # add NA for R_org
+                                R[,"Residual"] <- c(NA, var_r) # add NA for R_org
                         } 
-                        if (output_overdisp){
-                                R$Overdispersion <- c(NA, var_o) # add NA for R_org
-                        }
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(NA, var_f) # add NA for R_org
+                        } 
                         return(R)
                 }
                 
-  
-                if (link == "logit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + (pi^2)/3)
-                        P <- exp(beta0) / (1 + exp(beta0))
-                        R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / 
-                                 ((sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P)))
-                        
-                        # repeatability of Residual and Overdispersion variance
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + ((pi^2)/3))
-                }
-                if (link == "probit") {
-                        R_link <- var_a/(sum(VarComps[,"vcov"]) + 1)
-                        R_org <- NA
-                        
-                        R_e <- var_e / (sum(VarComps[,"vcov"]) + 1)
-                        R_o <- var_o / (sum(VarComps[,"vcov"]) + 1)
-                        
-                }
-                # check whether that works for any number of var
-                R <- as.data.frame(rbind(R_org, R_link))
+                if (ratio == TRUE) {
+                        if (link == "logit") {
+                                # link scale
+                                var_p_link <- sum(VarComps[,"vcov"]) + (pi^2)/3
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link <- var_a/ var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f_link <- var_f / var_p_link                                
+                                # origial scale
+                                P <- exp(beta0) / (1 + exp(beta0))
+                                var_p_org <- (sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P))
+                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / var_p_org
+                                R_f_org <- ( (var_f * P^2) / ((1 + exp(beta0))^2)) / var_p_org
+                        }
+                        if (link == "probit") {
+                                # link scale
+                                var_p_link <- sum(VarComps[,"vcov"]) + 1
+                                if(!adjusted) var_p_link <- var_p_link + var_f
+                                R_link <- var_a / var_p_link
+                                R_r <- var_r / var_p_link
+                                R_f_link <- var_f / var_p_link                                
+                                # origial scale
+                                R_org <- NA
+                                R_f_org <- NA
+                        }
+                        # check whether that works for any number of var
+                        R <- as.data.frame(rbind(R_org, R_link))
                 
-                # check whether to give out non-repeatability and overdispersion repeatability
-                if (output_resid){
-                        R$Residual <- c(NA, R_e) # add NA for R_org
+                        # check whether to give out non-repeatability and overdispersion repeatability
+                        if (output_resid){
+                                R[,"Residual"] <- c(NA, R_r) # add NA for R_org
+                        }
+                        if (output_fixed){
+                                R[,"Fixed"] <- c(R_f_org, R_f_link)
+                        }
+                        
+                        return(R)
                 }
-                if (output_overdisp){
-                        R$Overdispersion <- c(NA, R_o) # add NA for R_org
-                }
-                
-                return(R)
-                }
+        }
         
         R <- R_pe(formula, data, grname, peYN = FALSE)
         
@@ -331,12 +354,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # # delete Residual element
                 grname <- grname[-which(grname == "Overdispersion")]
         }
-        
-        
-        output_resid <- FALSE
-        output_overdisp <- FALSE
-        
-        
+        # Check whether Fixed is selected
+        if (any(grname == "Fixed")){
+                output_fixed <- TRUE
+                # # delete Fixed element
+                grname <- grname[-which(grname == "Fixed")]
+        }
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         

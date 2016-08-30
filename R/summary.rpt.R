@@ -66,7 +66,7 @@ summary.rpt <- function(object, ...) {
         
         if(object$datatype=="Poisson" | object$datatype=="Binary" |  object$datatype=="Proportion") {
                 # warning("Not yet implemented")
-                #                 cat("\n", "Repeatability calculation using the ", object$method, " method", "\n\n")
+                #                 cat("\n", "Repeatability calculation using the glmm method", "\n\n")
                 boot <- list(object$R_boot_org, object$R_boot_link)
                 perm <- list(object$R_permut_org, object$R_permut_link)
                 for(i in 1:ncol(object$R)) {

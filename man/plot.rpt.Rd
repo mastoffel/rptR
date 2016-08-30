@@ -23,7 +23,7 @@
 
 \item{xlab}{x-axis title}
 
-\item{\dots}{Additional arguments to the hist() function.}
+\item{\dots}{Additional arguments to the hist() function for customized plotting.}
 }
 \description{
 Plots the distribution of repeatability estimates from bootstrapping and permutation tests.

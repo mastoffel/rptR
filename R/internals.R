@@ -18,3 +18,19 @@ withWarnings <- function(expr) {
         val <- withCallingHandlers(expr, warning = wHandler)
         list(warnings = myWarnings)
 } 
+
+
+#' #' Captures the call of the parent function
+#' #' 
+#' #' 
+#' #' 
+#' #' @keywords internal
+#' #' 
+#' #' 
+#' 
+#' get_args <- function () {
+#'         as.list( match.call(
+#'                 def = sys.function( -1 ),
+#'                 call = sys.call(-1)) )[-1]
+#'         
+#' }
