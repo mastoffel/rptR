@@ -76,6 +76,8 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
 \item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
+\item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+\item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
 warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 }

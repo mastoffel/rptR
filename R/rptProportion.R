@@ -36,6 +36,8 @@
 #' \item{nobs}{Number of observations.}
 #' \item{overdisp}{Overdispersion parameter. Equals the variance in the observational factor random effect}
 #' \item{mod}{Fitted model.}
+#' \item{ratio}{Boolean. TRUE, if ratios have been estimated, FALSE, if variances have been estimated}
+#' \item{adjusted}{Boolean. TRUE, if estimates are adjusted}
 #' \item{all_warnings}{\code{list} with two elements. 'warnings_boot' and 'warnings_permut' contain
 #'      warnings from the lme4 model fitting of bootstrap and permutation samples, respectively.}
 #'
@@ -494,7 +496,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio,
+                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
