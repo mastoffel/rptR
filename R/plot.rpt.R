@@ -115,7 +115,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
             angle = 90, code = 3, lwd = 1.5, col = "black")
         graphics::points(Median.R, v.pos * 1.15, cex = 1.2, pch = 19, col = "black")
         graphics::points(R, v.pos * 1.3, cex = 1.1, pch = 19, col = "cornflowerblue")
-        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with CI", 
+        graphics::legend("topleft", pch = 19, cex = 0.8, bty = "n", col = c("black", "cornflowerblue"), c("Median of repeatabilities from permuted datasets with 95% percentiles", 
                 "Observed repeatability"), box.lty = 0)
     }
     

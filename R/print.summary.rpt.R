@@ -23,12 +23,12 @@
 print.summary.rpt <- function(x, ...) {
         
         if (x$ratio == TRUE) {
-                header_gaussian <- "Repeatability estimation using the lmer"
-                header_nongaussian <- "Repeatability estimation using glmer "
+                header_gaussian <- "Repeatability estimation using the lmm method"
+                header_nongaussian <- "Repeatability estimation using glmer method"
                 PE <- "Repeatability estimation overview:"
         } else if (x$ratio == FALSE) {
-                header_gaussian <- "Variance estimation using the lmer"
-                header_nongaussian <- "Variance estimation using glmer "
+                header_gaussian <- "Variance estimation using the lmm method"
+                header_nongaussian <- "Variance estimation using glmer method"
                 PE <- "Variance estimation overview:"
                 x$rpt <- lapply(x$rpt, function(x){
                         names(x)[1] <- "Var"
@@ -63,12 +63,11 @@ print.summary.rpt <- function(x, ...) {
                             ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
                     cat("\n\n")
                     cat("----------------------------------------")
-                    #cat("\n\n")
             }
     }
     
     if (x$datatype == "Gaussian") {
-        cat("\n", header_gaussian, x$method, " method", "\n\n", 
+        cat("\n", header_gaussian, "\n\n", 
             "Call = ", gsub("^\\s+", "", deparse(x$call)) , "\n", "Data: ", x$nobs, " observations", sep = "")
         cat("\n")
         cat("----------------------------------------")
@@ -90,7 +89,6 @@ print.summary.rpt <- function(x, ...) {
                 ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
             cat("\n\n")
             cat("----------------------------------------")
-            # cat("\n\n")
         }
     }
     
