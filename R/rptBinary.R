@@ -438,6 +438,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 permut_org$Residual <- rep(NA, length(permut_org[[1]]))
         }
         
+        # delete overdispersion from ngroups
+        ngroups <-  unlist(lapply(data[grname], function(x) length(unique(x))))
+        ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
+        
         res <- list(call = match.call(), 
                     datatype = "Binary", 
                     link = link,
@@ -452,7 +456,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                     R_permut_org = permut_org,
                     LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                                LRT_P = LRT_P), 
-                    ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+                    ngroups = ngroups, 
                     nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
                     all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"

@@ -432,6 +432,10 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 permut_org$Fixed <- rep(NA, length(permut_org[[1]]))
         }
         
+        # delete overdispersion from ngroups
+        ngroups <-  unlist(lapply(data[grname], function(x) length(unique(x))))
+        ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
+                
         res <- list(call = match.call(), 
                 datatype = "Poisson", 
                 link = link,
@@ -446,7 +450,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 R_permut_org = permut_org,
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                 LRT_P = LRT_P), 
-                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+                ngroups =ngroups, 
                 nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         

@@ -481,6 +481,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
         }
         
+        # delete overdispersion from ngroups
+        ngroups <-  unlist(lapply(data[grname], function(x) length(unique(x))))
+        ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
+        
         res <- list(call = match.call(), 
                 datatype = "Binary", 
                 link = link,
@@ -495,7 +499,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_permut_org = permut_org,
                 LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
                         LRT_P = LRT_P), 
-                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
+                ngroups =  ngroups, 
                 nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
