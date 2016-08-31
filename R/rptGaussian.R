@@ -104,9 +104,25 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # save the original grname
         grname_org <- grname
+        
+        # additional grname components
         output_resid <- FALSE
         output_overdisp <- FALSE
         output_fixed <- FALSE
+        
+        
+        # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
+        # from grname vector
+        check_grname <- function(component){
+                if (any(grname == component)){
+                        grname <<- grname[-which(grname == component)]
+                        if (component == "Residual") output_resid <<- TRUE
+                        if (component == "Overdispersion") output_overdisp <<- TRUE
+                        if (component == "Fixed") output_fixed <<- TRUE
+                }
+        }
+        lapply(c("Residual", "Overdispersion", "Fixed"), check_grname)
+        
         
         # point estimates of R or var
         R_pe <- function(formula, data, grname) {
@@ -115,27 +131,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 mod <- lme4::lmer(formula, data)
                 VarComps <- lme4::VarCorr(mod)
                 
-                # Check whether Residual is selected
-                if (any(grname == "Residual")){
-                        output_resid <- TRUE
-                        # # delete Residual element
-                        grname <- grname[-which(grname == "Residual")]
-                }
-                
-                # Check whether Overdispersion is selected
-                if (any(grname == "Overdispersion")){
-                        output_overdisp <- TRUE
-                        # # delete OVerdispersion element
-                        grname <- grname[-which(grname == "Overdispersion")]
-                }
-                
-                # Check whether Fixed is selected
-                if (any(grname == "Fixed")){
-                        output_fixed <- TRUE
-                        # # delete fixed element
-                        grname <- grname[-which(grname == "Fixed")]
-                }
-
                 # Residual variance
                 var_e <- attr(VarComps, "sc")^2
                 names(var_e) <- "Residual"
@@ -154,7 +149,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
-                if(!adjusted) var_p <- var_p + var_f
+                if (!adjusted) var_p <- var_p + var_f
 
                 # return variance instead of repeatability
                 if (ratio == FALSE) { 
@@ -250,34 +245,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                        CI_emp <- calc_CI(NA)
                 }
         } else  {
-                # for (i in 1:length(grname)) {
-                #         boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
-                # }
                 boot <- do.call(rbind, R_boot)
-                # CI 
                 CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
               
         }
         
-        
-        if (any(grname == "Residual")){
-                output_resid <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Residual")]
-        }
-        if (any(grname == "Overdispersion")){
-                output_overdisp <- TRUE
-                # # delete Overdispersion element
-                grname <- grname[-which(grname == "Overdispersion")]
-        }
-        if (any(grname == "Fixed")){
-                output_fixed <- TRUE
-                # # delete Fixed element
-                grname <- grname[-which(grname == "Fixed")]
-        }
-        
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -349,55 +324,74 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
         
+        # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
+        # function
+        mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
         for (i in 1:length(grname)) {
-                if (length(randterms) == 1) {
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        LRT_red[i] <- as.numeric(stats::logLik(stats::lm(formula_red, data = data)))
-                } else if (length(randterms) >= 1){
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                        ")"))))
-                        LRT_red[i] <- as.numeric(stats::logLik(lme4::lmer(formula = formula_red, data = data)))
-                }
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(stats::update(formula, eval(paste('. ~ . ',
-                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, stats::pchisq(LR,1,lower.tail=FALSE)/2)
         }
+        
+        
+        
+        # for (i in 1:length(grname)) {
+        #         if (length(randterms) == 1) {
+        #                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
+        #                 LRT_red[i] <- as.numeric(stats::logLik(stats::lm(formula_red, data = data)))
+        #         } else if (length(randterms) >= 1){
+        #                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+        #                 LRT_red[i] <- as.numeric(stats::logLik(lme4::lmer(formula = formula_red, data = data)))
+        #         }
+        #         LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
+        #         LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+        # }
         
         P <- cbind(LRT_P, P_permut)
         row.names(P) <- grname
         
-        
         # add Residual = NA for S3 functions to work
-         if(any(grname_org == "Residual")){
-                  # grname <- grname_org
-                  P <- rbind(P, NA)
-                  row.names(P)[nrow(P)] <- "Residual"
-                  R_permut <- rbind(R_permut, NA)
-                  row.names(R_permut)[nrow(R_permut)] <- "Residual"
-         }
-        
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Overdispersion")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Overdispersion"
-                R_permut <- rbind(R_permut, NA)
-                row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
+        add_NA <- function(component){
+                if(any(grname_org == component)){
+                        P <<- rbind(P, NA)
+                        row.names(P)[nrow(P)] <<- component
+                        R_permut <<- rbind(R_permut, NA)
+                        row.names(R_permut)[nrow(R_permut)] <<- component
+                }
         }
+        lapply(c("Residual", "Overdispersion", "Fixed"), add_NA)
         
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Fixed")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Fixed"
-                R_permut <- rbind(R_permut, NA)
-                row.names(R_permut)[nrow(R_permut)] <- "Fixed"
-        }
+        # # add Residual = NA for S3 functions to work
+        #  if(any(grname_org == "Residual")){
+        #           # grname <- grname_org
+        #           P <- rbind(P, NA)
+        #           row.names(P)[nrow(P)] <- "Residual"
+        #           R_permut <- rbind(R_permut, NA)
+        #           row.names(R_permut)[nrow(R_permut)] <- "Residual"
+        #  }
+        # 
+        # # add Overdisp = NA for S3 functions to work
+        # if(any(grname_org == "Overdispersion")){
+        #         # grname <- grname_org
+        #         P <- rbind(P, NA)
+        #         row.names(P)[nrow(P)] <- "Overdispersion"
+        #         R_permut <- rbind(R_permut, NA)
+        #         row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
+        # }
+        # 
+        # # add Overdisp = NA for S3 functions to work
+        # if(any(grname_org == "Fixed")){
+        #         # grname <- grname_org
+        #         P <- rbind(P, NA)
+        #         row.names(P)[nrow(P)] <- "Fixed"
+        #         R_permut <- rbind(R_permut, NA)
+        #         row.names(R_permut)[nrow(R_permut)] <- "Fixed"
+        # }
 
+        
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
                 CI = CI, 
