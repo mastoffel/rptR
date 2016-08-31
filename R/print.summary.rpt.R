@@ -84,9 +84,9 @@ print.summary.rpt <- function(x, ...) {
             cat("Bootstrapping and Permutation test:", "\n")
             print(format(rbind(x$boot[[i]], x$permut[[i]]), digits = 3, width = 6))
             cat("\n", "Likelihood ratio test: ", "\n", "logLik full model = ", (x$LRT[["LRT_mod"]]), 
-                "\n", "logLik red. model = ", (x$LRT[["LRT_red"]][i]), "\n", "D  = ", 
-                signif((x$LRT[["LRT_D"]][i]), 3), ", ", "df = ", unname(x$LRT[["LRT_df"]]), 
-                ", ", "P = ", signif((x$LRT[["LRT_P"]][i]), 3), sep = "")
+                    "\n", "logLik red. model = ", (x$LRT$LRT_table[["logL_red"]][i]), "\n", "D  = ", 
+                    signif((x$LRT$LRT_table[["LR_D"]][i]), 3), ", ", "df = ", x$LRT$LRT_table[["LRT_df"]][i], 
+                    ", ", "P = ", signif(x$LRT$LRT_table[["LRT_P"]][i], 3), sep = "")
             cat("\n\n")
             cat("----------------------------------------")
         }

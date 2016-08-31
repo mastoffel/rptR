@@ -120,6 +120,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         if (component == "Overdispersion") output_overdisp <<- TRUE
                         if (component == "Fixed") output_fixed <<- TRUE
                 }
+                return()
         }
         lapply(c("Residual", "Overdispersion", "Fixed"), check_grname)
         
@@ -322,7 +323,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- 1
+        LRT_df <- rep(1, length(grname))
         
         # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
@@ -335,20 +336,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
         }
-        
-        
-        
-        # for (i in 1:length(grname)) {
-        #         if (length(randterms) == 1) {
-        #                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-        #                 LRT_red[i] <- as.numeric(stats::logLik(stats::lm(formula_red, data = data)))
-        #         } else if (length(randterms) >= 1){
-        #                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-        #                 LRT_red[i] <- as.numeric(stats::logLik(lme4::lmer(formula = formula_red, data = data)))
-        #         }
-        #         LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-        #         LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-        # }
+        LRT_table <- data.frame(group = grname, logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
         
         P <- cbind(LRT_P, P_permut)
         row.names(P) <- grname
@@ -360,36 +348,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         row.names(P)[nrow(P)] <<- component
                         R_permut <<- rbind(R_permut, NA)
                         row.names(R_permut)[nrow(R_permut)] <<- component
+                        new_row <- as.data.frame(list(component, NA, NA, NA, NA), col.names = names(LRT_table))
+                        LRT_table <<- rbind(LRT_table, new_row)
                 }
+                return()
         }
         lapply(c("Residual", "Overdispersion", "Fixed"), add_NA)
         
-        # # add Residual = NA for S3 functions to work
-        #  if(any(grname_org == "Residual")){
-        #           # grname <- grname_org
-        #           P <- rbind(P, NA)
-        #           row.names(P)[nrow(P)] <- "Residual"
-        #           R_permut <- rbind(R_permut, NA)
-        #           row.names(R_permut)[nrow(R_permut)] <- "Residual"
-        #  }
-        # 
-        # # add Overdisp = NA for S3 functions to work
-        # if(any(grname_org == "Overdispersion")){
-        #         # grname <- grname_org
-        #         P <- rbind(P, NA)
-        #         row.names(P)[nrow(P)] <- "Overdispersion"
-        #         R_permut <- rbind(R_permut, NA)
-        #         row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
-        # }
-        # 
-        # # add Overdisp = NA for S3 functions to work
-        # if(any(grname_org == "Fixed")){
-        #         # grname <- grname_org
-        #         P <- rbind(P, NA)
-        #         row.names(P)[nrow(P)] <- "Fixed"
-        #         R_permut <- rbind(R_permut, NA)
-        #         row.names(R_permut)[nrow(R_permut)] <- "Fixed"
-        # }
 
         
         res <- list(call = match.call(), 
@@ -401,8 +366,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 P = as.data.frame(P),
                 R_boot = boot, 
                 R_permut = lapply(as.data.frame(t(R_permut)), function(x) return(x)),
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, 
-                        LRT_D = LRT_D, LRT_df = LRT_df, LRT_P = LRT_P), 
+                LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
