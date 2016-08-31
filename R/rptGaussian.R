@@ -22,8 +22,10 @@
 #'       element respesents a grouping factor.}
 #' \item{R_permut}{Vector(s) of permutation samples for \emph{R}. Each \code{list}
 #'       element represents a grouping factor.}
-#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-#'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
+#' \item{LRT}{\code{list} with two elements. (1) The likelihood for the full model and a \code{data.frame} 
+#'      called \code{LRT_table} for the reduced model(s), which includes columns
+#'      for the respective grouping factor(s), the likelihood(s) \emph{logL_red}, likelihood ratio(s)
+#'      \emph{LR_D}, p-value(s) \emph{LRT_P} and degrees of freedom \emph{LRT_df}} 
 #' \item{ngroups}{Number of groups for each grouping level.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
