@@ -339,9 +339,10 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
         }
-        LRT_table <- data.frame(group = grname, logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
+        LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
+        row.names(LRT_table) <- grname
         
-        P <- cbind(LRT_P, P_permut)
+        P <- as.data.frame(cbind(LRT_P, P_permut))
         row.names(P) <- grname
         
         # add Residual = NA for S3 functions to work
@@ -360,17 +361,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # 
         for (component in c("Residual", "Overdispersion", "Fixed")) {
                 if(any(grname_org == component)){
-                        P <- rbind(P, NA)
+                        P <- rbind(P, as.numeric(NA))
                         row.names(P)[nrow(P)] <- component
-                        R_permut <- rbind(R_permut, NA)
+                        R_permut <- rbind(R_permut, as.numeric(NA))
                         row.names(R_permut)[nrow(R_permut)] <- component
-                        new_row <- as.data.frame(list(component, NA, NA, NA, NA), col.names = names(LRT_table))
-                        LRT_table <- rbind(LRT_table, new_row)
+                        LRT_table <- rbind(LRT_table, as.numeric(NA))
+                        row.names(LRT_table)[nrow(LRT_table)] <- component
                 }
         }
    
-        
-
         
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
@@ -378,7 +377,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 R = R, 
                 se = se,
                 CI_emp = CI_emp, 
-                P = as.data.frame(P),
+                P = P,
                 R_boot = boot, 
                 R_permut = lapply(as.data.frame(t(R_permut)), function(x) return(x)),
                 LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
