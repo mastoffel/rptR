@@ -240,7 +240,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- .with_warnings({
+        warnings_boot <- with_warnings({
                 
         # to do: preallocate R_boot
         if (nboot > 0 & parallel == TRUE) {
@@ -361,7 +361,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # function for the reduced model in permut and LRT tests
         mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
         
-        warnings_permut <- .with_warnings({
+        warnings_permut <- with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {

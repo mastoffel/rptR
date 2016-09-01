@@ -228,7 +228,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- .with_warnings({
+        warnings_boot <- with_warnings({
                 
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -329,7 +329,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # function for the reduced model in permut and LRT tests
         mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
         
-        warnings_permut <- .with_warnings({
+        warnings_permut <- with_warnings({
                 
          if (npermut > 1){
                  for (i in 1:length(grname)) {
