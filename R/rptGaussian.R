@@ -66,9 +66,9 @@
 #'                    
 #' # unadjusted repeatabilities with fixed effects and 
 #' # estimation of the fixed effect variance
-#' #rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
-#' #                   grname=c("Container", "Population", "Fixed"), 
-#' #                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+#' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
+#'                   grname=c("Container", "Population", "Fixed"), 
+#'                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
 #' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
@@ -115,16 +115,17 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
         # from grname vector
-        check_grname <- function(component){
+ 
+        for (component in c("Residual", "Overdispersion", "Fixed")) {
                 if (any(grname == component)){
-                        grname <<- grname[-which(grname == component)]
-                        if (component == "Residual") output_resid <<- TRUE
-                        if (component == "Overdispersion") output_overdisp <<- TRUE
-                        if (component == "Fixed") output_fixed <<- TRUE
+                        grname <- grname[-which(grname == component)]
+                        if (component == "Residual") output_resid <- TRUE
+                        if (component == "Overdispersion") output_overdisp <- TRUE
+                        if (component == "Fixed") output_fixed <- TRUE
                 }
-                return()
         }
-        lapply(c("Residual", "Overdispersion", "Fixed"), check_grname)
+               
+          
         
         
         # point estimates of R or var
@@ -344,18 +345,30 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         row.names(P) <- grname
         
         # add Residual = NA for S3 functions to work
-        add_NA <- function(component){
+        # add_NA <- function(component){
+        #         if(any(grname_org == component)){
+        #                 P <<- rbind(P, NA)
+        #                 row.names(P)[nrow(P)] <<- component
+        #                 R_permut <<- rbind(R_permut, NA)
+        #                 row.names(R_permut)[nrow(R_permut)] <<- component
+        #                 new_row <- as.data.frame(list(component, NA, NA, NA, NA), col.names = names(LRT_table))
+        #                 LRT_table <<- rbind(LRT_table, new_row)
+        #         }
+        #         return()
+        # }
+        # lapply(c("Residual", "Overdispersion", "Fixed"), add_NA)
+        # 
+        for (component in c("Residual", "Overdispersion", "Fixed")) {
                 if(any(grname_org == component)){
-                        P <<- rbind(P, NA)
-                        row.names(P)[nrow(P)] <<- component
-                        R_permut <<- rbind(R_permut, NA)
-                        row.names(R_permut)[nrow(R_permut)] <<- component
+                        P <- rbind(P, NA)
+                        row.names(P)[nrow(P)] <- component
+                        R_permut <- rbind(R_permut, NA)
+                        row.names(R_permut)[nrow(R_permut)] <- component
                         new_row <- as.data.frame(list(component, NA, NA, NA, NA), col.names = names(LRT_table))
-                        LRT_table <<- rbind(LRT_table, new_row)
+                        LRT_table <- rbind(LRT_table, new_row)
                 }
-                return()
         }
-        lapply(c("Residual", "Overdispersion", "Fixed"), add_NA)
+   
         
 
         
