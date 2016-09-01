@@ -7,7 +7,7 @@
 with_warnings(expr)
 }
 \arguments{
-\item{An}{expression, such as the sequence of code used by rptR to calculate
+\item{expr}{An expression, such as the sequence of code used by rptR to calculate
 bootstrap or permutation estimates}
 }
 \description{

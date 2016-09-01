@@ -242,7 +242,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- with_warnings({
+        warnings_boot <- rptR::with_warnings({
                 
         # to do: preallocate R_boot
         if (nboot > 0 & parallel == TRUE) {
@@ -379,7 +379,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
-        warnings_permut <- with_warnings({
+        warnings_permut <- rptR::with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {

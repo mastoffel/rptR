@@ -126,8 +126,8 @@ test_that("rpt estimation works for two random effect, boot, no permut, no paral
 
 
 # run with one random effect, no boot, permut
-R_est_3 <- rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data = md,
-        nboot=0, npermut=5)
+R_est_3 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data = md,
+        nboot=0, npermut=5))
 
 test_that("rpt estimation works for two random effect, no boot, permut, no parallelisation, logit link", {
         # original scale
@@ -139,8 +139,8 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
         
 })
 
-R_est_4 <- rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Overdispersion", "Residual"), data = md,
-        nboot=0, npermut=5)
+R_est_4 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Overdispersion", "Residual"), data = md,
+        nboot=0, npermut=5))
 
 # test_that("repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
         

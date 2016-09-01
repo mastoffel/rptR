@@ -3,7 +3,7 @@
 #' This function is used within rptR to capture lme4 model fitting warnings in the
 #' bootstrap and permutation procedures.
 #' 
-#' @param An expression, such as the sequence of code used by rptR to calculate
+#' @param expr An expression, such as the sequence of code used by rptR to calculate
 #' bootstrap or permutation estimates
 #' 
 #' @keywords internal 
