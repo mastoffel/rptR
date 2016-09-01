@@ -207,7 +207,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- rptR::with_warnings({
+        warnings_boot <- .with_warnings({
                 
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -286,7 +286,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
-        warnings_permut <- rptR::with_warnings({
+        warnings_permut <- .with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {
