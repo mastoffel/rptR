@@ -100,7 +100,6 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # observational level random effect
         Overdispersion <- factor(1:nrow(data))
         data <- cbind(data, Overdispersion)
-        
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
 
@@ -248,19 +247,19 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         })
         
         # transform bootstrapping repeatabilities into vectors
-        boot_org <- as.list(rep(NA, length(grname)))
-        boot_link <- as.list(rep(NA, length(grname)))
+        boot_org <- as.list(rep(NA, length(grname_org)))
+        boot_link <- as.list(rep(NA, length(grname_org)))
         if (length(R_boot) == 1) {
                 # creating tables when R_boot = NA
                 if (is.na(R_boot)) {
                         # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
                         for(i in c("se_org", "se_link")){
                                 assign(i, structure(data.frame(matrix(NA, 
-                                       nrow = length(grname))), row.names = grname, names = i), envir = e1)   
+                                       nrow = length(grname_org))), row.names = grname_org, names = i), envir = e1)   
                         }
                         for(i in c("CI_org", "CI_link")){
-                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname), ncol = 2)), 
-                                        row.names = grname), envir = e1)   
+                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname_org), ncol = 2)), 
+                                        row.names = grname_org), envir = e1)   
                         }
                         
                 }
@@ -342,18 +341,17 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         for (i in 1:length(grname)) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
                                 mod_red <- mod_fun(formula_red, data = data, family = stats::binomial(link = link))
-                                
-                                if(parallel == TRUE) {
-                                        if (is.null(ncores)) {
-                                                ncores <- parallel::detectCores()
-                                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                                        }
+                        if(parallel == TRUE) {
+                                if (is.null(ncores)) {
+                                        ncores <- parallel::detectCores()
+                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                                }
                                         # start cluster
-                                        cl <- parallel::makeCluster(ncores)
-                                        parallel::clusterExport(cl, "R_pe", envir=environment())
-                                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
-                                                mod_red, dep_var, grname, data)
-                                        parallel::stopCluster(cl)
+                                cl <- parallel::makeCluster(ncores)
+                                parallel::clusterExport(cl, "R_pe", envir=environment())
+                                R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
+                                        mod_red, dep_var, grname, data)
+                                parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
                                         R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)

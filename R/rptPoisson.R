@@ -121,6 +121,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         output_resid <- FALSE
         output_fixed <- FALSE
         
+        # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
+        # from grname vector
+        for (component in c("Residual", "Fixed")) {
+                if (any(grname == component)){
+                        grname <- grname[-which(grname == component)]
+                        if (component == "Residual") output_resid <- TRUE
+                        if (component == "Fixed") output_fixed <- TRUE
+                }
+        }
+        
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
@@ -130,20 +140,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp
-                
-                # Check whether Residual is selected
-                if (any(grname == "Residual")){
-                        output_resid <- TRUE
-                        # # delete Residual element
-                        grname <- grname[-which(grname == "Residual")]
-                }
-
-                # Check whether Fixed is selected
-                if (any(grname == "Fixed")){
-                        output_fixed <- TRUE
-                        # # delete fixed element
-                        grname <- grname[-which(grname == "Fixed")]
-                }
                 
                 # groups random effect variances
                 var_a <- VarComps[grname, "vcov"]
@@ -255,27 +251,27 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         }
         })
         # transform bootstrapping repeatabilities into vectors
-        boot_org <- as.list(rep(NA, length(grname)))
-        boot_link <- as.list(rep(NA, length(grname)))
+        boot_org <- as.list(rep(NA, length(grname_org)))
+        boot_link <- as.list(rep(NA, length(grname_org)))
         if (length(R_boot) == 1) {
                 # creating tables when R_boot = NA for simplicity with subsequent processing
                 if (is.na(R_boot)) {
                         for(i in c("se_org", "se_link")){
-                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname))), 
-                                        row.names = grname, names = i), envir = e1)   
+                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname_org))), 
+                                        row.names = grname_org, names = i), envir = e1)   
                         }
                         for(i in c("CI_org", "CI_link")){
-                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname), 
-                                        ncol = 2)), row.names = grname), envir = e1)   
+                                assign(i, structure(data.frame(matrix(NA, nrow = length(grname_org), 
+                                        ncol = 2)), row.names = grname_org), envir = e1)   
                         }
                 }
         } else  {
-                for (i in 1:length(grname)) {
-                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
-                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
+                for (i in 1:length(grname_org)) {
+                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]]))
+                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]]))
                 }
-                names(boot_org) <- grname
-                names(boot_link) <- grname
+                names(boot_org) <- grname_org
+                names(boot_link) <- grname_org
         
                 calc_CI <- function(x) {
                         out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
@@ -290,18 +286,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, stats::sd))))
                 names(se_org) <- "se_org"
                 names(se_link) <- "se_link"
-        }
-
-        # delete from grname
-        if (any(grname == "Residual")){
-                output_resid <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Residual")]
-        }
-        if (any(grname == "Fixed")){
-                output_fixed <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Fixed")]
         }
 
         # significance test by permutation of residuals
@@ -342,18 +326,15 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
+        # function for the reduced model in permut and LRT tests
+        mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
+        
         warnings_permut <- .with_warnings({
                 
          if (npermut > 1){
                  for (i in 1:length(grname)) {
-                         if (length(randterms) > 1) {
-                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                         ")"))))
-                                 mod_red <- lme4::glmer(formula_red, data = data, family = stats::poisson(link = link))
-                         } else if (length(randterms) == 1) {
-                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                 mod_red <- stats::glm(formula_red, data = data, family = stats::poisson(link = link))
-                         }
+                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                                 mod_red <- mod_fun (formula_red, data = data, family = stats::poisson(link = link))
                  if(parallel == TRUE) {
                          if (is.null(ncores)) {
                                  ncores <- parallel::detectCores()
@@ -401,35 +382,29 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
         for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                        ")"))))
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
                 LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = stats::poisson(link = link))))
+                                                                family = stats::poisson(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
-                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
         }
-  
+        LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
+        row.names(LRT_table) <- grname
+        
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
         
         # add Residual = NA for S3 functions to work
-        if(any(grname_org == "Residual")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Residual"
-                permut_link$Residual <- rep(NA, length(permut_link[[1]]))
-                permut_org$Residual <- rep(NA, length(permut_org[[1]]))
-        }
-        # add Fixed = NA for S3 functions to work
-        if(any(grname_org == "Fixed")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Fixed"
-                permut_link$Fixed <- rep(NA, length(permut_link[[1]]))
-                permut_org$Fixed <- rep(NA, length(permut_org[[1]]))
+        for (component in c("Residual", "Fixed")) {
+                if(any(grname_org == component)){
+                        # grname <- grname_org
+                        P <- rbind(P, as.numeric(NA))
+                        row.names(P)[nrow(P)] <- component
+                        permut_link[component] <- NA
+                        permut_org[component] <- NA
+                        LRT_table <- rbind(LRT_table, as.numeric(NA))
+                        row.names(LRT_table)[nrow(LRT_table)] <- component
+                }
         }
         
         # delete overdispersion from ngroups
@@ -448,8 +423,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 R_boot_org = boot_org,
                 R_permut_link = permut_link, 
                 R_permut_org = permut_org,
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
-                LRT_P = LRT_P), 
+                LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
                 ngroups =ngroups, 
                 nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
