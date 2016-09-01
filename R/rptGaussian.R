@@ -287,18 +287,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
+        # function for the reduced model in permut and LRT tests
+        mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
+        
         warnings_permut <- .with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {
-                        if (length(randterms) == 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                mod_red <- stats::lm(formula_red, data = data)
-                        } else if (length(randterms) > 1) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                                mod_red <- lme4::lmer(formula_red, data = data)
-                        }
-                        
+                                mod_red <- mod_fun(formula_red, data = data)
                         if(parallel == TRUE) {
                                 if (is.null(ncores)) {
                                         ncores <- parallel::detectCores()
@@ -331,7 +328,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         # function
-        mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
+        # mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
         for (i in 1:length(grname)) {
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
@@ -345,20 +342,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         P <- as.data.frame(cbind(LRT_P, P_permut))
         row.names(P) <- grname
         
-        # add Residual = NA for S3 functions to work
-        # add_NA <- function(component){
-        #         if(any(grname_org == component)){
-        #                 P <<- rbind(P, NA)
-        #                 row.names(P)[nrow(P)] <<- component
-        #                 R_permut <<- rbind(R_permut, NA)
-        #                 row.names(R_permut)[nrow(R_permut)] <<- component
-        #                 new_row <- as.data.frame(list(component, NA, NA, NA, NA), col.names = names(LRT_table))
-        #                 LRT_table <<- rbind(LRT_table, new_row)
-        #         }
-        #         return()
-        # }
-        # lapply(c("Residual", "Overdispersion", "Fixed"), add_NA)
-        # 
         for (component in c("Residual", "Overdispersion", "Fixed")) {
                 if(any(grname_org == component)){
                         P <- rbind(P, as.numeric(NA))
