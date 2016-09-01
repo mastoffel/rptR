@@ -1,8 +1,8 @@
-#Captures and suppresses (still to find out why) warnings of an expression
-
-#This function is used within rptR to capture lme4 model fitting warnings in the
-#bootstrap and permutation procedures.
-
+# Captures and suppresses (still to find out why) warnings of an expression
+#
+# This function is used within rptR to capture lme4 model fitting warnings in the
+# bootstrap and permutation procedures.
+#
 # param expr An expression, such as the sequence of code used by rptR to calculate
 # bootstrap or permutation estimates
 

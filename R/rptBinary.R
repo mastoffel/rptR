@@ -307,7 +307,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 inv_fun <- stats::plogis
         }
         if (link == "probit") {
-                trans_fun <- stats::qnorm            # VGAM::probit
+                trans_fun <- stats::qnorm      # VGAM::probit
                 inv_fun <- stats::pnorm
         }
         
