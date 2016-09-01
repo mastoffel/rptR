@@ -71,7 +71,7 @@
 #'                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
-#' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
+#' R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
 #'             grname= c("Population", "Container", "Residual"),
 #'             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 #' 

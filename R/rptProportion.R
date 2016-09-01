@@ -490,7 +490,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 link = link,
                 CI = CI, 
                 R = R, 
-                se = t(cbind(se_org,se_link)), 
+                se = as.data.frame(t(cbind(se_org,se_link))), 
                 CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
                 P = as.data.frame(P),
                 R_boot_link = boot_link, 
