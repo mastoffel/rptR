@@ -41,7 +41,7 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
         
         e_boot <- environment()
         
-        warnings_boot <<- with_warnings({
+        warnings_boot <- with_warnings({
                 
                 # to do: preallocate R_boot
                 if (nboot > 0 & parallel == TRUE) {
