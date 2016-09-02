@@ -139,9 +139,46 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
         
 })
 
-R_est_4 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Overdispersion", "Residual"), data = md,
-        nboot=0, npermut=5))
+R_est_4 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), 
+        grname=c("Container", "Population", "Overdispersion", "Residual"), data = md,
+        nboot=0, npermut=0))
 
-# test_that("repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
-        
-        
+test_that("repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
+        expect_false(any(R_est_3$R$Container == R_est_4$R$Container) == FALSE)
+        expect_false(any(R_est_3$R$Population == R_est_4$R$Population) == FALSE)
+})
+
+
+
+# check that estimates are independent from the order in grname or formula
+
+R_est_5 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), 
+        grname=c("Population", "Container"), data = md,
+        nboot=0, npermut=0))
+
+test_that("repeatabilities are equal for different sequence in grname argument", {
+        expect_false(any(R_est_3$R$Container == R_est_5$R$Container) == FALSE)
+        expect_false(any(R_est_3$R$Population == R_est_5$R$Population) == FALSE)
+})
+
+test_that("LRTs are equal for different different sequence in grname argument", {
+        expect_equal(R_est_3$P["Container", "LRT_P"], R_est_5$P["Container", "LRT_P"])
+        expect_equal(R_est_3$P["Population", "LRT_P"], R_est_5$P["Population", "LRT_P"])
+})
+
+
+
+
+R_est_6 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Population) + (1|Container), 
+        grname=c("Container", "Population"), data = md,
+        nboot=0, npermut=0))
+
+test_that("repeatabilities are equal for different sequence in formula argument", {
+        expect_false(any(R_est_3$R$Container == R_est_6$R$Container) == FALSE)
+        expect_false(any(R_est_3$R$Population == R_est_6$R$Population) == FALSE)
+})
+
+test_that("LRTs are equal for different order in formula argument", {
+        expect_equal(R_est_3$P["Container", "LRT_P"], R_est_6$P["Container", "LRT_P"])
+        expect_equal(R_est_3$P["Population", "LRT_P"], R_est_6$P["Population", "LRT_P"])
+})
