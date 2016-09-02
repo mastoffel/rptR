@@ -3,4 +3,4 @@
 .RData
 inst/doc
 *.csv
- .DS_Store
+.DS_Store
