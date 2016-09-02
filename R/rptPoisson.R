@@ -279,24 +279,15 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
      
 
         
-        ## likelihood-ratio-test
-        LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- 1
+        ### likelihood-ratio-test ###
+        LRTs <- LRT_nongaussian(formula, data, grname, mod, link, family)
         
-        for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
-        
-        for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
-                                                                family = stats::poisson(link = link))))
-                LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-        }
-        LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
-        row.names(LRT_table) <- grname
-        
+        LRT_mod <- LRTs$mod
+        LRT_table <- LRTs$LRT_table
+        LRT_P <- LRT_table$LRT_P
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
+        
         
         # add Residual = NA for S3 functions to work
         for (component in c("Residual", "Fixed")) {

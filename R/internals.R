@@ -20,6 +20,7 @@ with_warnings <- function(expr) {
 
 
 
+
 #' Bootstrapping for non-gaussian functions (internal use)
 #' 
 #' @param bootstr bootstrap function. Re-assigns response simulated by simulate.merMod to data and estimates R with the R_pe function.
@@ -114,10 +115,6 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 
 
 
-
-
-
-
 #' Permutation function for non-gaussian functions (internal use)
 #' 
 #' @inheritParams bootstrap_nongaussian
@@ -127,6 +124,8 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 #' @param family respnse family (so far just binomial or poisson)
 #' @param npermut number of permutations
 #' @param R point estimate to concetenate with permutations
+#' 
+#' @keywords internal
 
 permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R){
         
@@ -204,3 +203,42 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         out <- list(P_permut = P_permut, permut_org = permut_org, permut_link = permut_link, warnings_permut = warnings_permut)
 
 }
+
+
+
+#' Likelihood ratio test for non-gaussian functions (internal use)
+#' 
+#' @inheritParams permut_nongaussian
+#' 
+#' @keywords internal
+
+
+LRT_nongaussian <- function(formula, data, grname, mod, link, family){
+        
+        # family
+        if (family == "poisson") family_fun <- stats::poisson
+        if (family == "binomial") family_fun <- stats::binomial
+        
+        LRT_mod <- as.numeric(stats::logLik(mod))
+        LRT_df <- 1
+
+        for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
+
+        for (i in 1:length(grname)) {
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data,
+                        family = family_fun(link = link))))
+                LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+        }
+
+        LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
+        row.names(LRT_table) <- grname
+        
+        out <- list(LRT_mod = LRT_mod, LRT_table = LRT_table)
+        
+}
+
+
+
+
