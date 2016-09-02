@@ -215,8 +215,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         
         ### confidence interval estimation by parametric bootstrapping ###
-        if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
         
+        # simulation of data.frame with responses
+        if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
+        # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
@@ -240,7 +242,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
   
         
         ### significance test by permutation of residuals ###
-        P_permut <- rep(NA, length(grname))
+        
+        # P_permut <- rep(NA, length(grname))
         
         # significance test by likelihood-ratio-test
         terms <- attr(terms(formula), "term.labels")

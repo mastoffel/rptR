@@ -221,8 +221,10 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         R <- R_pe(formula, data, grname, peYN = FALSE) # no bootstrap skipping at the moment
         
         # confidence interval estimation by parametric bootstrapping
+        
+        # simulation of data.frame with responses
         if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
-       
+        # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
@@ -289,7 +291,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
          if (npermut > 1){
                  for (i in 1:length(grname)) {
                                  formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                                 mod_red <- mod_fun (formula_red, data = data, family = stats::poisson(link = link))
+                                 mod_red <- mod_fun(formula_red, data = data, family = stats::poisson(link = link))
                  if(parallel == TRUE) {
                          if (is.null(ncores)) {
                                  ncores <- parallel::detectCores()

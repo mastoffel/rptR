@@ -2,17 +2,17 @@
 % Please edit documentation in R/internals.R
 \name{bootstrap_nongaussian}
 \alias{bootstrap_nongaussian}
-\title{Bootstrapping for non-gaussian functions}
+\title{Bootstrapping for non-gaussian functions (internal use)}
 \usage{
 bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname,
   grname_org, nboot, parallel, ncores, CI)
 }
 \arguments{
-\item{bootstr}{bootstrap function. Re-assigns response simulated by simulate.merMod to data and
-estimates R with the R_pe function.}
+\item{bootstr}{bootstrap function. Re-assigns response simulated by simulate.merMod to data and estimates R with the R_pe function.}
 
-\item{R_pe}{Function to estimate Repeatabilities and Variances for grouping factors,
-Residuals, Overdispersion and Fixed effects.}
+\item{R_pe}{Function to estimate Repeatabilities and Variances for grouping factors, Residuals, Overdispersion and Fixed effects.}
+
+\item{formula}{lme4 model formula}
 
 \item{data}{data.frame given as original input}
 
@@ -33,7 +33,7 @@ Residuals, Overdispersion and Fixed effects.}
 \item{CI}{confidence interval, defaults to 0.95}
 }
 \description{
-Bootstrapping for non-gaussian functions
+Bootstrapping for non-gaussian functions (internal use)
 }
 \keyword{internal}
 

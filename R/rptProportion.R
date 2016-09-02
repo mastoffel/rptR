@@ -216,11 +216,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         R <- R_pe(formula, data, grname, peYN = FALSE)
         
         # confidence interval estimation by parametric bootstrapping
+        
+        # simulation of data.frame with responses
         if (nboot > 0){
                 # every column contains a list with successes and failures, data.frame
                 Ysim <- stats::simulate(mod, nsim = nboot) 
         }  
-        
+        # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, colnames(y)] <- y
                 R_pe(formula, data, grname)
@@ -243,25 +245,12 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
 
         # significance test by permutation of residuals
-        P_permut <- rep(NA, length(grname))
-        
-        # significance test by likelihood-ratio-test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        # no permutation test
-        if (npermut == 1) {
-                R_permut <- NA
-                P_permut <- NA
-        }
         
         # response matrix for permutation test
         dep_var_expr <- as.character(formula)[2]
         dep_var <- as.data.frame(with(data, eval(parse(text=dep_var_expr))))
         
-        # significance test by permutation of residuals
-        # nperm argument just used for parallisation
-        
+        # defining main permutation function
         if (link == "logit") {
                 trans_fun <- stats::qlogis     # VGAM::logit
                 inv_fun <- stats::plogis
@@ -276,7 +265,6 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                  y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
                                   prob = inv_fun((trans_fun(stats::fitted(mod)) + 
                                   sample(stats::resid(mod)))))
-                # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm
                 data_perm[names(dep_var)[2]] <- rowSums(dep_var) - y_perm
@@ -284,68 +272,20 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 out
         }
         
-        # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-        P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
-                row.names = c("P_permut_org", "P_permut_link")), names = grname)
+        family <- "binomial"
+        permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R)
         
-        # for likelihood ratio and permutation test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        # function for the reduced model in permut and LRT tests
-        mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
-        
-        warnings_permut <- with_warnings({
-                
-        if (npermut > 1){
-                for (i in 1:length(grname)) {
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                        mod_red <- mod_fun(formula_red, data = data, family = stats::binomial(link = link))
-                        
-                        if(parallel == TRUE) {
-                                if (is.null(ncores)) {
-                                        ncores <- parallel::detectCores()
-                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                                }
-                        # start cluster
-                        cl <- parallel::makeCluster(ncores)
-                        parallel::clusterExport(cl, "R_pe", envir=environment())
-                        R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                mod=mod_red, dep_var=dep_var, grname=grname, data = data)
-                        parallel::stopCluster(cl)
-                        
-                        } else if (parallel == FALSE) {
-                                R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
-                        }
-                        # adding empirical rpt 
-                        R_permut <- c(list(R), R_permut)
-                }
-        }
-        })
-        
-        # equal to boot
-        permut_org <- as.list(rep(NA, length(grname)))
-        permut_link <- as.list(rep(NA, length(grname)))
-        
-        if (!(length(R_permut) == 1)){
-                        for (i in 1:length(grname)) {
-                                permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                                permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
-                        }
-                        names(permut_org) <- grname
-                        names(permut_link) <- grname
-        }
-        
-        
-        P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
-        P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
-        names(P_permut) <- names(permut_link)
-        
+        P_permut <- permutations$P_permut
+        permut_org <- permutations$permut_org
+        permut_link <- permutations$permut_link
+        warnings_permut <- permutations$warnings_permut
+        # for LRT
+        # terms <- attr(terms(formula), "term.labels")
+        # randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
-        
         
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         
