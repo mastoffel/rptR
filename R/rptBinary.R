@@ -243,20 +243,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         ### significance test by permutation of residuals ###
         
-        # P_permut <- rep(NA, length(grname))
-        
-        # significance test by likelihood-ratio-test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        # no permutation test
-        if (npermut == 1) {
-                R_permut <- NA 
-                P_permut <- NA
-        }
+        # response variable
+        dep_var <- as.character(formula)[2]
         
         # significance test by permutation of residuals
-        # nperm argument just used for parallisation
         
         if (link == "logit") {
                 trans_fun <- stats::qlogis     # VGAM::logit
@@ -271,70 +261,21 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
                         prob = inv_fun((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod)))))
-                
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
                 out
         }
-        # response variable
-        dep_var <- as.character(formula)[2]
         
-        # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-        P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
-                                         row.names = c("P_permut_org", "P_permut_link")), names = grname)
+        family <- "binomial"
+        permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
+                                           grname, npermut, parallel, ncores, link, family, R)
         
-        # for likelihood ratio and permutation test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        P_permut <- permutations$P_permut
+        permut_org <- permutations$permut_org
+        permut_link <- permutations$permut_link
+        warnings_permut <- permutations$warnings_permut
         
-        # function for the reduced model in permut and LRT tests
-        mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
-        
-        warnings_permut <- with_warnings({
-                
-                if (npermut > 1){
-                        for (i in 1:length(grname)) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                                mod_red <- mod_fun(formula_red, data = data, family = stats::binomial(link = link))
-                        if(parallel == TRUE) {
-                                if (is.null(ncores)) {
-                                        ncores <- parallel::detectCores()
-                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                                }
-                                        # start cluster
-                                cl <- parallel::makeCluster(ncores)
-                                parallel::clusterExport(cl, "R_pe", envir=environment())
-                                R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula, 
-                                        mod_red, dep_var, grname, data)
-                                parallel::stopCluster(cl)
-                                        
-                                } else if (parallel == FALSE) {
-                                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
-                                }
-                                # adding empirical rpt 
-                                R_permut <- c(list(R), R_permut)
-                        }
-                }
-        })
-        
-        
-        # equal to boot
-        permut_org <- as.list(rep(NA, length(grname)))
-        permut_link <- as.list(rep(NA, length(grname)))
-        
-        if (!(length(R_permut) == 1)){
-                for (i in 1:length(grname)) {
-                        permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                        permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
-                }
-                names(permut_org) <- grname
-                names(permut_link) <- grname
-        }
-        
-        P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
-        P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
-        names(P_permut) <- names(permut_link)
         
         
         ## likelihood-ratio-test

@@ -273,12 +273,14 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         }
         
         family <- "binomial"
-        permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R)
+        permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
+                                           grname, npermut, parallel, ncores, link, family, R)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org
         permut_link <- permutations$permut_link
         warnings_permut <- permutations$warnings_permut
+        
         # for LRT
         # terms <- attr(terms(formula), "term.labels")
         # randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
