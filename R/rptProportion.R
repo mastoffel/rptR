@@ -108,21 +108,6 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
-        # VarComps <- as.data.frame(lme4::VarCorr(mod))
-        # obsind_id <- which(VarComps[["grp"]] == "Overdispersion")
-        # overdisp <- VarComps$vcov[obsind_id]
-        # 
-        # # check if all variance components are 0
-        # if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-        #         nboot <- 0
-        #         npermut <- 0
-        #         warning("all variance components are 0, bootstrapping and permutation skipped")
-        # }
-        # 
-        # if (nboot == 1) {
-        #         warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
-        #         nboot <- 0
-        # }
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
@@ -232,7 +217,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         # confidence interval estimation by parametric bootstrapping
         if (nboot > 0){
-                Ysim <- stats::simulate(mod, nsim = nboot) # every column contains a list with successes and failures
+                # every column contains a list with successes and failures, data.frame
+                Ysim <- stats::simulate(mod, nsim = nboot) 
         }  
         
         bootstr <- function(y, mod, formula, data, grname) {
@@ -240,72 +226,20 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- with_warnings({
-                
-        # to do: preallocate R_boot
-        if (nboot > 0 & parallel == TRUE) {
-                if (is.null(ncores)) {
-                        ncores <- parallel::detectCores() - 1
-                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_boot <- unname(parallel::parLapply(cl, Ysim, bootstr, mod = mod, formula = formula, 
-                        data = data, grname = grname))
-                parallel::stopCluster(cl)
-        }
-        if (nboot > 0 & parallel == FALSE) {
-                R_boot <- unname(lapply(Ysim, bootstr, mod = mod, formula = formula, data = data, 
-                        grname = grname))
-        }
-        if (nboot == 0) {
-                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
-                R_boot <- NA
-        }
-        })
+        # run all bootstraps
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
         
-        # transform bootstrapping repeatabilities into vectors
-        boot_org <- as.list(rep(NA, length(grname_org)))
-        boot_link <- as.list(rep(NA, length(grname_org)))
-        if (length(R_boot) == 1) {
-                # creating tables when R_boot = NA
-                if (is.na(R_boot)) {
-                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
-                        for(i in c("se_org", "se_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname_org))), row.names = grname_org, names = i), 
-                                        envir = e1)   
-                        }
-                        for(i in c("CI_org", "CI_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname_org), ncol = 2)), row.names = grname_org), 
-                                        envir = e1)   
-                        }
-                        
-                }
-        }  else {
-                for (i in 1:length(grname)) {
-                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]]))
-                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]]))
-                }
-                names(boot_org) <- grname_org
-                names(boot_link) <- grname_org
-                
-                calc_CI <- function(x) {
-                        out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-                }
-                
-                # CI into data.frame and transpose to have grname in rows
-                CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
-                CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
-                
-                # se
-                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, stats::sd))))
-                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, stats::sd))))
-                names(se_org) <- "se_org"
-                names(se_link) <- "se_link"
-        }
+        # load everything (elegant solution)
+        # list2env(bootstraps, envir = e1)
+        
+        # load everything (bad solution to assure global binding and satisfy cran check) 
+        se_org <- bootstraps$se_org
+        se_link <- bootstraps$se_link
+        CI_org <- bootstraps$CI_org
+        CI_link <- bootstraps$CI_link
+        boot_link <- bootstraps$boot_link
+        boot_org <- bootstraps$boot_org
+        warnings_boot <- bootstraps$warnings_boot
         
 
         # significance test by permutation of residuals
