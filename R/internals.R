@@ -219,6 +219,13 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
         if (family == "poisson") family_fun <- stats::poisson
         if (family == "binomial") family_fun <- stats::binomial
         
+        # for likelihood ratio and permutation test
+        terms <- attr(terms(formula), "term.labels")
+        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        
+        # function for the reduced model in permut and LRT tests
+        mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
+        
         LRT_mod <- as.numeric(stats::logLik(mod))
         LRT_df <- 1
 
@@ -226,7 +233,7 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
 
         for (i in 1:length(grname)) {
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data,
+                LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data,
                         family = family_fun(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)

@@ -218,6 +218,25 @@ test_that("Repeatabilities are equal for different order in grname argument", {
         expect_false(any(R_est_2$R$Habitat == R_est_3$R$Habitat) == FALSE)
 })
 
+test_that("LRTs are equal for different different sequence in grname argument", {
+        expect_equal(R_est_2$P["Container", "LRT_P"], R_est_3$P["Container", "LRT_P"])
+        expect_equal(R_est_2$P["Habitat", "LRT_P"], R_est_3$P["Habitat", "LRT_P"])
+})
 
 
+
+
+R_est_4 <-  rptPoisson(formula = Egg ~ Treatment + (1|Habitat) + (1|Container),
+        grname=c("Container", "Habitat"), data = BeetlesFemale,
+        nboot=0, npermut=0, ratio = TRUE)
+
+test_that("Repeatabilities are equal for different order in formula argument", {
+        expect_false(any(R_est_2$R$Container == R_est_4$R$Container) == FALSE)
+        expect_false(any(R_est_2$R$Habitat == R_est_4$R$Habitat) == FALSE)
+})
+
+test_that("LRTs are equal for different for different order in formula argument", {
+        expect_equal(R_est_2$P["Container", "LRT_P"], R_est_4$P["Container", "LRT_P"])
+        expect_equal(R_est_2$P["Habitat", "LRT_P"], R_est_4$P["Habitat", "LRT_P"])
+})
         

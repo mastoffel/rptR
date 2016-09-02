@@ -245,7 +245,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (length(R_boot) == 1) {
                 # creating tables when R_boot = NA
                 if (is.na(R_boot)) {
-                       se <- NA
+                       se <- NA 
                        CI_emp <- calc_CI(NA)
                 }
         } else  {

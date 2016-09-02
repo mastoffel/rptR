@@ -26,7 +26,7 @@ rpt_proportion <- rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Populatio
 
 
 
-test_that("wrapper function rpt works for all distributions without perm or boot and defaults", {
+test_that("summary works for all distributions without perm or boot and defaults", {
         expect_error(test <- summary(rpt_gaussian), NA)
         expect_error(test <- summary(rpt_poisson), NA)
         expect_error(test <- summary(rpt_binary), NA)
@@ -43,10 +43,31 @@ rpt_binary <- rpt(Colour ~ (1|Population), grname=c("Population"),
 rpt_proportion <- rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
         nboot=2, npermut=2, datatype = "Proportion")
 
+test_that("summary works for all distributions with boot and permut", {
+        expect_error(test <- summary(rpt_gaussian), NA)
+        expect_error(test <- summary(rpt_poisson), NA)
+        expect_error(test <- summary(rpt_binary), NA)
+        expect_error(test <- summary(rpt_proportion), NA)
+})
+
+
+# summary with Residual, Overdispersion and Fixed
+rpt_gaussian <- rpt(BodyL ~ (1|Population), grname=c("Population", "Residual", "Overdispersion", "Fixed"), data=BeetlesBody, 
+        nboot=0, npermut=0, datatype = "Gaussian")
+rpt_poisson <- rpt(Egg ~ Treatment + (1|Container), grname=c("Container", "Residual", "Overdispersion", "Fixed"), data = BeetlesFemale,
+        nboot=0, npermut=0, datatype = "Poisson")
+rpt_binary <- rpt(Colour ~ (1|Population), grname=c("Population", "Residual", "Overdispersion", "Fixed"), 
+        data=BeetlesMale, nboot=0, npermut=0, datatype = "Binary")
+rpt_proportion <- rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population", "Residual", "Overdispersion", "Fixed"), data=md,
+        nboot=0, npermut=0, datatype = "Proportion")
+
+
 test_that("wrapper function rpt works for all distributions with perm and boot and defaults", {
         expect_error(test <- summary(rpt_gaussian), NA)
         expect_error(test <- summary(rpt_poisson), NA)
         expect_error(test <- summary(rpt_binary), NA)
         expect_error(test <- summary(rpt_proportion), NA)
 })
+
+
 

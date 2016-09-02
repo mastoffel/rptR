@@ -149,15 +149,25 @@ test_that("Repeatabilities are equal when grname has a different grname sequence
         expect_equal(R_est_10$R$Population, R_est_11$R$Population)
 })
 
+test_that("LRTs are equal for different different sequence in grname argument", {
+        expect_equal(R_est_10$P["Container", "LRT_P"], R_est_11$P["Container", "LRT_P"])
+        expect_equal(R_est_10$P["Population", "LRT_P"], R_est_11$P["Population", "LRT_P"])
+})
+
+
+
 R_est_12 <- rptGaussian(BodyL ~ (1|Population) + (1|Container), 
         grname=c("Container", "Population"), data=BeetlesBody, nboot=0,
         npermut=0, ratio = TRUE)
 
-test_that("Repeatabilities are equal when random effects in formula have a different grname sequence", {
+test_that("Repeatabilities are equal when random effects in formula have a different order", {
         expect_equal(R_est_10$R$Container, R_est_12$R$Container)
         expect_equal(R_est_10$R$Population, R_est_12$R$Population)
 })
 
-
+test_that("LRTs are equal when random effects in formula have a different order", {
+        expect_equal(R_est_10$P["Container", "LRT_P"], R_est_12$P["Container", "LRT_P"])
+        expect_equal(R_est_10$P["Population", "LRT_P"], R_est_12$P["Population", "LRT_P"])
+})
 
 

@@ -24,6 +24,7 @@ test_that("LRT works", {
 })
 
 
+
 # run with one random effect, boot, no permut
 R_est_2 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=2, npermut=0)
 
@@ -160,7 +161,7 @@ test_that("Repeatabilities are equal for grouping factors independent of residua
         expect_false(any(R_est_1$R$Population == R_est_2$R$Population) == FALSE)
 })
 
-# check that grname sequence doesnt play a role
+# check that grname and formula sequence dont play a role 
 
 R_est_3 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Population", "Container"), 
         data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE)
@@ -170,8 +171,21 @@ test_that("Repeatabilities are equal for different order in grname argument", {
      expect_equal(R_est_2$R$Population, R_est_3$R$Population) 
 })
 
+test_that("LRTs are equal for different order in grname argument", {
+        expect_equal(R_est_2$P["Container", "LRT_P"], R_est_3$P["Container", "LRT_P"])
+        expect_equal(R_est_2$P["Population", "LRT_P"], R_est_3$P["Population", "LRT_P"])
+})
 
 
+R_est_4 <- rptBinary(Colour ~ (1|Population) + (1|Container),  grname=c("Container", "Population"), 
+        data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE)
 
+test_that("Repeatabilities are equal for different order in formula argument", {
+        expect_equal(R_est_2$R$Container, R_est_4$R$Container)
+        expect_equal(R_est_2$R$Population, R_est_4$R$Population) 
+})
 
-
+test_that("LRTs are equal for different order in formula argument", {
+        expect_equal(R_est_2$P["Container", "LRT_P"], R_est_4$P["Container", "LRT_P"])
+        expect_equal(R_est_2$P["Population", "LRT_P"], R_est_4$P["Population", "LRT_P"])
+})
