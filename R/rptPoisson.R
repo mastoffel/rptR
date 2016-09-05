@@ -189,8 +189,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R_f_org <- NA
                         }
                         if (link == "log") {
+                                EY <- exp(beta0 + (sum(VarComps[,"vcov"]) + var_f)/2)
                                 # link scale
-                                estdv = log(1/exp(beta0)+1)
+                                estdv = log(1/EY+1)
                                 var_p_link <- sum(VarComps[,"vcov"]) +  estdv
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link = var_a / var_p_link
