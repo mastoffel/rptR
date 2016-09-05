@@ -185,7 +185,7 @@ rep6 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Contain
 
 In non-Gaussian models it frequently happens that some of the bootstrap or permutation iterations to not converge on a model fit. Warnings are thrown by `glmer`.
 
-As usual, the output can be viewed and displayed by `print`, `summary` and `plot`. The results show substantial reputability at the level of the population (due to genetic differentiation or lasting environmental influence prior to sampling), but very little repeatability at the level of the container (indicating limited shared environmental effects). This is a toy example, of course, but we like to illustrate how results would be interpreted.
+As usual, the output can be viewed and displayed by `print`, `summary` and `plot`. The results show substantial repeatability at the level of the population (due to genetic differentiation or lasting environmental influence prior to sampling), but very little repeatability at the level of the container (indicating limited shared environmental effects). This is a toy example, of course, but we like to illustrate how results would be interpreted.
 ```{r poisson-model-print}
 print(rep6)
 ```
@@ -312,6 +312,7 @@ plot(rep11, grname="Residual", scale="link", cex.main=0.8)
 ```
 
 Evidently, it is pointless to test for the statistical significance of residual variance againt a null hypothesis of no residual variance and we therefore omit this test. But for non-Gaussian models it is worthwhile testing if there is statistically significant overdispersion and we have therefore implemented this test. Note, however, that each grouping level specified in `grname` will be tested in separate iterations if a permutation test is required. Hence it is recommened to be careful with the use of `npermut` in combination with multiple grouping levels.
+
 
 ```{r binary-overdisperion-test, warning=1, fig.width=7, fig.height=4}
 rep12 <- rpt(Egg ~ (1|Container) + (1|Population),  grname=c("Population", "Overdispersion"), data=BeetlesFemale, datatype="Poisson", nboot=0, npermut=19, ratio=FALSE)

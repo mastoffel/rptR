@@ -71,8 +71,10 @@ Returns an object of class \code{rpt} that is a a list with the following elemen
       element respesents a grouping factor.}
 \item{R_permut}{Vector(s) of permutation samples for \emph{R}. Each \code{list}
       element represents a grouping factor.}
-\item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-     p-value(s) and degrees of freedom for the likelihood-ratio test.} 
+\item{LRT}{\code{list} with two elements. (1) The likelihood for the full model and a \code{data.frame} 
+     called \code{LRT_table} for the reduced model(s), which includes columns
+     for the respective grouping factor(s), the likelihood(s) \emph{logL_red}, likelihood ratio(s)
+     \emph{LR_D}, p-value(s) \emph{LRT_P} and degrees of freedom \emph{LRT_df}} 
 \item{ngroups}{Number of groups for each grouping level.}
 \item{nobs}{Number of observations.}
 \item{mod}{Fitted model.}
@@ -100,14 +102,14 @@ rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population",
 rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
                    data=BeetlesBody, nboot=3, npermut=3)
                    
-# unadjusted repeatabilities with  fixed effects and 
+# unadjusted repeatabilities with fixed effects and 
 # estimation of the fixed effect variance
 rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
-                   grname=c("Container", "Population", "Fixed"), 
-                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+                  grname=c("Container", "Population", "Fixed"), 
+                  data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
                
 # two random effects, estimation of variance (instead repeatability)
-rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
+R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
             grname= c("Population", "Container", "Residual"),
             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 

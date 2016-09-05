@@ -22,8 +22,10 @@
 #'       element respesents a grouping factor.}
 #' \item{R_permut}{Vector(s) of permutation samples for \emph{R}. Each \code{list}
 #'       element represents a grouping factor.}
-#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-#'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
+#' \item{LRT}{\code{list} with two elements. (1) The likelihood for the full model and a \code{data.frame} 
+#'      called \code{LRT_table} for the reduced model(s), which includes columns
+#'      for the respective grouping factor(s), the likelihood(s) \emph{logL_red}, likelihood ratio(s)
+#'      \emph{LR_D}, p-value(s) \emph{LRT_P} and degrees of freedom \emph{LRT_df}} 
 #' \item{ngroups}{Number of groups for each grouping level.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
@@ -62,14 +64,14 @@
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
 #'                    data=BeetlesBody, nboot=3, npermut=3)
 #'                    
-#' # unadjusted repeatabilities with  fixed effects and 
+#' # unadjusted repeatabilities with fixed effects and 
 #' # estimation of the fixed effect variance
 #' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
-#'                    grname=c("Container", "Population", "Fixed"), 
-#'                    data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+#'                   grname=c("Container", "Population", "Fixed"), 
+#'                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
-#' rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
+#' R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
 #'             grname= c("Population", "Container", "Residual"),
 #'             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 #' 
@@ -104,9 +106,27 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # save the original grname
         grname_org <- grname
+        
+        # additional grname components
         output_resid <- FALSE
         output_overdisp <- FALSE
         output_fixed <- FALSE
+        
+        
+        # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
+        # from grname vector
+ 
+        for (component in c("Residual", "Overdispersion", "Fixed")) {
+                if (any(grname == component)){
+                        grname <- grname[-which(grname == component)]
+                        if (component == "Residual") output_resid <- TRUE
+                        if (component == "Overdispersion") output_overdisp <- TRUE
+                        if (component == "Fixed") output_fixed <- TRUE
+                }
+        }
+               
+          
+        
         
         # point estimates of R or var
         R_pe <- function(formula, data, grname) {
@@ -115,27 +135,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 mod <- lme4::lmer(formula, data)
                 VarComps <- lme4::VarCorr(mod)
                 
-                # Check whether Residual is selected
-                if (any(grname == "Residual")){
-                        output_resid <- TRUE
-                        # # delete Residual element
-                        grname <- grname[-which(grname == "Residual")]
-                }
-                
-                # Check whether Overdispersion is selected
-                if (any(grname == "Overdispersion")){
-                        output_overdisp <- TRUE
-                        # # delete OVerdispersion element
-                        grname <- grname[-which(grname == "Overdispersion")]
-                }
-                
-                # Check whether Fixed is selected
-                if (any(grname == "Fixed")){
-                        output_fixed <- TRUE
-                        # # delete fixed element
-                        grname <- grname[-which(grname == "Fixed")]
-                }
-
                 # Residual variance
                 var_e <- attr(VarComps, "sc")^2
                 names(var_e) <- "Residual"
@@ -154,7 +153,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
-                if(!adjusted) var_p <- var_p + var_f
+                if (!adjusted) var_p <- var_p + var_f
 
                 # return variance instead of repeatability
                 if (ratio == FALSE) { 
@@ -209,7 +208,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- .with_warnings({
+        warnings_boot <- with_warnings({
                 
         if (nboot > 0 & parallel == TRUE) {
                 if (is.null(ncores)) {
@@ -246,38 +245,18 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (length(R_boot) == 1) {
                 # creating tables when R_boot = NA
                 if (is.na(R_boot)) {
-                       se <- NA
+                       se <- NA 
                        CI_emp <- calc_CI(NA)
                 }
         } else  {
-                # for (i in 1:length(grname)) {
-                #         boot[[i]] <- unlist(lapply(R_boot, function(x) x[, grname[i]]))
-                # }
                 boot <- do.call(rbind, R_boot)
-                # CI 
                 CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
               
         }
         
-        
-        if (any(grname == "Residual")){
-                output_resid <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Residual")]
-        }
-        if (any(grname == "Overdispersion")){
-                output_overdisp <- TRUE
-                # # delete Overdispersion element
-                grname <- grname[-which(grname == "Overdispersion")]
-        }
-        if (any(grname == "Fixed")){
-                output_fixed <- TRUE
-                # # delete Fixed element
-                grname <- grname[-which(grname == "Fixed")]
-        }
-        
+
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -308,18 +287,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
-        warnings_permut <- .with_warnings({
+        # function for the reduced model in permut and LRT tests
+        mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
+        
+        warnings_permut <- with_warnings({
                 
         if (npermut > 1){
                 for (i in 1:length(grname)) {
-                        if (length(randterms) == 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                mod_red <- stats::lm(formula_red, data = data)
-                        } else if (length(randterms) > 1) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
-                                mod_red <- lme4::lmer(formula_red, data = data)
-                        }
-                        
+                                mod_red <- mod_fun(formula_red, data = data)
                         if(parallel == TRUE) {
                                 if (is.null(ncores)) {
                                         ncores <- parallel::detectCores()
@@ -347,68 +323,47 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- 1
+        LRT_df <- rep(1, length(grname))
         
+        # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
+        # function
+        # mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
         for (i in 1:length(grname)) {
-                if (length(randterms) == 1) {
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                        LRT_red[i] <- as.numeric(stats::logLik(stats::lm(formula_red, data = data)))
-                } else if (length(randterms) >= 1){
-                        formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                        ")"))))
-                        LRT_red[i] <- as.numeric(stats::logLik(lme4::lmer(formula = formula_red, data = data)))
-                }
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(stats::update(formula, eval(paste('. ~ . ',
-                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, stats::pchisq(LR,1,lower.tail=FALSE)/2)
         }
+        LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
+        row.names(LRT_table) <- grname
         
-        P <- cbind(LRT_P, P_permut)
+        P <- as.data.frame(cbind(LRT_P, P_permut))
         row.names(P) <- grname
         
-        
-        # add Residual = NA for S3 functions to work
-         if(any(grname_org == "Residual")){
-                  # grname <- grname_org
-                  P <- rbind(P, NA)
-                  row.names(P)[nrow(P)] <- "Residual"
-                  R_permut <- rbind(R_permut, NA)
-                  row.names(R_permut)[nrow(R_permut)] <- "Residual"
-         }
-        
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Overdispersion")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Overdispersion"
-                R_permut <- rbind(R_permut, NA)
-                row.names(R_permut)[nrow(R_permut)] <- "Overdispersion"
+        for (component in c("Residual", "Overdispersion", "Fixed")) {
+                if(any(grname_org == component)){
+                        P <- rbind(P, as.numeric(NA))
+                        row.names(P)[nrow(P)] <- component
+                        R_permut <- rbind(R_permut, as.numeric(NA))
+                        row.names(R_permut)[nrow(R_permut)] <- component
+                        LRT_table <- rbind(LRT_table, as.numeric(NA))
+                        row.names(LRT_table)[nrow(LRT_table)] <- component
+                }
         }
+   
         
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Fixed")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Fixed"
-                R_permut <- rbind(R_permut, NA)
-                row.names(R_permut)[nrow(R_permut)] <- "Fixed"
-        }
-
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 
                 CI = CI, 
                 R = R, 
                 se = se,
                 CI_emp = CI_emp, 
-                P = as.data.frame(P),
+                P = P,
                 R_boot = boot, 
                 R_permut = lapply(as.data.frame(t(R_permut)), function(x) return(x)),
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, 
-                        LRT_D = LRT_D, LRT_df = LRT_df, LRT_P = LRT_P), 
+                LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
                 ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
                 nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))

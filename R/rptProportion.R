@@ -108,31 +108,27 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
-        VarComps <- as.data.frame(lme4::VarCorr(mod))
-        obsind_id <- which(VarComps[["grp"]] == "Overdispersion")
-        overdisp <- VarComps$vcov[obsind_id]
-        
-        # check if all variance components are 0
-        if (sum(VarComps$vcov[-obsind_id]!=0) == 0) {
-                nboot <- 0
-                npermut <- 0
-                warning("all variance components are 0, bootstrapping and permutation skipped")
-        }
-        
-        if (nboot == 1) {
-                warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
-                nboot <- 0
-        }
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
         e1 <- environment()
         
-        
         # save the original grname
         grname_org <- grname
         output_resid <- FALSE
         output_fixed <- FALSE
+        
+        
+        # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
+        # from grname vector
+        for (component in c("Residual", "Fixed")) {
+                if (any(grname == component)){
+                        grname <- grname[-which(grname == component)]
+                        if (component == "Residual") output_resid <- TRUE
+                        if (component == "Fixed") output_fixed <- TRUE
+                }
+        }
+        
         
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
@@ -141,19 +137,6 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp                
-                
-                # Check whether Residual is selected
-                if (any(grname == "Residual")){
-                        output_resid <- TRUE
-                        # # delete Residual element
-                        grname <- grname[-which(grname == "Residual")]
-                }
-                # Check whether Fixed is selected
-                if (any(grname == "Fixed")){
-                        output_fixed <- TRUE
-                        # # delete Fixed element
-                        grname <- grname[-which(grname == "Fixed")]
-                }
                 
                 # groups random effect variances
                 var_a <- VarComps[grname, "vcov"]
@@ -232,129 +215,51 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         R <- R_pe(formula, data, grname, peYN = FALSE)
         
-        # confidence interval estimation by parametric bootstrapping
-        if (nboot > 0){
-                Ysim <- stats::simulate(mod, nsim = nboot) # every column contains a list with successes and failures
-        }  
         
+        
+        ### parametric bootstrapping ###
+        
+        # simulation of data.frame with responses
+        if (nboot > 0){
+                # every column contains a list with successes and failures, data.frame
+                Ysim <- stats::simulate(mod, nsim = nboot) 
+        }  
+        # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, colnames(y)] <- y
                 R_pe(formula, data, grname)
         }
         
-        warnings_boot <- .with_warnings({
-                
-        # to do: preallocate R_boot
-        if (nboot > 0 & parallel == TRUE) {
-                if (is.null(ncores)) {
-                        ncores <- parallel::detectCores() - 1
-                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_boot <- unname(parallel::parLapply(cl, Ysim, bootstr, mod = mod, formula = formula, 
-                        data = data, grname = grname))
-                parallel::stopCluster(cl)
-        }
-        if (nboot > 0 & parallel == FALSE) {
-                R_boot <- unname(lapply(Ysim, bootstr, mod = mod, formula = formula, data = data, 
-                        grname = grname))
-        }
-        if (nboot == 0) {
-                # R_boot <- matrix(rep(NA, length(grname)), nrow = length(grname))
-                R_boot <- NA
-        }
-        })
+        # run all bootstraps
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
         
-        # transform bootstrapping repeatabilities into vectors
-        boot_org <- as.list(rep(NA, length(grname)))
-        boot_link <- as.list(rep(NA, length(grname)))
-        if (length(R_boot) == 1) {
-                # creating tables when R_boot = NA
-                if (is.na(R_boot)) {
-                        # for(i in c("CI_org", "CI_link", "se_org", "se_link")) assign(i, NA, envir = e1)
-                        for(i in c("se_org", "se_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname))), row.names = grname, names = i), 
-                                        envir = e1)   
-                        }
-                        for(i in c("CI_org", "CI_link")){
-                                assign(i, structure(data.frame(matrix(NA, 
-                                        nrow = length(grname), ncol = 2)), row.names = grname), 
-                                        envir = e1)   
-                        }
-                        
-                }
-        }  else {
-                for (i in 1:length(grname)) {
-                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname[i]]))
-                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname[i]]))
-                }
-                names(boot_org) <- grname
-                names(boot_link) <- grname
-                
-                calc_CI <- function(x) {
-                        out <- stats::quantile(x, c((1 - CI)/2, 1 - (1 - CI)/2), na.rm = TRUE)
-                }
-                
-                # CI into data.frame and transpose to have grname in rows
-                CI_org <- as.data.frame(t(as.data.frame(lapply(boot_org, calc_CI))))
-                CI_link <- as.data.frame(t(as.data.frame(lapply(boot_link, calc_CI))))
-                
-                # se
-                se_org <- as.data.frame(t(as.data.frame(lapply(boot_org, stats::sd))))
-                se_link <- as.data.frame(t(as.data.frame(lapply(boot_link, stats::sd))))
-                names(se_org) <- "se_org"
-                names(se_link) <- "se_link"
-        }
+        # load everything (elegant solution)
+        # list2env(bootstraps, envir = e1)
         
+        # load everything (bad solution to assure global binding and satisfy cran check) 
+        se_org <- bootstraps$se_org
+        se_link <- bootstraps$se_link
+        CI_org <- bootstraps$CI_org
+        CI_link <- bootstraps$CI_link
+        boot_link <- bootstraps$boot_link
+        boot_org <- bootstraps$boot_org
+        warnings_boot <- bootstraps$warnings_boot
         
-        # delete from grname
-        
-        if (any(grname == "Residual")){
-                output_resid <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Residual")]
-        }
-        if (any(grname == "Overdispersion")){
-                output_overdisp <- TRUE
-                # # delete Residual element
-                grname <- grname[-which(grname == "Overdispersion")]
-        }
-        # Check whether Fixed is selected
-        if (any(grname == "Fixed")){
-                output_fixed <- TRUE
-                # # delete Fixed element
-                grname <- grname[-which(grname == "Fixed")]
-        }
 
-        # significance test by permutation of residuals
-        P_permut <- rep(NA, length(grname))
         
-        # significance test by likelihood-ratio-test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        # no permutation test
-        if (npermut == 1) {
-                R_permut <- NA
-                P_permut <- NA
-        }
+        ### permutation of residuals ###
         
         # response matrix for permutation test
         dep_var_expr <- as.character(formula)[2]
         dep_var <- as.data.frame(with(data, eval(parse(text=dep_var_expr))))
         
-        # significance test by permutation of residuals
-        # nperm argument just used for parallisation
-        
+        # defining main permutation function
         if (link == "logit") {
                 trans_fun <- stats::qlogis     # VGAM::logit
                 inv_fun <- stats::plogis
         }
         if (link == "probit") {
-                trans_fun <- stats::qnorm            # VGAM::probit
+                trans_fun <- stats::qnorm      # VGAM::probit
                 inv_fun <- stats::pnorm
         }
         
@@ -363,7 +268,6 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                  y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
                                   prob = inv_fun((trans_fun(stats::fitted(mod)) + 
                                   sample(stats::resid(mod)))))
-                # y_perm <- rbinom(nrow(data), 1, prob = (predict(mod, type = "response") + sample(resid(mod))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm
                 data_perm[names(dep_var)[2]] <- rowSums(dep_var) - y_perm
@@ -371,132 +275,58 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 out
         }
         
-        # R_permut <- matrix(rep(NA, length(grname) * npermut), nrow = length(grname))
-        P_permut <- structure(data.frame(matrix(NA, nrow = 2, ncol = length(grname)),
-                row.names = c("P_permut_org", "P_permut_link")), names = grname)
+        family <- "binomial"
+        permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
+                                           grname, npermut, parallel, ncores, link, family, R)
         
-        # for likelihood ratio and permutation test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        warnings_permut <- .with_warnings({
-                
-        if (npermut > 1){
-                for (i in 1:length(grname)) {
-                        if (length(randterms) > 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                                        ")"))))
-                                mod_red <- lme4::glmer(formula_red, data = data, family = stats::binomial(link = link))
-                        } else if (length(randterms) == 1) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-                                mod_red <- stats::glm(formula_red, data = data, family = stats::binomial(link = link))
-                        }
-                        
-                if(parallel == TRUE) {
-                        if (is.null(ncores)) {
-                                ncores <- parallel::detectCores()
-                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
-                        }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                        mod=mod_red, dep_var=dep_var, grname=grname, data = data)
-                parallel::stopCluster(cl)
-                
-                } else if (parallel == FALSE) {
-                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
-                }
-                # adding empirical rpt 
-                R_permut <- c(list(R), R_permut)
-                }
-        }
-        })
-        
-        # equal to boot
-        permut_org <- as.list(rep(NA, length(grname)))
-        permut_link <- as.list(rep(NA, length(grname)))
-        
-        if (!(length(R_permut) == 1)){
-                        for (i in 1:length(grname)) {
-                                permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                                permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
-                        }
-                        names(permut_org) <- grname
-                        names(permut_link) <- grname
-        }
+        P_permut <- permutations$P_permut
+        permut_org <- permutations$permut_org
+        permut_link <- permutations$permut_link
+        warnings_permut <- permutations$warnings_permut
         
         
-        P_permut["P_permut_org", ] <- unlist(lapply(permut_org, function(x) sum(x >= x[1])))/npermut
-        P_permut["P_permut_link", ] <- unlist(lapply(permut_link, function(x) sum(x >= x[1])))/npermut
-        names(P_permut) <- names(permut_link)
+        ### likelihood-ratio-test ###
+        LRTs <- LRT_nongaussian(formula, data, grname, mod, link, family)
         
-        
-        ## likelihood-ratio-test
-        LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- 1
-        #         if (length(randterms) == 1) {
-        #                 formula_red <- update(formula, eval(paste(". ~ . ", paste("- (", randterms, ")"))))
-        #                 LRT.red <- as.numeric(logLik(lm(formula_red, data = data)))
-        #                 LRT.D <- as.numeric(-2 * (LRT.red - LRT.mod))
-        #                 LRT.P <- ifelse(LRT.D <= 0, LRT.df, pchisq(LRT.D, 1, lower.tail = FALSE)/2)
-        #                 # LR <- as.numeric(-2*(logLik(lm(update(formula, eval(paste('. ~ . ', paste('- (',
-        #                 # randterms, ')') ))), data=data))-logLik(mod))) P.LRT <- ifelse(LR<=0, 1,
-        #                 # pchisq(LR,1,lower.tail=FALSE)/2)
-        #         }
-        
-        
-        for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
-        
-        for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], 
-                        ")"))))
-                LRT_red[i] <- as.numeric(stats::logLik(lme4::glmer(formula = formula_red, data = data, 
-                        family = stats::binomial(link = link))))
-                LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
-                # LR <- as.numeric(-2*(logLik(lme4::lmer(update(formula, eval(paste('. ~ . ',
-                # paste('- (1 | ', grname[i], ')') ))), data=data))-logLik(mod))) P.LRT[i] <-
-                # ifelse(LR<=0, 1, pchisq(LR,1,lower.tail=FALSE)/2)
-        }
-        
+        LRT_mod <- LRTs$mod
+        LRT_table <- LRTs$LRT_table
+        LRT_P <- LRT_table$LRT_P
         P <- cbind(LRT_P, t(P_permut))
         row.names(P) <- grname
         
+        
         # add Residual = NA for S3 functions to work
-        if(any(grname_org == "Residual")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Residual"
-                permut_link$Residual <- rep(NA, length(permut_link[[1]]))
-                permut_org$Residual <- rep(NA, length(permut_org[[1]]))
+        for (component in c("Residual", "Fixed")) {
+                if(any(grname_org == component)){
+                        # grname <- grname_org
+                        P <- rbind(P, as.numeric(NA))
+                        row.names(P)[nrow(P)] <- component
+                        permut_link[component] <- NA
+                        permut_org[component] <- NA
+                        LRT_table <- rbind(LRT_table, as.numeric(NA))
+                        row.names(LRT_table)[nrow(LRT_table)] <- component
+                }
         }
         
-        # add Overdisp = NA for S3 functions to work
-        if(any(grname_org == "Overdispersion")){
-                # grname <- grname_org
-                P <- rbind(P, NA)
-                row.names(P)[nrow(P)] <- "Overdispersion"
-                permut_link$Overdispersion <- rep(NA, length(permut_link[[1]]))
-                permut_org$Overdispersion <- rep(NA, length(permut_org[[1]]))
-        }
+        # delete overdispersion from ngroups
+        ngroups <-  unlist(lapply(data[grname], function(x) length(unique(x))))
+        ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
         
         res <- list(call = match.call(), 
                 datatype = "Binary", 
                 link = link,
                 CI = CI, 
                 R = R, 
-                se = t(cbind(se_org,se_link)), 
+                se = as.data.frame(t(cbind(se_org,se_link))), 
                 CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
                 P = as.data.frame(P),
                 R_boot_link = boot_link, 
                 R_boot_org = boot_org,
                 R_permut_link = permut_link, 
                 R_permut_org = permut_org,
-                LRT = list(LRT_mod = LRT_mod, LRT_red = LRT_red, LRT_D = LRT_D, LRT_df = LRT_df, 
-                        LRT_P = LRT_P), 
-                ngroups = unlist(lapply(data[grname], function(x) length(unique(x)))), 
-                nobs = nrow(data), overdisp = overdisp, mod = mod, ratio = ratio, adjusted = adjusted,
+                LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
+                ngroups =  ngroups, 
+                nobs = nrow(data),  mod = mod, ratio = ratio, adjusted = adjusted,
                 all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
