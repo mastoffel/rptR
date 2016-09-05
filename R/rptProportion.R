@@ -288,7 +288,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         ### likelihood-ratio-test ###
         LRTs <- LRT_nongaussian(formula, data, grname, mod, link, family)
         
-        LRT_mod <- LRTs$mod
+        LRT_mod <- LRTs$LRT_mod
         LRT_table <- LRTs$LRT_table
         LRT_P <- LRT_table$LRT_P
         P <- cbind(LRT_P, t(P_permut))
