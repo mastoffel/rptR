@@ -30,8 +30,9 @@
 #'       element is a grouping factor.}
 #' \item{R_permut_org}{Permutation samples for \emph{R} on the original scale. Each \code{list}
 #'       element is a grouping factor.}
-#' \item{LRT}{List of likelihoods for the full model and the reduced model(s), likelihood ratios \emph{D}, 
-#'      p-value(s) and degrees of freedom for the likelihood-ratio test.} 
+#' \item{LRT}{List of two elements. \emph{LRT_mod} is the likelihood for the full model and (2) \emph{LRT_table} is a data.frame 
+#'      for the reduced model(s) including columns for the likelihood \emph{logl_red}, the likelihood ratio(s) \emph{LR_D}, 
+#'      p-value(s)\emph{LR_P} and degrees of freedom for the likelihood-ratio test(s) \emph{LR_df}.} 
 #' \item{ngroups}{Number of groups for each grouping level.}
 #' \item{nobs}{Number of observations.}
 #' \item{mod}{Fitted model.}
@@ -281,7 +282,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         LRTs <- LRT_nongaussian(formula, data, grname, mod, link, family)
         
-        LRT_mod <- LRTs$mod
+        LRT_mod <- LRTs$LRT_mod
         LRT_table <- LRTs$LRT_table
         LRT_P <- LRT_table$LRT_P
         P <- cbind(LRT_P, t(P_permut))
