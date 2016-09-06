@@ -87,7 +87,7 @@
 #' 
 
 rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs") {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -99,6 +99,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # check whether grnames just contain "Residual" or "Overdispersion"
         if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
+        # check whether expect is either "meanobs" or "latent"
+        if (link == "log" & (expect != "meanobs" & expect != "latent")) stop("The argument expect has to be either 'meanobs' (the default) or 'latent'")
+
         # link
         if (length(link) > 1) link <- "log" 
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
@@ -189,7 +192,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R_f_org <- NA
                         }
                         if (link == "log") {
-                                EY <- exp(beta0 + (sum(VarComps[,"vcov"]) + var_f)/2)
+                                if(expect=="meanobs") EY <- mean(mod@resp$y, na.rm=TRUE)
+                                if(expect=="latent") EY <- exp(beta0 + (sum(VarComps[,"vcov"]) + var_f)/2)
                                 # link scale
                                 estdv = log(1/EY+1)
                                 var_p_link <- sum(VarComps[,"vcov"]) +  estdv
@@ -198,9 +202,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link
                                 # origial scale
-                                EY <- exp(beta0 + (sum(VarComps[,"vcov"]))/2)
-                                var_p_org <- EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1
-                                if(!adjusted) var_p_org <- var_p_org + var_f
+                                if( adjusted) var_p_org <- EY * (exp(sum(VarComps[,"vcov"])) - 1) + 1
+                                if(!adjusted) var_p_org <- EY * (exp(sum(VarComps[,"vcov"] + var_f)) - 1) + 1
                                 R_org <- EY * (exp(var_a) - 1)/ var_p_org
                                 R_f_org <- EY * (exp(var_f) - 1)/ var_p_org
                         }

@@ -42,6 +42,13 @@
 #'        be part of the denominator, i.e. repeatabilities are calculated after controlling for 
 #'        variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
 #'        be added to the denominator.
+#' @param expect A character string specifying the method for estimating the expectation in Poisson models
+#'        with log link and in Binomial models with logit link (in all other cases the agrument is ignored). 
+#'        The only valid terms are 'meanobs' and 'latent'. With the default 'meanobs', the expectation is 
+#'        estimated as the mean of the observations in the sample. With 'latent', the expectation is
+#'        estimated from estiamtes of the intercept and variances on the link scale. While this is a 
+#'        preferred solution, it is susceptible to the distribution of fixed effect covariates and gives 
+#'        appropriate results typically only when all covariances are centered to zero.
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rptGaussian},
 #'          for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
@@ -101,7 +108,7 @@
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion", 
     "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
-    parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
+    parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs") {
         
     if (datatype == "Gaussian") {
             out_gaussian <- rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
@@ -109,17 +116,17 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Pro
             return(out_gaussian)
     }
     if (datatype == "Binary") {
-            out_binary <- rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_binary <- rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect)
             out_binary$call <- match.call()
             return(out_binary)
     }
     if (datatype == "Proportion") {
-            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect)
             out_proportion$call <- match.call()
             return(out_proportion)
     }
     if (datatype == "Poisson") {
-            out_poisson <- rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_poisson <- rptPoisson(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted,)
             out_poisson$call <- match.call()
             return(out_poisson)
     }
