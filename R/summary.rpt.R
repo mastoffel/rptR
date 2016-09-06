@@ -102,9 +102,3 @@ summary.rpt <- function(object, ...) {
         }
         	
 }
-
-
-
-
-
-
