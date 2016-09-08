@@ -99,12 +99,12 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         # check whether grnames just contain "Residual" or "Overdispersion"
         if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
-        # check whether expect is either "meanobs" or "latent"
-        if (link == "log" & (expect != "meanobs" & expect != "latent")) stop("The argument expect has to be either 'meanobs' (the default) or 'latent'")
-
         # link
         if (length(link) > 1) link <- "log" 
         if (!(link %in% c("log", "sqrt"))) stop("Link function has to be 'log' or 'sqrt'")
+        
+        # check whether expect is either "meanobs" or "latent"
+        if (link == "log" & (expect != "meanobs" & expect != "latent")) stop("The argument expect has to be either 'meanobs' (the default) or 'latent'")
         
         # observational level random effect
         Overdispersion <- factor(1:nrow(data))
