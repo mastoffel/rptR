@@ -6,7 +6,7 @@
 \usage{
 rptProportion(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
-  ratio = TRUE, adjusted = TRUE)
+  ratio = TRUE, adjusted = TRUE, expect = "meanobs")
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -54,6 +54,17 @@ If TRUE (the default), the variances explained by fixed effects (if any) will no
 be part of the denominator, i.e. repeatabilities are calculated after controlling for 
 variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
 be added to the denominator.}
+
+\item{expect}{A character string specifying the method for estimating the expectation in Poisson models
+with log link and in Binomial models with logit link (in all other cases the agrument is ignored). 
+The only valid terms are 'meanobs' and 'latent' (and 'liability for binary and proportion data). 
+With the default 'meanobs', the expectation is 
+estimated as the mean of the observations in the sample. With 'latent', the expectation is
+estimated from estiamtes of the intercept and variances on the link scale. While this is a 
+preferred solution, it is susceptible to the distribution of fixed effect covariates and gives 
+appropriate results typically only when all covariances are centered to zero. With 'liability' 
+estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
+to be slightly higher.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 

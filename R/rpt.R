@@ -44,11 +44,14 @@
 #'        be added to the denominator.
 #' @param expect A character string specifying the method for estimating the expectation in Poisson models
 #'        with log link and in Binomial models with logit link (in all other cases the agrument is ignored). 
-#'        The only valid terms are 'meanobs' and 'latent'. With the default 'meanobs', the expectation is 
+#'        The only valid terms are 'meanobs' and 'latent' (and 'liability for binary and proportion data). 
+#'        With the default 'meanobs', the expectation is 
 #'        estimated as the mean of the observations in the sample. With 'latent', the expectation is
 #'        estimated from estiamtes of the intercept and variances on the link scale. While this is a 
 #'        preferred solution, it is susceptible to the distribution of fixed effect covariates and gives 
-#'        appropriate results typically only when all covariances are centered to zero.
+#'        appropriate results typically only when all covariances are centered to zero. With 'liability' 
+#'        estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
+#'        to be slightly higher.
 #'   
 #' @details For \code{datatype='Gaussian'} calls function \link{rptGaussian},
 #'          for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
@@ -121,7 +124,7 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Pro
             return(out_binary)
     }
     if (datatype == "Proportion") {
-            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect)
             out_proportion$call <- match.call()
             return(out_proportion)
     }

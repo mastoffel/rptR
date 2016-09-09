@@ -62,11 +62,14 @@ be added to the denominator.}
 
 \item{expect}{A character string specifying the method for estimating the expectation in Poisson models
 with log link and in Binomial models with logit link (in all other cases the agrument is ignored). 
-The only valid terms are 'meanobs' and 'latent'. With the default 'meanobs', the expectation is 
+The only valid terms are 'meanobs' and 'latent' (and 'liability for binary and proportion data). 
+With the default 'meanobs', the expectation is 
 estimated as the mean of the observations in the sample. With 'latent', the expectation is
 estimated from estiamtes of the intercept and variances on the link scale. While this is a 
 preferred solution, it is susceptible to the distribution of fixed effect covariates and gives 
-appropriate results typically only when all covariances are centered to zero.}
+appropriate results typically only when all covariances are centered to zero. With 'liability' 
+estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
+to be slightly higher.}
 }
 \value{
 Returns an object of class \code{rpt}. See specific functions for details.
