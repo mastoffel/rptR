@@ -97,7 +97,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         } 
         
         # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # link
         if (length(link) > 1) link <- "log" 
