@@ -120,12 +120,12 @@ data=BeetlesMale, nboot=3, npermut=3)
 # estimation of the fixed effect variance
 rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container", "Population", "Fixed"), 
-                   data=BeetlesMale, nboot=3, npermut=3, adjusted=FALSE)
+                   data=BeetlesMale, nboot=0, npermut=0, adjusted=FALSE)
                    
 # variance estimation of random effects, residual and overdispersion 
 R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container","Population","Residual", "Overdispersion"), 
-                   data = BeetlesMale, nboot=3, npermut=3, ratio = FALSE)
+                   data = BeetlesMale, nboot=0, npermut=0, ratio = FALSE)
                    
 
      

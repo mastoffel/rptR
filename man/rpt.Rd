@@ -97,27 +97,27 @@ BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
 BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, 
      data=BeetlesMale, FUN=sum)
 
-# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
+# Note: nboot and npermut are set to 0 for speed reasons. Use larger numbers
 # for the real analysis.
 
 # gaussian data (example with a single random effect)
 rpt(BodyL ~ (1|Population), grname="Population", data=BeetlesBody, 
-     nboot=3, npermut=3, datatype = "Gaussian")
+     nboot=0, npermut=0, datatype = "Gaussian")
 
 # poisson data (example with two grouping levels and adjusted for fixed effect)
 rpt(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Population"), 
-     data = BeetlesFemale, nboot=3, npermut=3, datatype = "Poisson")
+     data = BeetlesFemale, nboot=0, npermut=0, datatype = "Poisson")
 
 # binary data (example with estimation of the fixed effect variance)
 rpt(Colour ~ Treatment + (1|Container) + (1|Population), 
      grname=c("Population", "Container", "Fixed"), 
-     data=BeetlesMale, nboot=3, npermut=3, datatype = "Binary", adjusted = FALSE)
+     data=BeetlesMale, nboot=0, npermut=0, datatype = "Binary", adjusted = FALSE)
 
 # proportion data (example for the estimation of raw variances, 
 # including residual and fixed-effect variance)
 rpt(cbind(Dark, Reddish) ~ Treatment + (1|Population), 
      grname=c("Population", "Residual", "Fixed"), data=BeetlesColour,
-     nboot=3, npermut=3, datatype = "Proportion", ratio=FALSE)
+     nboot=0, npermut=0, datatype = "Proportion", ratio=FALSE)
 
 
 }
