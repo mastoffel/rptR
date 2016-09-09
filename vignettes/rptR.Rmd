@@ -124,11 +124,7 @@ Nested sampling has consequences for how variances are interpreted. In our examp
 One might argue that the full container variance should contain the population variance. It is here possible to estimate the repeatability at the container-level without controlling for population and the results turn out to be almost equivalent to adding the population-level variance to the container-level variance.
 
 ```{r gaussian-containeronly-randeff, tidy = TRUE}
-<<<<<<< HEAD
-rep4 <- rpt(BodyL ~ (1|Container),  grname=c("Container"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
-=======
-rep4 <- rpt(BodyL ~ (1|Container),  grname="Container", data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
->>>>>>> 71065a2b4400c343f9b7820fd710c9a47880a409
+rep4 <- rpt(BodyL ~ (1|Container),  grname="Container", data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 print(rep4)
 ```
 
@@ -203,11 +199,7 @@ As usual, the output can be viewed and displayed by `print`, `summary` and `plot
 print(rep8)
 ```
 
-<<<<<<< HEAD
-There are two repeatabilities for Poisson GLMM, derived by a latent scale approximation and a original scale approximation. We have previously called the two estimates the latent scale repeatabilty and the original scale repeatabilty. However, these are both estimates of the same quantities, not entirely different repeatabilites, hence we now prefer to call them the _latent and orginal scale approximations_. In the case of Poisson GLMM, original scale approximations are actually considered to be the exact solutions, while link scale approximations are indeed approximate. However, in our experience the two typically give very similar results.
-=======
-There are two repeatabilities for Poisson GLMM, derived by a latent scale approximation and a original scale approximation. We have previously call the two estimates the latent scale repeatabilty and the original scale repeatabilty. However, the are both estimates of the same quantities, not entirely different repeatabilites, hence we now prefer to call them the latent and orginal scale approximations. In the case of Poisson GLMM, original scale approximations are actually the exact solutions, while link scale approximations are indeed approximate. However, in our experience the two typically give very similar results.
->>>>>>> 71065a2b4400c343f9b7820fd710c9a47880a409
+There are two repeatabilities for Poisson GLMM, derived by a latent scale approximation and a original scale approximation. We have previously call the two estimates the latent scale repeatabilty and the original scale repeatabilty. However, the are both estimates of the same quantities, not entirely different repeatabilites, hence we now prefer to call them the _latent and orginal scale approximations_. In the case of Poisson GLMM, original scale approximations are actually the exact solutions, while link scale approximations are indeed approximate. However, in our experience the two typically give very similar results.
 
 ```{r poisson-model-plot, tidy = TRUE, fig.width=3.2, fig.show="hold"}
 plot(rep8, grname="Container", scale="link", cex.main=0.8)
@@ -223,15 +215,9 @@ rep9 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Contain
 print(rep9)
 ```
 
-<<<<<<< HEAD
-The quantification of the distribution-specific variance of Poisson models with log-link requires a parameter $\lambda$ that represents the expected value, i.e. the global mean on the data scale. We have previously given different advice for estimating $\lambda$, including the inverse-link of the intercept on the latent scale. While this often gives a reasonable approximation in many cases, the estimate will be biased for small expected values (smaller than about 2). A prefered alternative is to use the mean of the observations in the sample as we have also suggested previously. This is now the default option in `rptR` that is determined by the `expect` argument with its default `expect = "meanobs"`. 
-
-There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including variance caused by fixed effects, on the latents scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only of all covariates are centered. Since centering is not enforced within `rptR`, we have made this option available on an explicit request by setting `expect = "latent"`. The repeatabilities estimated by the formulae presented in Nakagawa & Schielzeth (2010) can be requested by `expect = "liability"`. 
-=======
 The quantification of the distribution-specific variance of Poisson models with log-link requires a parameter $\lambda$ that represents the expected value, i.e. the global mean on the data scale. We have previously given different advice for estimating $\lambda$, including the inverse-link of the intercept on the latent scale. While this often gives a reasonable approximation in many cases, the estimate will be biased for small expected values (smaller than about 2). A prefered alternative is to use the mean of the observations in the sample as we have also suggested previously. The is now the default option in `rptR` that is determined by the `expect` argument with its default `expect = "meanobs"`. 
 
-There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $\beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including varianc caused by fixed effects, on the latents scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only of all covariates are centered. Since centering is not enforced within `rptR`, we have made this option availble on on explicit request by setting `expect = "latent"`. 
->>>>>>> 71065a2b4400c343f9b7820fd710c9a47880a409
+There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $\beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including varianc caused by fixed effects, on the latents scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only of all covariates are centered. Since centering is not enforced within `rptR`, we have made this option availble on on explicit request by setting `expect = "latent"`. The repeatabilities estimated by the formulae presented in Nakagawa & Schielzeth (2010) can be requested by `expect = "liability"`. 
 
 ## Repeatabilities for Binary data
 
@@ -360,13 +346,7 @@ Nakagawa, S. & H. Schielzeth (2010). Repeatability for Gaussian and non-Gaussian
 
 Nakagawa, S. & H. Schielzeth (2013). A general and simple method for obtaining $R^2$ from generalized linear mixed-effects models. Methods in Ecology and Evolution 4: 133-142.
 
-<<<<<<< HEAD
-Nakagawa, S. & H. Schielzeth (in prep.). The coefficient of determination R2 and intra-class correlation ICC from generalized linear mixed-effects models revisited and expanded. Manuscript.
-
-Manly, B. F. J. (2007). Randomization, bootstrap and Monte Carlo methods in Biology. 3rd edn. Chapman & Hall, Boca Rato.
-=======
-Nakagawa, S. & H. Schielzeth (in prep). The coefficient of determination $R^2$ and intra-class correlation ICC from generalized linear mixed-effects models revisited and expanded.
->>>>>>> 71065a2b4400c343f9b7820fd710c9a47880a409
+Nakagawa, S. & H. Schielzeth (in prep.). The coefficient of determination $R^2$ and intra-class correlation ICC from generalized linear mixed-effects models revisited and expanded. Manuscript.
 
 Manly, B. F. J. (2007). Randomization, bootstrap and Monte Carlo methods in Biology. 3rd edn. Chapman & Hall, Boca Rato.
 
