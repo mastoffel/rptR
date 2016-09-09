@@ -266,19 +266,13 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # significance test by permutation of residuals
         
-        if (link == "logit") {
-                trans_fun <- stats::qlogis     # VGAM::logit
-                inv_fun <- stats::plogis
-        }
-        if (link == "probit") {
-                trans_fun <- stats::qnorm      # VGAM::probit
-                inv_fun <- stats::pnorm
-        }
-        
+        if (link == "logit") inv_fun <- stats::plogis
+        if (link == "probit") inv_fun <- stats::pnorm
+
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
-                        prob = inv_fun((trans_fun(stats::fitted(mod)) + sample(stats::resid(mod)))))
+                        prob = inv_fun(stats::predicted(mod_red, type="link") + sample(stats::resid(mod))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
