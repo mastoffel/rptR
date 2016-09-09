@@ -109,23 +109,22 @@ Estimates repeatability from a generalized linear mixed-effects models fitted by
 \examples{
 data(BeetlesMale)
 
-# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
-# for the real analysis.
+# Note: nboot and npermut are set to 0 for speed reasons. 
 
 # repeatability with one grouping level
 rptBinary(Colour ~ (1|Population), grname=c("Population"), 
-data=BeetlesMale, nboot=3, npermut=3)
+data=BeetlesMale, nboot=0, npermut=0)
 
 # unadjusted repeatabilities with  fixed effects and 
 # estimation of the fixed effect variance
 rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container", "Population", "Fixed"), 
-                   data=BeetlesMale, nboot=3, npermut=3, adjusted=FALSE)
+                   data=BeetlesMale, nboot=0, npermut=0, adjusted=FALSE)
                    
 # variance estimation of random effects, residual and overdispersion 
 R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container","Population","Residual", "Overdispersion"), 
-                   data = BeetlesMale, nboot=3, npermut=3, ratio = FALSE)
+                   data = BeetlesMale, nboot=0, npermut=0, ratio = FALSE)
                    
 
      

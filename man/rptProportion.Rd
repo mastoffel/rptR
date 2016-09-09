@@ -116,8 +116,7 @@ BeetlesMale$Reddish <- (BeetlesMale$Colour-1)*-1
 BeetlesColour <- aggregate(cbind(Dark, Reddish) ~ Treatment + Population + Container, 
      data=BeetlesMale, FUN=sum)
 
-# Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
-# for the real analysis.
+# Note: nboot and npermut are set to 0 for speed reasons. 
 
 # repeatability with one grouping level
 rptProportion(cbind(Dark, Reddish) ~ (1|Population), 
@@ -127,12 +126,12 @@ rptProportion(cbind(Dark, Reddish) ~ (1|Population),
 # estimation of the fixed effect variance
 rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
      grname=c("Population", "Fixed"), 
-     data=BeetlesColour, nboot=3, npermut=3, adjusted=FALSE)
+     data=BeetlesColour, nboot=0, npermut=0, adjusted=FALSE)
                    
 # variance estimation of random effects, residual and overdispersion 
 rptProportion(cbind(Dark, Reddish) ~ Treatment + (1|Container) + (1|Population), 
      grname=c("Container","Population","Residual", "Overdispersion"), 
-     data = BeetlesColour, nboot=3, npermut=3, ratio = FALSE)
+     data = BeetlesColour, nboot=0, npermut=0, ratio = FALSE)
 
 }
 \author{

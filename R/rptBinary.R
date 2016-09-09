@@ -59,23 +59,22 @@
 #' @examples 
 #' data(BeetlesMale)
 #' 
-#' # Note: nboot and npermut are set to 3 for speed reasons. Use larger numbers
-#' # for the real analysis.
+#' # Note: nboot and npermut are set to 0 for speed reasons. 
 #' 
 #' # repeatability with one grouping level
 #' rptBinary(Colour ~ (1|Population), grname=c("Population"), 
-#' data=BeetlesMale, nboot=3, npermut=3)
+#' data=BeetlesMale, nboot=0, npermut=0)
 #' 
 #' # unadjusted repeatabilities with  fixed effects and 
 #' # estimation of the fixed effect variance
 #' rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
 #'                    grname=c("Container", "Population", "Fixed"), 
-#'                    data=BeetlesMale, nboot=3, npermut=3, adjusted=FALSE)
+#'                    data=BeetlesMale, nboot=0, npermut=0, adjusted=FALSE)
 #'                    
 #' # variance estimation of random effects, residual and overdispersion 
 #' R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
 #'                    grname=c("Container","Population","Residual", "Overdispersion"), 
-#'                    data = BeetlesMale, nboot=3, npermut=3, ratio = FALSE)
+#'                    data = BeetlesMale, nboot=0, npermut=0, ratio = FALSE)
 #'                    
 #' 
 #'      
@@ -123,7 +122,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # Helper functions
         # inverf based on posting by sundar on R-help
         # https://stat.ethz.ch/pipermail/r-help/2006-June/108153.html
-        inverf <- function(x) qnorm((x + 1)/2)/sqrt(2)
+        inverf <- function(x) stats::qnorm((x + 1)/2)/sqrt(2)
 
         # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
         # from grname vector
@@ -154,7 +153,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 
                 # Distribution-specific and Residual variance
                 if (link == "logit") {
-                        if(expect=="latent") Ep <- plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
+                        if(expect=="latent") Ep <- stats::plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
                         if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                         if(expect=="liability") Ep <- exp(beta0) / (1 + exp(beta0))
                         if(expect=="latent") estdv_link <- 1 / (Ep*(1-Ep))
@@ -163,7 +162,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 if (link == "probit") {
-                        if(expect=="latent") Ep <- pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
+                        if(expect=="latent") Ep <- stats::pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
                         if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                         if(expect=="latent") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
                         if(expect=="meanobs") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
@@ -198,9 +197,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(qlogis(Ep)))^2+Ep*(1-Ep))
-                                R_org <- ( var_a * Ep^2 / ((1 + exp(qlogis(Ep)))^2)) / var_p_org
-                                R_f_org <- ( var_f * Ep^2/ ((1 + exp(qlogis(Ep)))^2)) / var_p_org
+                                var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(stats::qlogis(Ep)))^2+Ep*(1-Ep))
+                                R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
+                                R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                         }
                         if (link == "probit") {
                                 # link scale
