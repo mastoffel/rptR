@@ -169,11 +169,11 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                         cl <- parallel::makeCluster(ncores)
                                         parallel::clusterExport(cl, "R_pe", envir=environment())
                                         R_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                                mod=mod_red, dep_var=dep_var, grname=grname, data = data)
+                                                mod=mod_red, dep_var=dep_var, grname=grname[i], data = data)
                                         parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
-                                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname, data)
+                                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
                                 }
                                 # adding empirical rpt 
                                 R_permut <- c(list(R), R_permut)

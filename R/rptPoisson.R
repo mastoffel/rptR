@@ -97,7 +97,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         } 
         
         # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # link
         if (length(link) > 1) link <- "log" 
@@ -261,11 +261,11 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
                 if (link == "sqrt") {
                         y_perm <- stats::rpois(nrow(data), 
-                        (sqrt(stats::fitted(mod_red)) + sample(stats::resid(mod_red)))^2)
+                                (stats::predicted(mod_red, type="link") + sample(stats::resid(mod_red)))^2)
                         }
                 if (link == "log") {
                         y_perm <- stats::rpois(nrow(data), 
-                        exp(log(stats::fitted(mod_red)) + sample(stats::resid(mod_red))))
+                                exp(stats::predicted(mod_red, type="link") + sample(stats::resid(mod_red))))
                 }
                 data_perm <- data
                 data_perm[dep_var] <- y_perm

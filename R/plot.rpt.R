@@ -59,7 +59,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                          main <- paste("Original-scale approximation \nrepeatabilities for", grname)
                 }
             } else if (type == "permut") {
-                    if (grname == "Residual" | grname == "Overdispersion") stop("No permutation tests for Residual or Overdispersion")
+                    if (grname == "Residual" | grname == "Fixed") stop("No permutation tests for Residual or Fixed")
                 if (scale == "link") {
                         main <- paste("Link-scale approximation permutation test \nrepeatabilities for", grname)   
                 }
