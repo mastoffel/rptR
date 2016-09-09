@@ -151,6 +151,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
+                
                 # Distribution-specific and Residual variance
                 if (link == "logit") {
                         if(expect=="latent") Ep <- stats::plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
@@ -169,9 +172,6 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if(expect=="liability") estdv_link <- 1
                         var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
-                
-                # Fixed effect variance
-                var_f <- stats::var(stats::predict(mod, re.form=NA))
                 
                 if (ratio == FALSE) {
                         R_link <- var_a
@@ -197,7 +197,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(stats::qlogis(Ep)))^2+Ep*(1-Ep))
+                                if(adjusted) var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                if(!adjusted) var_p_org <- ((sum(VarComps[,"vcov"])+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
                                 R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                         }
