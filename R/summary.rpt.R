@@ -47,16 +47,16 @@ summary.rpt <- function(object, ...) {
                                 CI_1 <- as.numeric(object$CI_emp[i, 1])
                                 CI_2 <- as.numeric(object$CI_emp[i, 2])
                         }
-                        if (is.na(object$se[1])) {
-                                SE <- NA
-                        } else {
+                        if (any(!is.na(object$se))) {
                                 SE <- unlist(object$se)[[i]] 
+                        } else {
+                                SE <- NA
                         }
                         
-                        if (is.na(object$R_boot[1])) {
-                                RBOOT <- NA
-                        } else {
+                        if (any(!is.na(object$R_boot))) {
                                 RBOOT <- object$R_boot[[i]]
+                        } else {
+                                RBOOT <- NA
                         }
                         
                         object$rpt[[i]]    <- structure(data.frame(object$R[i], SE,  CI_1, CI_2, 
