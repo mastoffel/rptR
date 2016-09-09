@@ -122,6 +122,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         output_resid <- FALSE
         output_fixed <- FALSE
         
+        # Helper functions
+        # inverf based on posting by sundar on R-help
+        # https://stat.ethz.ch/pipermail/r-help/2006-June/108153.html
+        inverf <- function(x) qnorm((x + 1)/2)/sqrt(2)
         
         # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
         # from grname vector
