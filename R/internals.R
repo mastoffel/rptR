@@ -151,7 +151,7 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         if (family == "poisson") family_fun <- stats::poisson
         if (family == "binomial") family_fun <- stats::binomial
    
- 
+        e_permut <- environment()
         
         warnings_permut <- with_warnings({
                 
@@ -160,6 +160,8 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
                                 mod_red <- mod_fun(formula_red, data = data, family = family_fun(link = link))
                                 
+                                if (!(grname[i] == "Overdispersion")){
+                                        
                                 if(parallel == TRUE) {
                                         if (is.null(ncores)) {
                                                 ncores <- parallel::detectCores()
@@ -175,14 +177,24 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                 } else if (parallel == FALSE) {
                                         out_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
                                 }
+                                
+                                } 
+                                # in case its overdispersion, just add NA data.frames. 
+                                if (grname[i] == "Overdispersion") {
+                                        out_permut <- lapply(1:(npermut-1), function(x) data.frame("Overdispersion" = c(NA,NA), row.names = c("R_org", "R_link")))
+                                }
+                                
                                 # adding empirical rpt 
-                                if(!exists("R_permut")) {
+                                if(!exists("R_permut", envir = e_permut)) {
                                         R_permut <- out_permut
                                 } else {
                                         R_permut <- lapply(1:length(R_permut), function(x) cbind(R_permut[[x]], out_permut[[x]]))
                                 }
+                                
+                        
                         }
                         R_permut <- c(list(R), R_permut)
+                        R_permut[[1]]["Overdispersion"] <- NA
                 }
         })
         #list(R),
