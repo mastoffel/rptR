@@ -9,9 +9,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
                       
-**FINAL TO-DO LIST
-= increase nboot and npermut from 19 to 1000
-
 The concept of 'repeatability' relates to the way of quantifying the reliability of measurments. In a wider context, however, the repeatability offers insights into the components contributing variability in the data. The repeatability describes the relative partitioning of variance into within-group and between-group sources of variance and is more generally referred to as the intra-class correlation (ICC). The hierarchical decomposition of variances has become the focus of several disciplines. For example, in the context of behavioral research, repeatability measures the relative consistency of some behaviorial trait within individuals and the variability across individuals. The repeatability, therefore, became a fundamental quantity of interest in the field of animal personality research.
 
 A very powerful tool for estimating repeatabilities is the mixed effects model framework. Random-effect predictors are used to estimate variances at different hierarchical levels. In the simplest case of a design where repeated measures (e.g. quantification of behavior) were taken from the same features (e.g. individuals), the repeatability $R$ is calculated as the variances among groups means (group-level variance $V_G$) over the sum of group-level and data-level $V_R$ variance:
@@ -64,10 +61,10 @@ We analyse the data using the `rpt` function with the argument `datatype = "Gaus
 rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
 ```
 
-Since this seems to work and we see a sizable repeatability, we increase the number of parametric bootstraps to 1000, in order to evaluate the uncertainty in the repeatability estimate. The increase in the number of parametric bootstraps will not affect on the point estimates, but interval estimates will be affected. At the same time, the permutation test can be kept switched off. The results are stored as an object names `rep1`.
+Since this works fine and we see a sizable repeatability, we increase the number of parametric bootstraps to 1000, in order to evaluate the uncertainty in the repeatability estimate. The increase in the number of parametric bootstraps will not affect on the point estimates, but interval estimates will be affected. At the same time, the permutation test can be kept switched off. The results are stored as an object names `rep1`.
 
 ```{r gaussian-full-boot, tidy = TRUE}
-rep1 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
+rep1 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 ```
 
 `rptR` offers three generic function for convenient display. The `print` function displays the essence of the repeatability estimation: the point estimate R, standard error SE, confidence interval CI and P values. The `summary` function is more verbose, summarizing parts of the data structure, distributional summaries of the bootstrap and permutation samples and the full details on likelihood ratio tests. Finally, the `plot` function shows the distribution of the parametric bootstrap samples along with the point estimate and the limits of the confidence interval. The plot can be customized by specifying additional graphical parameters as with the `cex.main` argument below (see `?par` for additional arguments).
@@ -84,7 +81,7 @@ The statistical significance of the repeatability is tested by likelihood ratio 
 Permutation can be used as a robust alternative or addition to LRT. In the simplest case this will work by randomizing the vector of group identities against the response vector followed by refitting the model to the randomized data and storage of the repeatability for each of many replications. However, in more complex models involving multiple random effects and/or fixed effects, this will also break the data structure between the grouping factor of interest and other aspects of the experimental design. We therefore construct randomized datasets by fitting a model without the grouping factor of interest and add randomized residuals for this model to the fitted values of this model. This maintains the general data structure and any effects of other design aspects on the response while still breaking the link between grouping factor and the response.
 
 ```{r gaussian-full-boot-permut, tidy = TRUE, warning=1}
-rep2 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=19)
+rep2 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=1000)
 ```
 
 It is not unusual to see warnings about convergence problems, because the data is simulated with zero group-level variance and this might occasionally produce odd data. The results of the permutation tests are shown as part of `print` and `summary`, and can be visualized using the `type` argument in the `plot` function. The results are in general agreement with the LRT in this case, but note that the resolution of the permutation tests is limited by the number of iterations. Since the empirical estimate is always included as one permutation sample (following the reasoning that data is simulated under the null hypothesis being true this is a possible, albeit highly unlikely extreme event, Manly 2007), the resolution is limited to $1/N$ were $N$ is the number of permutations.
@@ -109,7 +106,7 @@ summary(rep2$mod)
 It is possible to include additional random effect components in the repeatability estimation. Indeed there does exist a repeatability for each grouping level (i.e. random effects) and `rptR` controlled by the `grname` argument allows estimating one, multiple or all of them simultaneously. As an example, we estimate the repeatability at the level of the source population (`Population`) as well as at the level of the housing group at the pupal stage (`Container`). Variances at the level of the pupal housing group (`Container`) might arise from various environmental influences, such as temperature or humidity, that might vary on a fine scale among containers.
 
 ```{r gaussian-multiple-randeff, tidy = TRUE}
-rep3 <- rpt(BodyL ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
+rep3 <- rpt(BodyL ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 print(rep3)
 ```
 
@@ -127,7 +124,7 @@ Nested sampling has consequences for how variances are interpreted. In our examp
 One might argue that the full container variance should contain the population variance. It is here possible to estimate the repeatability at the container-level without controlling for population and the results turn out to be almost equivalent to adding the population-level variance to the container-level variance.
 
 ```{r gaussian-containeronly-randeff, tidy = TRUE}
-rep4 <- rpt(BodyL ~ (1|Container),  grname=c("Container"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
+rep4 <- rpt(BodyL ~ (1|Container),  grname=c("Container"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 print(rep4)
 ```
 
@@ -138,7 +135,7 @@ All repeatabilities so far were raw repeatabilities in the sense that they repre
 Estimating adjusted repeatability is facilitated in `rprR` by the `formula` argument. As in any `lmer` formula, fixed effect covariates can be included. We will here include `Treatment` and `Sex` as covariates. Note that the treatment was artificially applied, hence it potentially introduces excess variation to the sample that we might want to control for statistically. 'Sex' is a more controversial example, because it represents part of the natural variation, but often we want to know the (adjusted) repeatabilities given that the sexual identities of the individuals are known (and assuming that repeatabilities are identical across the sexes).
 
 ```{r gaussian-adjusted, tidy = TRUE}
-rep5 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0)
+rep5 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 ```
 
 The results can be viewed and plotted as before and the significance of the fixed effect can be assessed from the fitted model.
@@ -153,10 +150,10 @@ It turns out that most of the variance among containers was cased by sexual dimo
 
 ## Estimating enhanced unadjusted repeatabilities
 
-It is sometimes desiarable to fit models with fixed effects without loosing the variance explained by fixed effects from the denominator. We have therefore introduced the argument `adjusted`. It defaults to `TRUE`, which means that adjusted repeatabilites are estimated. But when set to `FALSE`, it allows estimating what we here call the enhanced unadjusted repeatability, because it allows to fit an improved model without loosing the variance from the repeatability denominator of the repeatability. With `adjusted = FALSE` the variance explained by fixed effects will be calculated by the variance in the linear predictor (on the link scale for non-Gaussian data). This variance is added to the denominator of the repeatability equation just as other variance components.
+It is sometimes desiarable to fit models with fixed effects without loosing the variance explained by fixed effects from the denominator. We have therefore introduced the argument `adjusted`. It defaults to `TRUE`, which means that adjusted repeatabilites are estimated. But when set to `FALSE`, it allows estimating what we here call the _enhanced unadjusted repeatability_, because it allows to fit an improved model without loosing the variance from the repeatability denominator of the repeatability. With `adjusted = FALSE` the variance explained by fixed effects will be calculated by the variance in the linear predictor (on the link scale for non-Gaussian data). This variance is added to the denominator of the repeatability equation just as other variance components.
 
 ```{r gaussian-enhanced-unadjusted, tidy = TRUE}
-rep6 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0, adjusted=FALSE)
+rep6 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0, adjusted=FALSE)
 print(rep6)
 ```
 
@@ -164,10 +161,10 @@ In our example it turns out that the fixed effects explain a substantial amount 
 
 ## Estimating the coefficient determination $R^2$ for fixed effects
 
-If we are able to feed the variance explained by fixed effects to the denominator of the repeatability calclation, it is also possible to extract the variance explained by fixed effects in the model. We have introduced a reserved term `Fixed` to the `grname` argument for this purpose. In combination with `ratio = FALSE`, `Fixed` will return the variance in the linear predictor (on the latent scale for non-Gaussian data). In combination with `ratio = TRUE`, `Fixed` will return the fraction of the total variance that is explained by variance in the linear predictor, i.e. by fixed effects. Incidently, the combination `grname = "Fixed", ratio = TRUE` estimates a form of the coefficient of determination $R^2$ that we have called the _marginal $R^2$_ of mixed effects models (Nakagawa & Schielzeth 2013). While we do provide a quantification of uncertainty for the variance explained by fixed effects and for marginal $R^2$, we haven't implemented significance tested for the fixed effect variance. This should be quantified by other means.
+If we are able to feed the variance explained by fixed effects to the denominator of the repeatability calclation, it is also possible to extract the variance explained by fixed effects in the model. We have introduced a reserved term `Fixed` to the `grname` argument for this purpose. In combination with `ratio = FALSE`, `grname = Fixed` will return the variance in the linear predictor (on the latent scale for non-Gaussian data). In combination with `ratio = TRUE`, `grname = Fixed` will return the fraction of the total variance that is explained by variance in the linear predictor, i.e. by fixed effects. Incidently, the combination `grname = "Fixed", ratio = TRUE` estimates a form of the coefficient of determination $R^2$ that we have called the _marginal $R^2$_ of mixed effects models (Nakagawa & Schielzeth 2013). While we do provide a quantification of uncertainty for the variance explained by fixed effects and for marginal $R^2$, we have not implemented significance tested for the fixed effect variance. This should be quantified by other means.
 
 ```{r gaussian-r2, tidy = TRUE, fig.width=7, fig.height=4}
-rep7 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesBody, datatype="Gaussian", nboot=19, npermut=0, adjusted=FALSE)
+rep7 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0, adjusted=FALSE)
 print(rep7)
 plot(rep7, grname="Fixed", type="boot")
 ```
@@ -192,7 +189,7 @@ hist(BeetlesFemale$Egg, nclass=max(BeetlesFemale$Egg))
 We will estimate the repeatability through the `rpt` function using the `datatype = "Poisson"` argument. Alternatively, it would be possible to fit the model directly using the `rptPoisson` function. The `formula` syntax follows the notation using in `glmer` from the `lme4` package, which is also the central engine for fitting the mixed effects model.
 
 ```{r poisson-model, tidy = TRUE, warning=1}
-rep8 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"),  data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0)
+rep8 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"),  data=BeetlesFemale, datatype="Poisson", nboot=1000, npermut=0)
 ```
 
 In non-Gaussian models it frequently happens that some of the bootstrap or permutation iterations to not converge on a model fit. Warnings are thrown by `glmer` and are collected in the `all_warnings` element of the `rpt` return object.
@@ -202,7 +199,7 @@ As usual, the output can be viewed and displayed by `print`, `summary` and `plot
 print(rep8)
 ```
 
-There are two repeatabilities for Poisson GLMM, derived by a latent scale approximation and a original scale approximation. We have previously called the two estimates the latent scale repeatabilty and the original scale repeatabilty. However, these are both estimates of the same quantities, not entirely different repeatabilites, hence we now prefer to call them the latent and orginal scale approximations. In the case of Poisson GLMM, original scale approximations are actually considered to be the exact solutions, while link scale approximations are indeed approximate. However, in our experience the two typically give very similar results.
+There are two repeatabilities for Poisson GLMM, derived by a latent scale approximation and a original scale approximation. We have previously called the two estimates the latent scale repeatabilty and the original scale repeatabilty. However, these are both estimates of the same quantities, not entirely different repeatabilites, hence we now prefer to call them the _latent and orginal scale approximations_. In the case of Poisson GLMM, original scale approximations are actually considered to be the exact solutions, while link scale approximations are indeed approximate. However, in our experience the two typically give very similar results.
 
 ```{r poisson-model-plot, tidy = TRUE, fig.width=3.2, fig.show="hold"}
 plot(rep8, grname="Container", scale="link", cex.main=0.8)
@@ -214,14 +211,13 @@ plot(rep8, grname="Population", scale="original", cex.main=0.8)
 As with Gaussian models it is possible to estimate enhanced unadjusted repeatabilities as well as the proportion of variances explained by fixed effects (marginal $R^2$). In this case the treatment effect explained about 9% of the variance and including this fraction to the denomionator of the repeatability calculation gives marginally reduced repeatability estimates for population and container:
 
 ```{r poisson-enhanced-unadjusted, tidy = TRUE}
-rep9 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"),  data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, adjusted=FALSE)
+rep9 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"),  data=BeetlesFemale, datatype="Poisson", nboot=1000, npermut=0, adjusted=FALSE)
 print(rep9)
 ```
 
-The quantification of the distribution-specific variance of Poisson models with log-link requires a parameter $\lambda$ that represents the expected value, i.e. the global mean on the data scale. We have previously given different advice for estimating $\lambda$, including the inverse-link of the intercept on the latent scale. While this often gives a reasonable approximation in many cases, the estimate will be biased for small expected values (smaller than about 2). A prefered alternative is to use the mean of the observations in the sample as we have also suggested previously. The is now the default option in `rptR` that is determined by the `expect` argument with its default `expect = "meanobs"`. 
+The quantification of the distribution-specific variance of Poisson models with log-link requires a parameter $\lambda$ that represents the expected value, i.e. the global mean on the data scale. We have previously given different advice for estimating $\lambda$, including the inverse-link of the intercept on the latent scale. While this often gives a reasonable approximation in many cases, the estimate will be biased for small expected values (smaller than about 2). A prefered alternative is to use the mean of the observations in the sample as we have also suggested previously. This is now the default option in `rptR` that is determined by the `expect` argument with its default `expect = "meanobs"`. 
 
-There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including variance caused by fixed effects, on the latents scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only of all covariates are centered. Since centering is not enforced within `rptR`, we have made this option available on an explicit request by setting `expect = "latent"`. 
-
+There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including variance caused by fixed effects, on the latents scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only of all covariates are centered. Since centering is not enforced within `rptR`, we have made this option available on an explicit request by setting `expect = "latent"`. The repeatabilities estimated by the formulae presented in Nakagawa & Schielzeth (2010) can be requested by `expect = "liability"`. 
 
 ## Repeatabilities for Binary data
 
@@ -234,10 +230,10 @@ data(BeetlesMale)
 table(c("dark","reddish")[BeetlesMale$Colour+1])
 ```
 
-We estimate the repeatability through the wrapper function `rpt` at the level of population and at the level of containers. As with Poisson models it frequently happens that some of the bootstrap or permutation iterations to not converge on a model fit and that `glmer` throws warnings that are collected in the `warnings` element of the `rpt` object.
+We estimate the repeatability through the wrapper function `rpt` at the level of population and at the level of containers. As with Poisson models it frequently happens that some of the bootstrap or permutation iterations to not converge on a model fit and that `glmer` throws warnings that are collected in the `all_warnings` element of the `rpt` object.
 
 ```{r binary-model, warning=1, tidy = TRUE, fig.width=7, fig.height=4}
-rep10 <- rpt(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", nboot=19, npermut=0)
+rep10 <- rpt(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", nboot=1000, npermut=0)
 print(rep10)
 ```
 
@@ -246,7 +242,7 @@ As with Poisson GLMM, there are two approximations for the repeatability that we
 It turns out that there is significant repeatability at the level of populations, but not on the level of containers (at least not beyond variance among populations). It frequently happens that small variances are estimated as zero, because small variances are difficult to estimate with any level of confidence. For a check of robustness, we still estimate the enhanced unadjusted repeatabilities controlling for the treatment manipulation, but it turns out that this change to the model does hardly affect the repeatability estimates due to the low explanatory power of the treatment.
 
 ```{r binary-enhaned-unadjusted, tidy = TRUE, fig.width=3.2, fig.show='hold'}
-rep11 <- rpt(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesMale, datatype="Binary", nboot=19, npermut=0, adjusted=FALSE)
+rep11 <- rpt(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Fixed"), data=BeetlesMale, datatype="Binary", nboot=1000, npermut=0, adjusted=FALSE)
 print(rep11)
 plot(rep11, grname="Population", scale="link", cex.main=0.8)
 plot(rep11, grname="Population", scale="original", cex.main=0.8)
@@ -268,7 +264,7 @@ Counts of successes and failures are conveniently modeled as proportion data. Th
 BeetlesMale$Dark = BeetlesMale$Colour
 BeetlesMale$Reddish = (BeetlesMale$Colour-1)*-1
 BeetlesMaleAggr <- aggregate(cbind(Dark, Reddish) ~ Population + Container, data=BeetlesMale, FUN=sum)
-rep12 <- rpt(cbind(Dark, Reddish) ~ (1|Population),  grname=c("Population"), data=BeetlesMaleAggr, datatype="Proportion", nboot=19, npermut=0)
+rep12 <- rpt(cbind(Dark, Reddish) ~ (1|Population),  grname=c("Population"), data=BeetlesMaleAggr, datatype="Proportion", nboot=1000, npermut=0)
 print(rep12)
 ```
 
@@ -287,21 +283,21 @@ In our examples we have used the default link functions of Poisson models (`log`
 ###Poisson models###
 ```{r poisson-model-link comparison, tidy = TRUE, warning=FALSE}
 print(rep8) # log link
-rep8a <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesFemale, datatype="Poisson", link="sqrt", nboot=19, npermut=0)
+rep8a <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesFemale, datatype="Poisson", link="sqrt", nboot=1000, npermut=0)
 print(rep8a) # sqrt link
 ```
 
 ###Binary models###
 ```{r biary-model-link comparison, tidy = TRUE, warning=FALSE}
 print(rep10) # logit link
-rep10a <- rpt(Colour ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", link="probit", nboot=19, npermut=0)
+rep10a <- rpt(Colour ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data=BeetlesMale, datatype="Binary", link="probit", nboot=1000, npermut=0)
 print(rep10a) # probit link
 ```
 
 ###Proportion models###
 ```{r proportion-model-link comparison, tidy = TRUE, warning=FALSE}
 print(rep12) # logit link
-rep12a <- rpt(cbind(Dark, Reddish) ~ (1|Population),  grname=c("Population"), data=BeetlesMaleAggr, datatype="Proportion", link="probit", nboot=19, npermut=0)
+rep12a <- rpt(cbind(Dark, Reddish) ~ (1|Population),  grname=c("Population"), data=BeetlesMaleAggr, datatype="Proportion", link="probit", nboot=1000, npermut=0)
 print(rep12a) # probit link
 ```
 
@@ -312,27 +308,27 @@ We wrote `rptR` with the focus primarily on estimating repeatabilities, includin
 For example, if we are interesting in the link scale variances of colour morph variation, we can estimate the variances as:
 
 ```{r binary-variance-model, warning=1,  tidy = TRUE, fig.show='hold', fig.width=3.2}
-rep13 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, ratio=FALSE)
+rep13 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesFemale, datatype="Poisson", nboot=1000, npermut=0, ratio=FALSE)
 print(rep13)
-plot(rep13, grname="Population", scale="link", cex.main=0.8)
 plot(rep13, grname="Container", scale="link", cex.main=0.8)
+plot(rep13, grname="Population", scale="link", cex.main=0.8)
 ```
 
-Evidently, the significance of the random effect terms won't change no matter whether they are presented as variances or as variances devided by the phenotypic variance. If we are interested in inspecting raw variances, we are often also interested in quantifying the amount of residuals variance and its uncertainty, too. We have therefore introduced to reserve terms for the `grname` argument to allow this. `Residual` will allow estimating the residual variance, which in the case of non-Gaussian models is the overdispersion on the latent scale plus the distribution-specific variance. `Overdispersion` will allow estimating the overdispersion variance and the latent scale, which in the case of Gaussian models (with implicit identity link) is equal to the residual estimated by `Residual`. 
+Evidently, the significance of the random effect terms won't change no matter whether they are presented as variances or as variances devided by the phenotypic variance. If we are interested in inspecting raw variances, we are often also interested in quantifying the amount of residual variance and its uncertainty, too. We have therefore introduced two addition reserved terms for the `grname` argument (besides `grname = "Fixed"`) to allow this. `Residual` will allow estimating the residual variance, which in the case of non-Gaussian models is the overdispersion on the latent scale plus the distribution-specific variance. `Overdispersion` will allow estimating the overdispersion variance and the latent scale, which in the case of Gaussian models (with implicit identity link) is equal to the residual estimated by `Residual`. 
 
-It is currently necessary to specify at least one additional grouping level in the `grname` argument along with `Overdispersion` and/or `Residual`. The results for `Container` and `Population` are unaffaected and are the same as above (`rep13`). In our example there is significant overdispersion, meaning that besides treatment effects and variation among populations and among containers within populations there is more unexplained variation than expected from the Poisson distribution alone.
+It is currently necessary to specify at least one additional grouping level in the `grname` argument along with `Residual`. The results for `Container` and `Population` are unaffaected and are the same as above (`rep13`). In our example there is significant overdispersion, meaning that besides treatment effects and variation among populations and among containers within populations there is more unexplained variation than expected from the Poisson distribution alone.
 
 ```{r binary-residual-model, warning=1,  tidy = TRUE, fig.show='hold', fig.width=3.2}
-rep14 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion", "Residual"), data=BeetlesFemale, datatype="Poisson", nboot=19, npermut=0, ratio=FALSE)
+rep14 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion", "Residual"), data=BeetlesFemale, datatype="Poisson", nboot=1000, npermut=0, ratio=FALSE)
 print(rep14)
 plot(rep14, grname="Overdispersion", scale="link", cex.main=0.8)
 plot(rep14, grname="Residual", scale="link", cex.main=0.8)
 ```
 
-Evidently, it is pointless to test for the statistical significance of residual variance againt a null hypothesis of no residual variance and we therefore omit this test. But for non-Gaussian models it is worthwhile testing if there is statistically significant overdispersion and we have therefore implemented this test. Note, however, that each grouping level specified in `grname` will be tested in separate iterations if a permutation test is required. Hence it is recommened to be careful with the use of `npermut` in combination with multiple grouping levels.
+Evidently, it is pointless to test for the statistical significance of residual variance againt a null hypothesis of no residual variance and we therefore omit this test. But for non-Gaussian models it is worthwhile testing if there is statistically significant overdispersion and we have therefore implemented the LRT test (but not the permutation test) for `Overdispersion`. Be aware, however, that each grouping level specified in `grname` will be tested in separate iterations if a permutation test is required. Hence it is recommened to be careful with the use of `npermut` in combination with multiple grouping levels.
 
 ```{r binary-overdisperion-test, warning=1, tidy = TRUE, fig.width=7, fig.height=4}
-rep15 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Population", "Overdispersion"), data=BeetlesFemale, datatype="Poisson", nboot=0, npermut=19, ratio=FALSE)
+rep15 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population", "Overdispersion"), data=BeetlesFemale, datatype="Poisson", nboot=0, npermut=1000, ratio=FALSE)
 print(rep15)
 ```
 
@@ -349,6 +345,8 @@ Bates, D., M. Maechler, B. Bolker & S. Walker (2015). Fitting linear mixed-effec
 Nakagawa, S. & H. Schielzeth (2010). Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists. Biological Reviews 85: 935-956.
 
 Nakagawa, S. & H. Schielzeth (2013). A general and simple method for obtaining $R^2$ from generalized linear mixed-effects models. Methods in Ecology and Evolution 4: 133-142.
+
+Nakagawa, S. & H. Schielzeth (in prep.). The coefficient of determination R2 and intra-class correlation ICC from generalized linear mixed-effects models revisited and expanded. Manuscript.
 
 Manly, B. F. J. (2007). Randomization, bootstrap and Monte Carlo methods in Biology. 3rd edn. Chapman & Hall, Boca Rato.
 
