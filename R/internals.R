@@ -151,7 +151,7 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         if (family == "poisson") family_fun <- stats::poisson
         if (family == "binomial") family_fun <- stats::binomial
    
-        
+ 
         
         warnings_permut <- with_warnings({
                 
@@ -173,14 +173,19 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                         parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
-                                        R_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
+                                        out_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
                                 }
                                 # adding empirical rpt 
-                                R_permut <- c(list(R), R_permut)
+                                if(!exists("R_permut")) {
+                                        R_permut <- out_permut
+                                } else {
+                                        R_permut <- lapply(1:length(R_permut), function(x) cbind(R_permut[[x]], out_permut[[x]]))
+                                }
                         }
+                        R_permut <- c(list(R), R_permut)
                 }
         })
-        
+        #list(R),
         # equal to boot
         permut_org <- as.list(rep(NA, length(grname)))
         permut_link <- as.list(rep(NA, length(grname)))

@@ -272,7 +272,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         permut <- function(nperm, formula, mod, dep_var, grname, data) {
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
-                        prob = inv_fun(stats::predicted(mod_red, type="link") + sample(stats::resid(mod))))
+                        prob = inv_fun(stats::predict(mod_red, type="link") + sample(stats::resid(mod))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
                 out <- R_pe(formula, data_perm, grname)
