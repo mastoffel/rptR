@@ -151,12 +151,23 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
-                # Overdispersion variance
+                # Distribution-specific and Residual variance
                 if (link == "logit") {
-                        var_r <- var_o + ((pi^2)/3)
+                        if(expect=="latent") Ep <- plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
+                        if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
+                        if(expect=="liability") Ep <- exp(beta0) / (1 + exp(beta0))
+                        if(expect=="latent") estdv_link <- 1 / (Ep*(1-Ep))
+                        if(expect=="meanobs") estdv_link <- 1 / (Ep*(1-Ep))
+                        if(expect=="liability") estdv_link <- pi^2/3
+                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 if (link == "probit") {
-                        var_r <- var_o + 1
+                        if(expect=="latent") Ep <- pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
+                        if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
+                        if(expect=="latent") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
+                        if(expect=="meanobs") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
+                        if(expect=="liability") estdv_link <- 1
+                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 
                 # Fixed effect variance
@@ -179,14 +190,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 
                 if (ratio == TRUE) {
                         if (link == "logit") {
-                                if(expect=="latent") Ep <- plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
-                                if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
-                                if(expect=="liability") Ep <- exp(beta0) / (1 + exp(beta0))
                                 # link scale
-                                if(expect=="latent") estdv <- 1 / (Ep*(1-Ep))
-                                if(expect=="meanobs") estdv <- 1 / (Ep*(1-Ep))
-                                if(expect=="liability") estdv <- pi^2/3
-                                var_p_link <- sum(VarComps[,"vcov"]) + estdv
+                                var_p_link <- sum(VarComps[,"vcov"]) + estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a/ var_p_link
                                 R_r <- var_r / var_p_link
@@ -197,13 +202,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(qlogis(Ep)))^2)) / var_p_org
                         }
                         if (link == "probit") {
-                                if(expect=="latent") Ep <- pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
-                                if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                                 # link scale
-                                if(expect=="latent") estdv <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
-                                if(expect=="meanobs") estdv <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
-                                if(expect=="liability") estdv <- 1
-                                var_p_link <- sum(VarComps[,"vcov"]) + estdv
+                                var_p_link <- sum(VarComps[,"vcov"]) + estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link

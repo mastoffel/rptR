@@ -152,13 +152,16 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
-                # Overdispersion variance
+                # Distribution-specific and residual variance
                 if (link == "sqrt") {
-                        var_r <- VarComps["Overdispersion", "vcov"] + 0.25
+                        estdv_link = 0.25
+                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 if (link == "log") {
-                        estdv <- log(1/exp(beta0)+1)
-                        var_r <- VarComps["Overdispersion", "vcov"] + estdv
+                        if(expect=="meanobs") EY <- mean(mod@resp$y, na.rm=TRUE)
+                        if(expect=="latent") EY <- exp(beta0 + (sum(VarComps[,"vcov"]) + var_f)/2)
+                        estdv_link = log(1/EY+1)
+                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 
                 # Fixed effect variance
@@ -182,7 +185,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 if (ratio == TRUE) {
                         if (link == "sqrt") {
                                 # link scale
-                                var_p_link <- sum(VarComps[,"vcov"]) + 0.25
+                                var_p_link <- sum(VarComps[,"vcov"]) + estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link
@@ -192,11 +195,8 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R_f_org <- NA
                         }
                         if (link == "log") {
-                                if(expect=="meanobs") EY <- mean(mod@resp$y, na.rm=TRUE)
-                                if(expect=="latent") EY <- exp(beta0 + (sum(VarComps[,"vcov"]) + var_f)/2)
                                 # link scale
-                                estdv = log(1/EY+1)
-                                var_p_link <- sum(VarComps[,"vcov"]) +  estdv
+                                var_p_link <- sum(VarComps[,"vcov"]) +  estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link = var_a / var_p_link
                                 R_r <- var_r / var_p_link
