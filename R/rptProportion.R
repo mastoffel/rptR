@@ -88,7 +88,7 @@
 #' 
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs") {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -99,7 +99,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         # check whether grnames just contain "Residual" or "Overdispersion"
         if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
-        
+ 
+        # check whether expect is either "meanobs" or "latent" or "liability"
+        if (expect != "meanobs" & expect != "latent" & expect != "liability") stop("The argument expect has to be either 'meanobs' (the default), 'latent' or 'liability'")
+               
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
@@ -176,21 +179,31 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 
                 if (ratio == TRUE) {
                         if (link == "logit") {
+                                if(expect=="latent") Ep <- plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
+                                if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
+                                if(expect=="liability") Ep <- exp(beta0) / (1 + exp(beta0))
                                 # link scale
-                                var_p_link <- sum(VarComps[,"vcov"]) + (pi^2)/3
+                                if(expect=="latent") estdv <- 1 / (Ep*(1-Ep))
+                                if(expect=="meanobs") estdv <- 1 / (Ep*(1-Ep))
+                                if(expect=="liability") estdv <- pi^2/3
+                                var_p_link <- sum(VarComps[,"vcov"]) + estdv
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a/ var_p_link
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                P <- exp(beta0) / (1 + exp(beta0))
-                                var_p_org <- (sum(VarComps[,"vcov"]) * P^2) / ((1 + exp(beta0))^2) + (P * (1-P))
-                                R_org <- ( (var_a * P^2) / ((1 + exp(beta0))^2)) / var_p_org
-                                R_f_org <- ( (var_f * P^2) / ((1 + exp(beta0))^2)) / var_p_org
+                                var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(qlogis(Ep)))^2+Ep*(1-Ep))
+                                R_org <- ( var_a * Ep^2 / ((1 + exp(qlogis(Ep)))^2)) / var_p_org
+                                R_f_org <- ( var_f * Ep^2/ ((1 + exp(qlogis(Ep)))^2)) / var_p_org
                         }
                         if (link == "probit") {
+                                if(expect=="latent") Ep <- pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
+                                if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                                 # link scale
-                                var_p_link <- sum(VarComps[,"vcov"]) + 1
+                                if(expect=="latent") estdv <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
+                                if(expect=="meanobs") estdv <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
+                                if(expect=="liability") estdv <- 1
+                                var_p_link <- sum(VarComps[,"vcov"]) + estdv
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link
