@@ -275,11 +275,11 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         if (link == "logit") inv_fun <- stats::plogis
         if (link == "probit") inv_fun <- stats::pnorm
 
-        permut <- function(nperm, formula, mod, dep_var, grname, data) {
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
                 # for binom it will be logit 
                  y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
-                                  prob = inv_fun(stats::predicted(mod_red, type="link") + 
-                                  sample(stats::resid(mod))))
+                                  prob = inv_fun(stats::predict(mod_red, type="link") + 
+                                  sample(stats::resid(mod_red))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm
                 data_perm[names(dep_var)[2]] <- rowSums(dep_var) - y_perm
