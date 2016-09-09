@@ -116,7 +116,7 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Pro
             return(out_gaussian)
     }
     if (datatype == "Binary") {
-            out_binary <- rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted)
+            out_binary <- rptBinary(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect)
             out_binary$call <- match.call()
             return(out_binary)
     }
