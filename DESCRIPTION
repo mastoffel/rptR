@@ -9,7 +9,7 @@ Author: Holger Schielzeth <holger.schielzeth@uni-jena.de>,
         Shinichi Nakagawa <s.nakagawa@unsw.edu.au>
 Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: R functions for estimating repeatability (intra-class
-    correlation) from Gaussian, binary, proportion and count data.
+    correlation) from gaussian, binary, proportion and count data.
 License: GPL (>= 2)
 Imports: 
     methods,

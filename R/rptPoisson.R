@@ -62,13 +62,12 @@
 #' # load data
 #' data(BeetlesFemale)
 #' 
-#' # Note: nboot and npermut are set to low numbers for speed reasons. Use larger numbers
-#' # for the real analysis.
+#' # Note: nboot and npermut are set to 0 for speed reasons. 
 #' 
 #' # estimating adjusted repeatabilities for two random effects
 #' rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
 #'                    grname=c("Container", "Population"), 
-#'                    data = BeetlesFemale, nboot=3, npermut=3)
+#'                    data = BeetlesFemale, nboot=0, npermut=0)
 #' 
 #' # unadjusted repeatabilities with  fixed effects and 
 #' # estimation of the fixed effect variance
@@ -78,7 +77,6 @@
 #'                 
 #'                
 #' # variance estimation of random effects, residual and overdispersion 
-#' 
 #' rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
 #'                    grname=c("Container","Population","Residual", "Overdispersion"), 
 #'                    data = BeetlesFemale, nboot=0, npermut=0, ratio = FALSE)
