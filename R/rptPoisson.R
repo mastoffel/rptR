@@ -82,6 +82,11 @@
 #' rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
 #'                    grname=c("Container","Population","Residual", "Overdispersion"), 
 #'                    data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
+#'                    
+#'                    
+#' rep15 <- rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population),  
+#'         grname=c("Population", "Overdispersion"), 
+#'         data=BeetlesFemale, nboot=0, npermut=19, ratio=FALSE)
 #' 
 #' @export
 #' 
@@ -261,11 +266,11 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
                 if (link == "sqrt") {
                         y_perm <- stats::rpois(nrow(data), 
-                                (stats::predicted(mod_red, type="link") + sample(stats::resid(mod_red)))^2)
+                                (stats::predict(mod_red, type="link") + sample(stats::resid(mod_red)))^2)
                         }
                 if (link == "log") {
                         y_perm <- stats::rpois(nrow(data), 
-                                exp(stats::predicted(mod_red, type="link") + sample(stats::resid(mod_red))))
+                                exp(stats::predict(mod_red, type="link") + sample(stats::resid(mod_red))))
                 }
                 data_perm <- data
                 data_perm[dep_var] <- y_perm

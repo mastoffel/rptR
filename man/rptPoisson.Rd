@@ -127,6 +127,11 @@ rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population),
 rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population) , 
                    grname=c("Container","Population","Residual", "Overdispersion"), 
                    data = BeetlesFemale, nboot=3, npermut=3, ratio = FALSE)
+                   
+                   
+rep15 <- rptPoisson(formula = Egg ~ Treatment + (1|Container) + (1|Population),  
+        grname=c("Population", "Overdispersion"), 
+        data=BeetlesFemale, nboot=0, npermut=19, ratio=FALSE)
 
 }
 \author{
