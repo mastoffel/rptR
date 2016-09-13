@@ -19,7 +19,7 @@ R_est_1 <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Popula
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
         expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
-        expect_equal(R_est_1$R["R_org", ],1.080313, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_org", ],0.1853997, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", ], 0.1879315, tolerance = 0.001)
 })
 
@@ -36,8 +36,8 @@ R_est_2 <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Popula
 test_that("rpt estimation works for one random effect, boot, no permut, no parallelisation, logit link", {
         
         # original scale
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["2.5%"]), 1.072363, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["97.5%"]), 1.092992, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["2.5%"]), 0.1587981, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["97.5%"]), 0.1896277, tolerance = 0.001)
         # link scale
         expect_equal(as.numeric(R_est_2$CI_emp$CI_link["2.5%"]),  0.1602279, tolerance = 0.001)
         expect_equal(as.numeric(R_est_2$CI_emp$CI_link["97.5%"]), 0.1923845, tolerance = 0.001)
@@ -48,14 +48,14 @@ test_that("rpt estimation works for one random effect, boot, no permut, no paral
 
 # run with one random effect, no boot, permut
 R_est_3 <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
-        nboot=0, npermut=5)
+        nboot=0, npermut=2)
 
 test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
         
         # original scale
-        expect_equal(R_est_3$P$P_permut_org, 0.2, tolerance = 0.001)
+        expect_equal(R_est_3$P$P_permut_org, 0.5, tolerance = 0.001)
         # link scale
-        expect_equal(R_est_3$P$P_permut_link, 0.2, tolerance = 0.001)
+        expect_equal(R_est_3$P$P_permut_link, 0.5, tolerance = 0.001)
         
 })
 
@@ -69,16 +69,16 @@ test_that("rpt estimation works for one random effect, no boot, permut, no paral
 ########## checks for two random effects
 
 # run with one random effect, no boot, no permut
-R_est_1 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population"), data = md,
+R_est_1 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), grname=c("Container", "Population", "Residual"), data = md,
         nboot=0, npermut=0))
 
 test_that("rpt estimation works for two random effect, no boot, no permut, no parallelisation, logit link", {
         expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
         # 1st random effect
-        expect_equal(R_est_1$R["R_org", 1], 3.720300e-11, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_org", 1], 3.030087e-11, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", 1], 4.686765e-11 , tolerance = 0.001)
         # 2nd random effect
-        expect_equal(R_est_1$R["R_org", 2],  1.080313, tolerance = 0.001)
+        expect_equal(R_est_1$R["R_org", 2],  0.1854017, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", 2], 0.1879334, tolerance = 0.001)
 })
 
@@ -87,11 +87,6 @@ test_that("LRTs works", {
         expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001)
         expect_equal(R_est_1$P[2, "LRT_P"], 5.81e-09, tolerance = 0.001)
 })
-
-# variance components sum up to 1
-R_est_1 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), 
-        grname=c("Container", "Population", "Residual"), data = md,
-        nboot=0, npermut=0))
 
 test_that("random effect components sum to up to one", {
         expect_equal(sum(R_est_1$R["R_link", ]), 1)
@@ -106,20 +101,20 @@ test_that("rpt estimation works for two random effect, boot, no permut, no paral
         
         # original scale
         # 1st random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[1, "2.5%"]),  0, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[1, "97.5%"]), 0, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[1, "2.5%"]),  0.0001784753, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[1, "97.5%"]), 0.006960535, tolerance = 0.001)
         # 2nd random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[2, "2.5%"]),  1.065764 , tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[2, "97.5%"]),1.090891, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[2, "2.5%"]),  0.1085067 , tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org[2, "97.5%"]), 0.1204242, tolerance = 0.001)
         
         
         # link scale
         # 1st random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[1, "2.5%"]),  0, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[1, "97.5%"]),0, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[1, "2.5%"]),  0.0001784753, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[1, "97.5%"]),0.006960535, tolerance = 0.001)
         # 2nd random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[2, "2.5%"]), 0.1302289, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[2, "97.5%"]), 0.1815155, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[2, "2.5%"]), 0.1085067, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link[2, "97.5%"]), 0.1204242, tolerance = 0.001)
         
 })
 
