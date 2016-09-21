@@ -8,10 +8,13 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+```{r, echo = FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
                       
-The concept of 'repeatability' relates to the way of quantifying the reliability of measurments. In a wider context, however, the repeatability offers insights into the components contributing variability in the data. The repeatability describes the relative partitioning of variance into within-group and between-group sources of variance and is more generally referred to as the intra-class correlation (ICC). The hierarchical decomposition of variances has become the focus of several disciplines. For example, in the context of behavioral research, repeatability measures the relative consistency of some behaviorial trait within individuals and the variability across individuals. The repeatability, therefore, became a fundamental quantity of interest in the field of animal personality research.
+The concept of 'repeatability' relates to the way of quantifying the reliability of measurements. In a wider context, however, the repeatability offers insights into the components contributing to variability in the data. The repeatability describes the relative partitioning of variance into within-group and between-group sources of variance and is more generally referred to as the intra-class correlation (ICC). The hierarchical decomposition of variances has become the focus of several disciplines. For example, in the context of behavioral research, repeatability measures the relative consistency of some behaviorial trait within individuals and the variability across individuals. The repeatability, therefore, became a fundamental quantity of interest in the field of animal personality research.
 
-A very powerful tool for estimating repeatabilities is the mixed effects model framework. Random-effect predictors are used to estimate variances at different hierarchical levels. In the simplest case of a design where repeated measures (e.g. quantification of behavior) were taken from the same features (e.g. individuals), the repeatability $R$ is calculated as the variances among groups means (group-level variance $V_G$) over the sum of group-level and data-level $V_R$ variance:
+A very powerful tool for estimating repeatabilities is the mixed effects model framework. Random-effect predictors are used to estimate variances at different hierarchical levels. In the simplest case of a design where repeated measures (e.g. quantification of behavior) were taken from the same features (e.g. individuals), the repeatability $R$ is calculated as the variances among group means (group-level variance $V_G$) over the sum of group-level and data-level $V_R$ variance:
 $$
 R = {V_G}/{(V_G+V_R)}
 $$
