@@ -23,8 +23,8 @@
 print.rpt <- function(x, ...) {
         
 if (x$ratio == TRUE) {
-        header_gaussian <- "Repeatability calculation using the lmm method"
-        header_nongaussian <- "Repeatability calculation using the glmm method and"
+        header_gaussian <- "Repeatability estimation using the lmm method"
+        header_nongaussian <- "Repeatability estimation using the glmm method and"
         header2 <- "Repeatability for "
         PE <- "R  = "
         subheader_link <- "Link-scale approximation:"
@@ -90,7 +90,3 @@ if (x$ratio == TRUE) {
     }
 } 
 
-        
-        
-        
- 
