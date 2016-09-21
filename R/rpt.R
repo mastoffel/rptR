@@ -93,6 +93,8 @@
 #' rpt(Egg ~ Treatment + (1|Container) + (1|Population), grname=c("Population"), 
 #'      data = BeetlesFemale, nboot=0, npermut=0, datatype = "Poisson")
 #' 
+#' \dontrun{
+#' 
 #' # binary data (example with estimation of the fixed effect variance)
 #' rpt(Colour ~ Treatment + (1|Container) + (1|Population), 
 #'      grname=c("Population", "Container", "Fixed"), 
@@ -104,6 +106,7 @@
 #'      grname=c("Population", "Residual", "Fixed"), data=BeetlesColour,
 #'      nboot=0, npermut=0, datatype = "Proportion", ratio=FALSE)
 #' 
+#' }
 #' 
 #' @keywords models
 #' 

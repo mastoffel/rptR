@@ -120,12 +120,14 @@ data=BeetlesMale, nboot=0, npermut=0)
 rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container", "Population", "Fixed"), 
                    data=BeetlesMale, nboot=0, npermut=0, adjusted=FALSE)
-                   
+
+
+\dontrun{
 # variance estimation of random effects, residual and overdispersion 
 R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container","Population","Residual", "Overdispersion"), 
                    data = BeetlesMale, nboot=0, npermut=0, ratio = FALSE)
-                   
+}    
 
      
 }
