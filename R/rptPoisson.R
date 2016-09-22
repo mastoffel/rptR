@@ -152,6 +152,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
+
+                # Fixed effect variance
+                var_f <- stats::var(stats::predict(mod, re.form=NA))
                 
                 # Distribution-specific and residual variance
                 if (link == "sqrt") {
@@ -165,9 +168,6 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                         var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
                 }
                 
-                # Fixed effect variance
-                var_f <- stats::var(stats::predict(mod, re.form=NA))
-
                 if (ratio == FALSE) {
                         R_link <- var_a
                         R_org <- NA
