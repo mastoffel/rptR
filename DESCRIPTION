@@ -14,7 +14,7 @@ License: GPL (>= 2)
 Imports: 
     methods,
     stats,
-    lme4,
+    lme4 (>= 1.1-7),
     parallel (>= 3.1.2)
 Suggests: 
     testthat,
