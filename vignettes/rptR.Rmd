@@ -307,7 +307,7 @@ We wrote `rptR` with the focus primarily on estimating repeatabilities, includin
 
 For example, if we are interesting in the link scale variances of colour morph variation, we can estimate the variances as:
 
-```{r binary-variance-model, warning=1,  tidy = TRUE, fig.show='hold', fig.width=3.2, }
+```{r binary-variance-model, warning=1,  tidy = TRUE, fig.show='hold', fig.width=3.2 }
 rep13 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesFemale, datatype="Poisson", nboot=11, npermut=0, ratio=FALSE)
 print(rep13)
 plot(rep13, grname="Container", scale="link", cex.main=0.8)
