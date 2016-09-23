@@ -10,6 +10,7 @@ rptR
 
 ``` r
     # install.packages("devtools")
+    # building vignettes might take some time. Set build_vignettes = FALSE for a quick download.
     devtools::install_github("mastoffel/rptR", build_vignettes = TRUE)
     # tutorial
     browseVignettes("rptR")
