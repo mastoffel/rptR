@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 # rptR
 
 ![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
+[![CRAN total downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR) 
 
 `rptR` provides a collection of functions for calculating point estimates, confidence intervals and significance tests of the repeatability (intra-class correlation coefficient) of measurements, as well as on the variances themselves. The function `rpt` is a the core functions that calls more specialised functions as required. Specialised functions can also be called directly (see `?rpt` for details). All functions return lists of values. The function `?summary.rpt` produces summaries in a detailed format, whereby `?plot.rpt` plots the distributions of bootstrap or permutation test estimates.
 
