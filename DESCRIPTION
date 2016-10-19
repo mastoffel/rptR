@@ -15,7 +15,8 @@ Imports:
     methods,
     stats,
     lme4,
-    parallel (>= 3.1.2)
+    parallel (>= 3.1.2),
+    pbapply
 Suggests: 
     testthat,
     knitr,
