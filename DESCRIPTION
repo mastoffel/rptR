@@ -1,6 +1,6 @@
 Package: rptR
 Title: Repeatability Estimation for Gaussian and Non-Gaussian Data
-Version: 0.9.0.9000
+Version: 0.9.1.9000
 Depends: 
     R (>= 3.2.1)
 Date: 2016-09-23
