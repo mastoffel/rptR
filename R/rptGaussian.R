@@ -220,7 +220,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # start cluster
                 cl <- parallel::makeCluster(ncores)
                 parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_boot <- unname(parallel::parApply(cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
+                R_boot <- unname(parallel::parApply(cl = cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
                         data = data, grname = grname))
                 parallel::stopCluster(cl)
         }
