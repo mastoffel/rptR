@@ -40,7 +40,7 @@ if (x$ratio == TRUE) {
 
         
         if (x$datatype == "Gaussian") {
-                # cat("\n")
+                cat("\n\n")
                 cat(header_gaussian, "\n\n")
                 for (i in 1:length(x$R)) {
                         cat(header2, names(x$R)[i], "\n",
@@ -63,7 +63,7 @@ if (x$ratio == TRUE) {
         
         
     if (x$datatype == "Poisson" | x$datatype == "Binary" | x$datatype == "Proportion") {
-            # cat("\n")
+            cat("\n\n")
             cat(header_nongaussian, x$link, 
                     "link", "\n\n") 
             # grnames <- names(x$R)

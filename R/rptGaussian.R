@@ -204,10 +204,6 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # bootstrapping function
         bootstr <- function(y, mod, formula, data, grname) {
-                # progress bar
-                # if (!is.null(num_iter)) num_iter <<- num_iter + 1
-                # utils::setTxtProgressBar(pb, num_iter)
-                # function
                 data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 R_pe(formula, data, grname)
         }
@@ -230,16 +226,11 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
                 
         if (nboot > 0 & parallel == FALSE) {
-                
+               
                 cat("Bootstrap Progress:\n")
-                # flush.console() 
-                # pb <- utils::txtProgressBar(label = "Bootstrap Progress...", min = 1, max = ncol(Ysim), style = 3)
-                # num_iter <- 1
-                
                 R_boot <- unname(pbapply::pbapply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
                         grname = grname))
                 
-                #close(pb)
         }
         if (nboot == 0) {
                 R_boot <- NA

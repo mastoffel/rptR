@@ -57,7 +57,8 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
                         parallel::stopCluster(cl)
                 }
                 if (nboot > 0 & parallel == FALSE) {
-                        R_boot <- unname(lapply(Ysim, bootstr, mod, formula, data , 
+                        cat("Bootstrap Progress:\n")
+                        R_boot <- unname(pbapply::pblapply(Ysim, bootstr, mod, formula, data , 
                                 grname))
                 }
                 if (nboot == 0) {
@@ -175,7 +176,8 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                         parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
-                                        out_permut <- lapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
+                                        cat("Permutation Progress:\n")
+                                        out_permut <- pbapply::pblapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
                                 }
                                 
                                 } 
