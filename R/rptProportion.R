@@ -138,16 +138,17 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         
         # point estimates of R
-        R_pe <- function(formula, data, grname, peYN = FALSE, mod = NULL, resp = NULL) {
+        R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                if (!is.null(mod)) {
-                        mod <- lme4::refit(mod, newresp = resp)
-                } else {
-                        # model
-                        mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
-                }
+                # if (!is.null(mod)) {
+                #         mod <- lme4::refit(mod, newresp = resp)
+                # } else {
+                #         # model
+                #         mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                # }
                 
-               
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp                
@@ -251,8 +252,9 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         }  
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
-                # data[, colnames(y)] <- y
-                R_pe(formula, data, grname, mod = mod, resp = y)
+                data[, colnames(y)] <- y
+                # R_pe(formula, data, grname, mod = mod, resp = y)
+                R_pe(formula, data, grname)
         }
         
         # run all bootstraps
