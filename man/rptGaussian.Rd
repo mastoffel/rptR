@@ -106,7 +106,9 @@ rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Popul
 # estimation of the fixed effect variance
 rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
                   grname=c("Container", "Population", "Fixed"), 
-                  data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+                  data=BeetlesBody, nboot=100, npermut=3, adjusted=FALSE)
+                  
+                  
                
 # two random effects, estimation of variance (instead repeatability)
 R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 

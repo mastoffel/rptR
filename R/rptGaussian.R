@@ -68,7 +68,9 @@
 #' # estimation of the fixed effect variance
 #' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
 #'                   grname=c("Container", "Population", "Fixed"), 
-#'                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
+#'                   data=BeetlesBody, nboot=100, npermut=3, adjusted=FALSE)
+#'                   
+#'                   
 #'                
 #' # two random effects, estimation of variance (instead repeatability)
 #' R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
@@ -115,7 +117,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
         # from grname vector
- 
+        
         for (component in c("Residual", "Overdispersion", "Fixed")) {
                 if (any(grname == component)){
                         grname <- grname[-which(grname == component)]
@@ -124,15 +126,20 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         if (component == "Fixed") output_fixed <- TRUE
                 }
         }
-               
-          
+        
+        
         
         
         # point estimates of R or var
-        R_pe <- function(formula, data, grname) {
+        R_pe <- function(formula, data, grname, mod = NULL, resp = NULL) {
                 
-                # model
-                mod <- lme4::lmer(formula, data)
+                if (!is.null(mod)) {
+                        mod <- lme4::refit(mod, newresp = resp)
+                } else {
+                        # model
+                        mod <- lme4::lmer(formula, data)   
+                }
+                
                 VarComps <- lme4::VarCorr(mod)
                 
                 # Residual variance
@@ -146,7 +153,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # Fixed effect variance
                 var_f <- stats::var(stats::predict(mod, re.form=NA))
                 names(var_f) <- "Fixed"
-
+                
                 # group variances
                 var_a <- as.numeric(VarComps[grname])
                 names(var_a) <- grname
@@ -154,7 +161,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 # denominator variance
                 var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
                 if (!adjusted) var_p <- var_p + var_f
-
+                
                 # return variance instead of repeatability
                 if (ratio == FALSE) { 
                         R <- as.data.frame(t(var_a))
@@ -175,11 +182,11 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 # return repeatability
                 if (ratio == TRUE) { 
-        
+                        
                         R <- var_a/var_p
                         R <- as.data.frame(t(R))
                         names(R) <- grname
-                
+                        
                         # check whether to give out Residual
                         if(output_resid){
                                 R$Residual <- var_e / var_p
@@ -204,37 +211,38 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # bootstrapping function
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
-                R_pe(formula, data, grname)
+                # data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
+                resp <- as.vector(y)
+                R_pe(formula, data, grname, mod = mod, resp = resp)
         }
         
         num_iter <- NULL
         
         warnings_boot <- with_warnings({
                 
-        if (nboot > 0 & parallel == TRUE) {
-                if (is.null(ncores)) {
-                        ncores <- parallel::detectCores() - 1
-                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                if (nboot > 0 & parallel == TRUE) {
+                        if (is.null(ncores)) {
+                                ncores <- parallel::detectCores() - 1
+                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                        }
+                        # start cluster
+                        cl <- parallel::makeCluster(ncores)
+                        parallel::clusterExport(cl, "R_pe", envir=environment())
+                        R_boot <- unname(parallel::parApply(cl = cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
+                                data = data, grname = grname))
+                        parallel::stopCluster(cl)
                 }
-                # start cluster
-                cl <- parallel::makeCluster(ncores)
-                parallel::clusterExport(cl, "R_pe", envir=environment())
-                R_boot <- unname(parallel::parApply(cl = cl, Ysim, 2, bootstr, mod = mod, formula = formula, 
-                        data = data, grname = grname))
-                parallel::stopCluster(cl)
-        }
                 
-        if (nboot > 0 & parallel == FALSE) {
-               
-                cat("Bootstrap Progress:\n")
-                R_boot <- unname(pbapply::pbapply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
-                        grname = grname))
-                
-        }
-        if (nboot == 0) {
-                R_boot <- NA
-        }
+                if (nboot > 0 & parallel == FALSE) {
+                        
+                        cat("Bootstrap Progress:\n")
+                        R_boot <- unname(pbapply::pbapply(Ysim, 2, bootstr, mod = mod, formula = formula, data = data, 
+                                grname = grname))
+                        
+                }
+                if (nboot == 0) {
+                        R_boot <- NA
+                }
                 
         })
         
@@ -250,18 +258,18 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (length(R_boot) == 1) {
                 # creating tables when R_boot = NA
                 if (is.na(R_boot)) {
-                       se <- NA 
-                       CI_emp <- calc_CI(NA)
+                        se <- NA 
+                        CI_emp <- calc_CI(NA)
                 }
         } else  {
                 boot <- do.call(rbind, R_boot)
                 CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
-              
+                
         }
         
-
+        
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
@@ -288,7 +296,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         dep_var <- as.character(formula)[2]
         # one random effect, uses stats::lm()
         # multiple random effects, uses lmer()
- 
+        
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
@@ -297,35 +305,35 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         warnings_permut <- with_warnings({
                 
-        if (npermut > 1){
-                for (i in 1:length(grname)) {
+                if (npermut > 1){
+                        for (i in 1:length(grname)) {
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
                                 mod_red <- mod_fun(formula_red, data = data)
-                        if(parallel == TRUE) {
-                                if (is.null(ncores)) {
-                                        ncores <- parallel::detectCores()
-                                        warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                                if(parallel == TRUE) {
+                                        if (is.null(ncores)) {
+                                                ncores <- parallel::detectCores()
+                                                warning("No core number specified: detectCores() is used to detect the number of \n cores on the local machine")
+                                        }
+                                        # start cluster
+                                        cl <- parallel::makeCluster(ncores)
+                                        parallel::clusterExport(cl, "R_pe", envir=environment())
+                                        R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
+                                        parallel::stopCluster(cl)
+                                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
+                                } else if (parallel == FALSE) {
+                                        cat("Permutation Progress:\n")
+                                        R_permut[i, ] <- c(R[i], as.numeric(unlist(pbapply::pbreplicate(npermut - 1, permut(formula=formula, data = data, 
+                                                mod_red=mod_red, dep_var=dep_var, grname=grname, i=i)))))
+                                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                                 }
-                                # start cluster
-                                cl <- parallel::makeCluster(ncores)
-                                parallel::clusterExport(cl, "R_pe", envir=environment())
-                                R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
-                                parallel::stopCluster(cl)
-                                P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
-                        } else if (parallel == FALSE) {
-                                cat("Permutation Progress:\n")
-                                R_permut[i, ] <- c(R[i], as.numeric(unlist(pbapply::pbreplicate(npermut - 1, permut(formula=formula, data = data, 
-                                        mod_red=mod_red, dep_var=dep_var, grname=grname, i=i)))))
-                                P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                         }
                 }
-        }
                 
         })
         # name R_permut and P_permut
         row.names(R_permut) <- grname
         names(P_permut) <- grname
-  
+        
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
@@ -358,7 +366,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         row.names(LRT_table)[nrow(LRT_table)] <- component
                 }
         }
-   
+        
         
         res <- list(call = match.call(), 
                 datatype = "Gaussian", 

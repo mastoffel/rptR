@@ -137,9 +137,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         }
         
         # point estimates of R
-        R_pe <- function(formula, data, grname) {
+        R_pe <- function(formula, data, grname, mod = NULL, resp = NULL) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                if (!is.null(mod)) {
+                        mod <- lme4::refit(mod, newresp = resp)
+                } else {
+                        # model
+                        mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                }
                 
                 # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
@@ -240,8 +245,9 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
-                R_pe(formula, data, grname)
+                # data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
+                resp <- as.vector(y)
+                R_pe(formula, data, grname, mod = mod, resp = resp)
         }
         
         # run all bootstraps

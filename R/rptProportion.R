@@ -138,9 +138,16 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         
         # point estimates of R
-        R_pe <- function(formula, data, grname, peYN = FALSE) {
+        R_pe <- function(formula, data, grname, peYN = FALSE, mod = NULL, resp = NULL) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                if (!is.null(mod)) {
+                        mod <- lme4::refit(mod, newresp = resp)
+                } else {
+                        # model
+                        mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                }
+                
+               
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp                
@@ -244,12 +251,13 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         }  
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, colnames(y)] <- y
-                R_pe(formula, data, grname)
+                # data[, colnames(y)] <- y
+                R_pe(formula, data, grname, mod = mod, resp = y)
         }
         
         # run all bootstraps
-        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, 
+                grname_org, nboot, parallel, ncores, CI)
         
         # load everything (elegant solution)
         # list2env(bootstraps, envir = e1)

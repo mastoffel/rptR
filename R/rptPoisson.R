@@ -137,11 +137,15 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         }
         
         # point estimates of R
-        R_pe <- function(formula, data, grname, peYN = FALSE) {
+        R_pe <- function(formula, data, grname, peYN = FALSE, mod = NULL, resp = NULL) {
                 
-                # mod <- suppressWarnings(lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link)))
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
-                
+                if (!is.null(mod)) {
+                        mod <- lme4::refit(mod, newresp = resp)
+                } else {
+                        # model
+                        mod <- lme4::glmer(formula = formula, data = data, family = stats::poisson(link = link))
+                }
+               
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp
@@ -232,8 +236,9 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
-                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
-                R_pe(formula, data, grname)
+                # data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
+                resp <- as.vector(y)
+                R_pe(formula, data, grname, mod = mod, resp = resp)
         }
         
         # run all bootstraps
