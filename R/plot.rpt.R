@@ -15,6 +15,10 @@
 #' Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
+#' @return 
+#' A histogram of the distribution of bootstrapping or permutation test estimates of the 
+#' repeatability including a confidence interval (CI).
+#' 
 #' @author Holger Schielzeth  (holger.schielzeth@@uni-jena.de), 
 #'         Shinichi Nakagawa (s.nakagawa@unsw.edu.au),
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com) 

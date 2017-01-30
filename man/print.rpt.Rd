@@ -11,6 +11,15 @@
 
 \item{\dots}{Additional arguments; none are used in this method.}
 }
+\value{
+Abbreviations in the print.rpt output:
+\item{R}{Repeatability.}
+\item{SE}{Standard error of R.}
+\item{CI}{Confidence interval of R derived from parametric bootstrapping.}
+\item{P}{P-value}
+\item{LRT}{Likelihood-ratio test}
+\item{Permutation}{Permutation of residuals}
+}
 \description{
 Displays the results a rpt object (i.e. the result of a rpt function call) in a nice form.
 }

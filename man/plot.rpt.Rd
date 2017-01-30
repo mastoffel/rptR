@@ -25,6 +25,10 @@
 
 \item{\dots}{Additional arguments to the hist() function for customized plotting.}
 }
+\value{
+A histogram of the distribution of bootstrapping or permutation test estimates of the 
+repeatability including a confidence interval (CI).
+}
 \description{
 Plots the distribution of repeatability estimates from bootstrapping and permutation tests.
 }
