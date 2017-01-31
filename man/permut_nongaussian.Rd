@@ -5,7 +5,7 @@
 \title{Permutation function for non-gaussian functions (internal use)}
 \usage{
 permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut,
-  parallel, ncores, link, family, R)
+  parallel, ncores, link, family, R, mod)
 }
 \arguments{
 \item{permut}{permutation function which permutes residuals and calculates R}
@@ -31,6 +31,8 @@ permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut,
 \item{family}{respnse family (so far just binomial or poisson)}
 
 \item{R}{point estimate to concetenate with permutations}
+
+\item{mod}{fitted lme4 model}
 }
 \description{
 Permutation function for non-gaussian functions (internal use)

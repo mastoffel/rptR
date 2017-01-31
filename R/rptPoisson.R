@@ -264,7 +264,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         dep_var <- as.character(formula)[2]
         
         #  main permutation function
-        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data, mod) {
                 if (link == "sqrt") {
                         y_perm <- stats::rpois(nrow(data), 
                                 (stats::predict(mod_red, type="link") + sample(stats::resid(mod_red)))^2)
@@ -275,13 +275,15 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 }
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                out <- R_pe(formula, data_perm, grname)
+                
+                out <- R_pe(formula, data_perm, grname, mod = mod, resp = y_perm)
+                # out <- R_pe(formula, data_perm, grname)
                 out
         }
         
         family <- "poisson"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                                           grname, npermut, parallel, ncores, link, family, R)
+                                           grname, npermut, parallel, ncores, link, family, R, mod)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org

@@ -128,7 +128,7 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 #' 
 #' @keywords internal
 
-permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R){
+permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R, mod){
         
   
         # predefine if no permutation test
@@ -172,12 +172,12 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                         cl <- parallel::makeCluster(ncores)
                                         parallel::clusterExport(cl, "R_pe", envir=environment())
                                         out_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                                mod=mod_red, dep_var=dep_var, grname=grname[i], data = data)
+                                                mod=mod_red, dep_var=dep_var, grname=grname[i], data = data, mod = mod)
                                         parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
                                         cat("Permutation Progress:\n")
-                                        out_permut <- pbapply::pblapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
+                                        out_permut <- pbapply::pblapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data, mod)
                                 }
                                 
                                 } 

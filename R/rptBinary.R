@@ -277,19 +277,21 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (link == "logit") inv_fun <- stats::plogis
         if (link == "probit") inv_fun <- stats::pnorm
 
-        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data, mod) {
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
                         prob = inv_fun(stats::predict(mod_red, type="link") + sample(stats::resid(mod_red))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                out <- R_pe(formula, data_perm, grname)
+                
+                # add mod and resp to use lme4::refit instead of fitting a new model
+                out <- R_pe(formula, data_perm, grname, mod = mod, resp = y_perm)
                 out
         }
         
         family <- "binomial"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                                           grname, npermut, parallel, ncores, link, family, R)
+                                           grname, npermut, parallel, ncores, link, family, R, mod)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org
