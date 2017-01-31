@@ -213,6 +213,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         bootstr <- function(y, mod, formula, data, grname) {
                 # data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
                 resp <- as.vector(y)
+                # add mod and resp to use lme4::refit instead of fitting a new model
                 R_pe(formula, data, grname, mod = mod, resp = resp)
         }
         
@@ -285,11 +286,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # significance test by permutation of residuals
         # nperm argument just used for parallisation
-        permut <- function(nperm, formula, data, mod_red, dep_var, grname, i) {
+        permut <- function(nperm, formula, data, mod_red, dep_var, grname, i, mod) {
                 y_perm <- stats::fitted(mod_red) + sample(stats::resid(mod_red))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                out <- R_pe(formula, data_perm, grname[i])
+                
+                # add mod and resp to use lme4::refit instead of fitting a new model
+                out <- R_pe(formula, data_perm, grname[i], mod = mod, resp = y_perm)
                 out
         }
         
@@ -317,13 +320,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                         # start cluster
                                         cl <- parallel::makeCluster(ncores)
                                         parallel::clusterExport(cl, "R_pe", envir=environment())
-                                        R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i))))
+                                        R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i, mod))))
                                         parallel::stopCluster(cl)
                                         P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                                 } else if (parallel == FALSE) {
                                         cat("Permutation Progress:\n")
                                         R_permut[i, ] <- c(R[i], as.numeric(unlist(pbapply::pbreplicate(npermut - 1, permut(formula=formula, data = data, 
-                                                mod_red=mod_red, dep_var=dep_var, grname=grname, i=i)))))
+                                                mod_red=mod_red, dep_var=dep_var, grname=grname, i=i, mod = mod)))))
                                         P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                                 }
                         }
