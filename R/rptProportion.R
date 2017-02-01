@@ -98,10 +98,10 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         # check whether grnames just contain "Residual" or "Overdispersion"
         if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
- 
+        
         # check whether expect is either "meanobs" or "latent" or "liability"
         if (expect != "meanobs" & expect != "latent" & expect != "liability") stop("The argument expect has to be either 'meanobs' (the default), 'latent' or 'liability'")
-               
+        
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
@@ -140,15 +140,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                # if (!is.null(mod)) {
-                #         mod <- lme4::refit(mod, newresp = resp)
-                # } else {
-                #         # model
-                #         mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
-                # }
-                
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
-                
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp                
@@ -226,7 +218,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
-                
+                        
                         # check whether to give out non-repeatability and overdispersion repeatability
                         if (output_resid){
                                 R[,"Residual"] <- c(NA, R_r) # add NA for R_org
@@ -253,13 +245,11 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
                 data[, colnames(y)] <- y
-                # R_pe(formula, data, grname, mod = mod, resp = y)
                 R_pe(formula, data, grname)
         }
         
         # run all bootstraps
-        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, 
-                grname_org, nboot, parallel, ncores, CI)
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
         
         # load everything (elegant solution)
         # list2env(bootstraps, envir = e1)
@@ -273,7 +263,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         boot_org <- bootstraps$boot_org
         warnings_boot <- bootstraps$warnings_boot
         
-
+        
         
         ### permutation of residuals ###
         
@@ -284,12 +274,12 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # defining main permutation function
         if (link == "logit") inv_fun <- stats::plogis
         if (link == "probit") inv_fun <- stats::pnorm
-
-        permut <- function(nperm, formula, mod_red, dep_var, grname, data, mod) {
+        
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
                 # for binom it will be logit 
-                 y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
-                                  prob = inv_fun(stats::predict(mod_red, type="link") + 
-                                  sample(stats::resid(mod_red))))
+                y_perm <- stats::rbinom(nrow(data), rowSums(dep_var), 
+                        prob = inv_fun(stats::predict(mod_red, type="link") + 
+                                        sample(stats::resid(mod_red))))
                 data_perm <- data
                 data_perm[names(dep_var)[1]] <- y_perm
                 data_perm[names(dep_var)[2]] <- rowSums(dep_var) - y_perm
@@ -299,7 +289,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         
         family <- "binomial"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                                           grname, npermut, parallel, ncores, link, family, R, mod = NULL)
+                grname, npermut, parallel, ncores, link, family, R)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org

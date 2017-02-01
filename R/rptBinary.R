@@ -84,7 +84,7 @@
 #' 
 
 rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-                      npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs") {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs") {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -95,10 +95,10 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # check whether grnames just contain "Residual" or "Overdispersion"
         if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
-
+        
         # check whether expect is either "meanobs" or "latent" or "liability"
         if (expect != "meanobs" & expect != "latent" & expect != "liability") stop("The argument expect has to be either 'meanobs' (the default), 'latent' or 'liability'")
-                
+        
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
@@ -107,7 +107,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         data <- cbind(data, Overdispersion)
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
-
+        
         if (nboot == 1) {
                 warning("nboot has to be greater than 1 to calculate a CI and has been set to 0")
                 nboot <- 0
@@ -125,7 +125,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # inverf based on posting by sundar on R-help
         # https://stat.ethz.ch/pipermail/r-help/2006-June/108153.html
         inverf <- function(x) stats::qnorm((x + 1)/2)/sqrt(2)
-
+        
         # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
         # from grname vector
         for (component in c("Residual", "Fixed")) {
@@ -137,24 +137,19 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         }
         
         # point estimates of R
-        R_pe <- function(formula, data, grname, mod = NULL, resp = NULL) {
+        R_pe <- function(formula, data, grname) {
                 
-                if (!is.null(mod)) {
-                        mod <- lme4::refit(mod, newresp = resp)
-                } else {
-                        # model
-                        mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
-                }
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 
                 # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame
                 VarComps <- as.data.frame(lme4::VarCorr(mod))
                 rownames(VarComps) = VarComps$grp
-
+                
                 # groups random effect variances
                 var_a <- VarComps[grname, "vcov"]
                 names(var_a) <- grname
-
+                
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
@@ -222,7 +217,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         }
                         # check whether that works for any number of var
                         R <- as.data.frame(rbind(R_org, R_link))
-                
+                        
                         # check whether to give out non-repeatability and overdispersion repeatability
                         if (output_resid){
                                 R[,"Residual"] <- c(NA, R_r) # add NA for R_org
@@ -245,14 +240,14 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (nboot > 0)  Ysim <- as.data.frame(stats::simulate(mod, nsim = nboot))
         # main bootstrap function
         bootstr <- function(y, mod, formula, data, grname) {
-                # data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
-                resp <- as.vector(y)
-                R_pe(formula, data, grname, mod = mod, resp = resp)
+                data[, names(stats::model.frame(mod))[1]] <- as.vector(y)
+                R_pe(formula, data, grname)
         }
         
         # run all bootstraps
-        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
-       
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, 
+                grname_org, nboot, parallel, ncores, CI)
+        
         # load everything (bad solution to assure global binding and satisfy cran check) 
         se_org <- bootstraps$se_org
         se_link <- bootstraps$se_link
@@ -264,8 +259,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # load everything (elegant solution)
         # list2env(bootstraps, envir = e1)   
-     
-  
+        
+        
         
         ### significance test by permutation of residuals ###
         
@@ -276,22 +271,20 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         if (link == "logit") inv_fun <- stats::plogis
         if (link == "probit") inv_fun <- stats::pnorm
-
-        permut <- function(nperm, formula, mod_red, dep_var, grname, data, mod) {
+        
+        permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
                 # for binom it will be logit 
                 y_perm <- stats::rbinom(nrow(data), 1, 
                         prob = inv_fun(stats::predict(mod_red, type="link") + sample(stats::resid(mod_red))))
                 data_perm <- data
                 data_perm[dep_var] <- y_perm
-                
-                # add mod and resp to use lme4::refit instead of fitting a new model
-                out <- R_pe(formula, data_perm, grname, mod = mod, resp = y_perm)
+                out <- R_pe(formula, data_perm, grname)
                 out
         }
         
         family <- "binomial"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                                           grname, npermut, parallel, ncores, link, family, R, mod)
+                grname, npermut, parallel, ncores, link, family, R)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org
@@ -328,21 +321,21 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
         
         res <- list(call = match.call(), 
-                    datatype = "Binary", 
-                    link = link,
-                    CI = CI, 
-                    R = R, 
-                    se = as.data.frame(t(cbind(se_org,se_link))), # changed to 
-                    CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
-                    P = as.data.frame(P),
-                    R_boot_link = boot_link, 
-                    R_boot_org = boot_org,
-                    R_permut_link = permut_link, 
-                    R_permut_org = permut_org,
-                    LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
-                    ngroups = ngroups, 
-                    nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
-                    all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
+                datatype = "Binary", 
+                link = link,
+                CI = CI, 
+                R = R, 
+                se = as.data.frame(t(cbind(se_org,se_link))), # changed to 
+                CI_emp = list(CI_org = CI_org, CI_link = CI_link), 
+                P = as.data.frame(P),
+                R_boot_link = boot_link, 
+                R_boot_org = boot_org,
+                R_permut_link = permut_link, 
+                R_permut_org = permut_org,
+                LRT = list(LRT_mod = LRT_mod, LRT_table = LRT_table), 
+                ngroups = ngroups, 
+                nobs = nrow(data), mod = mod, ratio = ratio, adjusted = adjusted,
+                all_warnings = list(warnings_boot = warnings_boot, warnings_permut = warnings_permut))
         class(res) <- "rpt"
         return(res)
-} 
+}

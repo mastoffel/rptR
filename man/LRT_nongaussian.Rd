@@ -13,8 +13,6 @@ LRT_nongaussian(formula, data, grname, mod, link, family)
 
 \item{grname}{original grnames vector without Residual or Fixed}
 
-\item{mod}{fitted lme4 model}
-
 \item{link}{link function}
 
 \item{family}{respnse family (so far just binomial or poisson)}

@@ -324,7 +324,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                         parallel::stopCluster(cl)
                                         P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                                 } else if (parallel == FALSE) {
-                                        cat("Permutation Progress:\n")
+                                        cat("Permutation Progress for", grname[i], ":\n")
                                         R_permut[i, ] <- c(R[i], as.numeric(unlist(pbapply::pbreplicate(npermut - 1, permut(formula=formula, data = data, 
                                                 mod_red=mod_red, dep_var=dep_var, grname=grname, i=i, mod = mod)))))
                                         P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut

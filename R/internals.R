@@ -128,7 +128,7 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 #' 
 #' @keywords internal
 
-permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R, mod){
+permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R){
         
   
         # predefine if no permutation test
@@ -172,12 +172,12 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                         cl <- parallel::makeCluster(ncores)
                                         parallel::clusterExport(cl, "R_pe", envir=environment())
                                         out_permut <- parallel::parLapply(cl, 1:(npermut-1), permut, formula=formula, 
-                                                mod=mod_red, dep_var=dep_var, grname=grname[i], data = data, mod = mod)
+                                                mod=mod_red, dep_var=dep_var, grname=grname[i], data = data)
                                         parallel::stopCluster(cl)
                                         
                                 } else if (parallel == FALSE) {
-                                        cat("Permutation Progress:\n")
-                                        out_permut <- pbapply::pblapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data, mod)
+                                        cat(paste0("Permutation Progress for ", grname[i], ":\n"))
+                                        out_permut <- pbapply::pblapply(1:(npermut - 1), permut, formula, mod_red, dep_var, grname[i], data)
                                 }
                                 
                                 } 
@@ -219,7 +219,8 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         names(P_permut) <- names(permut_link)
         
         
-        out <- list(P_permut = P_permut, permut_org = permut_org, permut_link = permut_link, warnings_permut = warnings_permut)
+        out <- list(P_permut = P_permut, permut_org = permut_org, 
+                permut_link = permut_link, warnings_permut = warnings_permut)
 
 }
 
