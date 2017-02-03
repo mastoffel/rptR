@@ -25,11 +25,12 @@
 #' @param nboot Number of parametric bootstraps for interval estimation 
 #'        (defaults to 1000). Larger numbers of bootstraps give a better
 #'        asymtotic CI, but may be time-consuming. Bootstrapping can be switch off by setting 
-#'        \code{nboot = 0}.
+#'        \code{nboot = 0}. See also \strong{Details} below.
 #' @param npermut Number of permutations used when calculating asymptotic p-values 
 #'        (defaults to 0). Larger numbers of permutations give a better
 #'        asymtotic p-values, but may be time-consuming (in particular when multiple grouping factors
 #'        are specified). Permutaton tests can be switch off by setting \code{npermut = 0}. 
+#'        See also \strong{Details} below.
 #' @param parallel Boolean to express if parallel computing should be applied (defaults to FALSE). 
 #'        If TRUE, bootstraps and permutations will be distributed across multiple cores. 
 #' @param ncores Specifying the number of cores to use for parallelization. On default,
@@ -53,14 +54,38 @@
 #'        estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
 #'        to be slightly higher.
 #'   
-#' @details For \code{datatype='Gaussian'} calls function \link{rptGaussian},
-#'          for \code{datatype='Poisson'} calls function \link{rptPoisson}, 
-#'          for \code{datatype='Binary'} calls function \link{rptBinary}, 
-#'          for \code{datatype='Proportion'} calls function \link{rptProportion}.
+#' @details 
+#' For \code{datatype='Gaussian'} calls function \link{rptGaussian},  
+#' for \code{datatype='Poisson'} calls function \link{rptPoisson},   
+#' for \code{datatype='Binary'} calls function \link{rptBinary},   
+#' for \code{datatype='Proportion'} calls function \link{rptProportion}.  
+#'   
+#' Confidence intervals and standard errors are estimated via \strong{parametric bootstrapping}. This
+#' starts from the assumption that the model is specified correctly and then repeatedly (\code{nboot} times) generates 
+#' new response variables based on the estimated model parameters. The model is subsequently 
+#' refitted with each generated response and the respective repeatability is calculated, 
+#' leading to a distribution of repeatability estimates around the empirical point estimate 
+#' which represent its uncertainty.
+#' 
+#' In addition to the likelihood-ratio test, the package uses a \strong{permutation test} to test the statistical significance 
+#' of a repeatability (R) against the null hypothesis H0: R = 0. In the simplest case, 
+#' a permutation test randomizes the vector of group identities against the 
+#' response vector many times, followed by refitting the model and recalculating the repeatabilities, 
+#' which then provide the H0 distribution. However, in more complex models involving multiple random 
+#' effects and/or fixed effects, this will also break the data structure between the grouping factor 
+#' of interest and other aspects of the experimental design. Therefore \code{rptR} implements a more 
+#' robust alternative which works by fitting a model withouth the grouping factor of interest and 
+#' randomize the residuals of the model, followed by recalculating the repeatability. This maintains 
+#' the general data structure and any effects of other design aspects on the response while still 
+#' breaking the link between grouping factor and the response. The number of permutations
+#' can be adjusted with the \code{nperm} argument. Point estimates of repeatabilities are always included 
+#' as one permutation, because they represented one possible outcome if the null hypothesis was 
+#' true (Manly 2006).
+#' 
 #' 
 #' @return Returns an object of class \code{rpt}. See specific functions for details.
 #'
-#' @references Nakagawa, S. & Schielzeth, H. (2011) \emph{Repeatability for 
+#' @references Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for 
 #'      Gaussian and non-Gaussian data: a practical guide for biologists}. 
 #'      Biological Reviews 85: 935-956.
 #'      
