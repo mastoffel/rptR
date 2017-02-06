@@ -60,27 +60,36 @@
 #' for \code{datatype='Binary'} calls function \link{rptBinary},   
 #' for \code{datatype='Proportion'} calls function \link{rptProportion}.  
 #'   
-#' Confidence intervals and standard errors are estimated via \strong{parametric bootstrapping}. This
-#' starts from the assumption that the model is specified correctly and then repeatedly (\code{nboot} times) generates 
-#' new response variables based on the estimated model parameters. The model is subsequently 
-#' refitted with each generated response and the respective repeatability is calculated, 
-#' leading to a distribution of repeatability estimates around the empirical point estimate 
-#' which represent its uncertainty.
+#' Confidence intervals and standard errors are estimated by \strong{parametric bootstrapping}. 
+#' Under the assumption that the model is specified correctly, the fitted model can be used
+#' to generate response values that could potentially be obversed. Differences between the original 
+#' data and the simulated response from the fitted model arise from sampling variation. The full model
+#' is then fitted to each simuated response vector. The distribution of estimates across all 
+#' \code{nboot} replicates represents the design- and model-specific sampling variance and hence 
+#' uncertainty of the estimates.
 #' 
-#' In addition to the likelihood-ratio test, the package uses a \strong{permutation test} to test the statistical significance 
-#' of a repeatability (R) against the null hypothesis H0: R = 0. In the simplest case, 
-#' a permutation test randomizes the vector of group identities against the 
-#' response vector many times, followed by refitting the model and recalculating the repeatabilities, 
-#' which then provide the H0 distribution. However, in more complex models involving multiple random 
-#' effects and/or fixed effects, this will also break the data structure between the grouping factor 
-#' of interest and other aspects of the experimental design. Therefore \code{rptR} implements a more 
-#' robust alternative which works by fitting a model withouth the grouping factor of interest and 
-#' randomize the residuals of the model, followed by recalculating the repeatability. This maintains 
-#' the general data structure and any effects of other design aspects on the response while still 
-#' breaking the link between grouping factor and the response. The number of permutations
-#' can be adjusted with the \code{nperm} argument. Point estimates of repeatabilities are always included 
-#' as one permutation, because they represented one possible outcome if the null hypothesis was 
-#' true (Manly 2006).
+#' In addition to the likelihood-ratio test, the package uses \strong{permutation tests} for null 
+#' hypothesis testing. The general idea is to randomize data under the null hypothesis of no effect 
+#' and then test in how many cases the estimates from the model reach or exceed those in the observed 
+#' data. In the simplest case, a permutation test randomizes the vector of group identities against 
+#' the response vector many times, followed by refitting the model and recalculating the repeatabilities.
+#' This provides a null distribution for the case that group identities are unrelated to the response. 
+#' However, in more complex models involving multiple random effects and/or fixed effects, such a 
+#' procedure will also break the data structure between the grouping factor of interest and other 
+#' aspects of the experimental design. Therefore \code{rptR} implements a more robust alternative 
+#' which works by fitting a model withouth the grouping factor of interest. It then adds the 
+#' randomized residuals to the fitted values of this model, followed by recalculating the repeatability 
+#' from the full model. This procedure maintains the general data structure and any effects other 
+#' than the grouping effect of interest. The number of permutations can be adjusted with the \code{nperm} argument. 
+#' By the logic of a null hypothsis testing, the observed data is one possible (albeit maybe unlikely) 
+#' outcome under the null hypothesis. So the observed data is always included as one 'randomization' and 
+#' the P value can thus never be lower than \code{1/nperm}, because at least one randomization is as 
+#' exteme as the observed data.   
+#' 
+#' Note also that the \strong{likelihood-ratio test}, since testing variances at the boundary of the 
+#' possible parameter range (i.e. against zero), uses a mixture distribution of Chi-square 
+#' distrbutions with zero and one degree of freedom as a reference. This ist equivalent to deviding 
+#' the P value derived from a Chi-square distribution with one degree of freedom by two.
 #' 
 #' 
 #' @return Returns an object of class \code{rpt}. See specific functions for details.

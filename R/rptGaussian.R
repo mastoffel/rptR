@@ -36,35 +36,12 @@
 #'
 #' @details 
 #' 
-#' Confidence intervals and standard errors are estimated via \strong{parametric bootstrapping}. This
-#' starts from the assumption that the model is specified correctly and then repeatedly (\code{nboot} times) generates 
-#' new response variables based on the estimated model parameters. The model is subsequently 
-#' refitted with each generated response and the respective repeatability is calculated, 
-#' leading to a distribution of repeatability estimates around the empirical point estimate 
-#' which represent its uncertainty.
-#' 
-#' In addition to the likelihood-ratio test, the package uses a \strong{permutation test} to test the statistical significance 
-#' of a repeatability (R) against the null hypothesis H0: R = 0. In the simplest case, 
-#' a permutation test randomizes the vector of group identities against the 
-#' response vector many times, followed by refitting the model and recalculating the repeatabilities, 
-#' which then provide the H0 distribution. However, in more complex models involving multiple random 
-#' effects and/or fixed effects, this will also break the data structure between the grouping factor 
-#' of interest and other aspects of the experimental design. Therefore \code{rptR} implements a more 
-#' robust alternative which works by fitting a model withouth the grouping factor of interest and 
-#' randomize the residuals of the model, followed by recalculating the repeatability. This maintains 
-#' the general data structure and any effects of other design aspects on the response while still 
-#' breaking the link between grouping factor and the response. The number of permutations
-#' can be adjusted with the \code{nperm} argument. Point estimates of repeatabilities are always included 
-#' as one permutation, because they represented one possible outcome if the null hypothesis was 
-#' true (Manly 2006).
+#' see details section of \code{\link{rpt}} for details on parametric bootstrapping,
+#' permutation and likelihood-ratio tests.
 #' 
 #' @references 
 #' Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
 #' concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
-#'
-#' Faraway, J. J. (2006) \emph{Extending the linear model with R}. Boca Raton, FL, Chapman & Hall/CRC.
-#' 
-#' Manly, B. F. J. (2006) \emph{Randomization, bootstrap and Monte Carlo methods in Biology}. 3rd edn. Chapman & Hall, Boca Raton.
 #' 
 #' Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and 
 #' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
@@ -107,7 +84,8 @@
 #' 
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE) {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE,
+        rptOutput = NULL, update = FALSE) {
         
         # delete rows with missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -290,6 +268,13 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 }
         } else  {
                 boot <- do.call(rbind, R_boot)
+                
+                ## addition
+                if (update){
+                        if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                        boot <- rbind(boot, rptOutput$R_boot)
+                }
+                
                 CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
                 se <- as.data.frame(t(as.data.frame(lapply(boot, stats::sd))))
                 names(se) <- "se"
