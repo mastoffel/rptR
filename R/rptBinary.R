@@ -290,7 +290,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         family <- "binomial"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                grname, npermut, parallel, ncores, link, family, R)
+                grname, npermut, parallel, ncores, link, family, R, rptOutput, update)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org

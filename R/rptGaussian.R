@@ -319,7 +319,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 old_perm_length <- length(rptOutput$R_permut[[1]])
                 R_permut <- data.frame(matrix(rep(NA, length(grname) * (npermut + old_perm_length)), nrow = length(grname)))
                 # add new R permut without empirical point estimate to old R permut
-                npermut <- npermut + 1 # account for deleting the point estimate in the update
+                if (npermut > 0) npermut <- npermut + 1 # account for deleting the point estimate in the update
         }
         
         # function for the reduced model in permut and LRT tests

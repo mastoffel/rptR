@@ -5,7 +5,7 @@
 \title{Permutation function for non-gaussian functions (internal use)}
 \usage{
 permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut,
-  parallel, ncores, link, family, R)
+  parallel, ncores, link, family, R, rptOutput, update)
 }
 \arguments{
 \item{permut}{permutation function which permutes residuals and calculates R}

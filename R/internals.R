@@ -137,7 +137,8 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 #' 
 #' @keywords internal
 
-permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, ncores, link, family, R){
+permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, 
+                               ncores, link, family, R, rptOutput, update){
         
   
         # predefine if no permutation test
@@ -162,6 +163,12 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         if (family == "binomial") family_fun <- stats::binomial
    
         e_permut <- environment()
+        
+        if (update){
+                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                # one more permutation as we don't add the empirical point estimate again
+                if (npermut > 0)  npermut <- npermut + 1
+        }
         
         warnings_permut <- with_warnings({
                 
@@ -204,7 +211,13 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                                 
                         
                         }
-                        R_permut <- c(list(R), R_permut)
+                        
+                        if (!update){
+                                # if we are updated, we don't add the point estimate again
+                                R_permut <- c(list(R), R_permut)
+                        }
+                        
+                        # R_permut <- c(list(R), R_permut)
                         R_permut[[1]]["Overdispersion"] <- NA
                 }
         })
@@ -214,9 +227,19 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         permut_link <- as.list(rep(NA, length(grname)))
         
         if (!(length(R_permut) == 1)){
+                
                 for (i in 1:length(grname)) {
-                        permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
-                        permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+                        
+                        if (update){
+                                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                                permut_org[[i]]<- c(rptOutput$R_permut_org[[i]], unlist(lapply(R_permut, function(x) x["R_org", grname[i]])))
+                                permut_link[[i]] <- c(rptOutput$R_permut_link[[i]], unlist(lapply(R_permut, function(x) x["R_link", grname[i]])))
+                        } else {
+                                permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
+                                permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
+                        }
+                        
+                      
                 }
                 names(permut_org) <- grname
                 names(permut_link) <- grname
