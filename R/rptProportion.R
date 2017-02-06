@@ -93,7 +93,8 @@
 #' 
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
-        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs") {
+        npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
+        rptOutput = NULL, update = FALSE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -255,7 +256,8 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         }
         
         # run all bootstraps
-        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI)
+        bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, 
+                grname_org, nboot, parallel, ncores, CI, rptOutput, update)
         
         # load everything (elegant solution)
         # list2env(bootstraps, envir = e1)

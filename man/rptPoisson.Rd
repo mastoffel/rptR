@@ -128,7 +128,7 @@ data(BeetlesFemale)
 # estimating adjusted repeatabilities for two random effects
 rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), 
                    grname=c("Container", "Population"), 
-                   data = BeetlesFemale, nboot=10, npermut=0)
+                   data = BeetlesFemale, nboot=0, npermut=0)
 
 # unadjusted repeatabilities with  fixed effects and 
 # estimation of the fixed effect variance
