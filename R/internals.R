@@ -37,7 +37,7 @@ with_warnings <- function(expr) {
 #' @param CI confidence interval, defaults to 0.95
 #' @keywords internal
 
-bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI) {
+bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI, rptOutput, update) {
         
         e_boot <- environment()
         
@@ -86,8 +86,17 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
                 }
         } else {
                 for (i in 1:length(grname_org)) {
-                        boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]]))
-                        boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]]))
+                        
+                        if (update){
+                                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                                boot_org[[i]] <- c(rptOutput$R_boot_org[[i]], unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]])))
+                                boot_link[[i]] <- c(rptOutput$R_boot_link[[i]],unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]])))
+                        } else {
+                                boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]]))
+                                boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]])) 
+                        }
+                        
+         
                 }
                 names(boot_org) <- grname_org
                 names(boot_link) <- grname_org

@@ -5,7 +5,7 @@
 \title{Bootstrapping for non-gaussian functions (internal use)}
 \usage{
 bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname,
-  grname_org, nboot, parallel, ncores, CI)
+  grname_org, nboot, parallel, ncores, CI, rptOutput, update)
 }
 \arguments{
 \item{bootstr}{bootstrap function. Re-assigns response simulated by simulate.merMod to data and estimates R with the R_pe function.}

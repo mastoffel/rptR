@@ -53,6 +53,11 @@
 #'        appropriate results typically only when all covariances are centered to zero. With 'liability' 
 #'        estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
 #'        to be slightly higher.
+#' @param rptOutput The output of a rptR function. Can be specified in combination with update = TRUE
+#'        to update bootstraps and permutations
+#' @param update If TRUE, the rpt object to be updated has to be inputted with the rptOutput argument.
+#'        The function just updates the permutations and bootstraps, so make sure to specify all other
+#'        arguments excactly like for the rpt object specified in rptOutput. 
 #'   
 #' @details 
 #' For \code{datatype='Gaussian'} calls function \link{rptGaussian},  
@@ -148,7 +153,8 @@
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binomial", "Proportion", 
     "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
-    parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs") {
+    parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs",
+    rptOutput = NULL, update = FALSE) {
         
     if (datatype == "Gaussian") {
             out_gaussian <- rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted)

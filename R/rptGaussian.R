@@ -71,10 +71,9 @@
 #' # estimation of the fixed effect variance
 #' rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
 #'                   grname=c("Container", "Population", "Fixed"), 
-#'                   data=BeetlesBody, nboot=100, npermut=3, adjusted=FALSE)
+#'                   data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
 #'                   
 #'                   
-#'                
 #' # two random effects, estimation of variance (instead repeatability)
 #' R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
 #'             grname= c("Population", "Container", "Residual"),
@@ -314,6 +313,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_permut <- data.frame(matrix(rep(NA, length(grname) * npermut), nrow = length(grname)))
         P_permut <- rep(NA, length(grname))
         
+        if (update){
+                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                
+                old_perm_length <- length(rptOutput$R_permut[[1]])
+                R_permut <- data.frame(matrix(rep(NA, length(grname) * (npermut + old_perm_length)), nrow = length(grname)))
+                # add new R permut without empirical point estimate to old R permut
+                npermut <- npermut + 1 # account for deleting the point estimate in the update
+        }
+        
         # function for the reduced model in permut and LRT tests
         mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
@@ -333,13 +341,22 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                         parallel::clusterExport(cl, "R_pe", envir=environment())
                                         R_permut[i, ] <- c(R[i], as.numeric(unlist(parallel::parSapply(cl, 1:(npermut-1), permut, formula, data, mod_red, dep_var, grname, i, mod))))
                                         parallel::stopCluster(cl)
-                                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                                 } else if (parallel == FALSE) {
                                         cat("Permutation Progress for", grname[i], ":\n")
                                         R_permut[i, ] <- c(R[i], as.numeric(unlist(pbapply::pbreplicate(npermut - 1, permut(formula=formula, data = data, 
                                                 mod_red=mod_red, dep_var=dep_var, grname=grname, i=i, mod = mod)))))
-                                        P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
+                                        
                                 }
+                                
+                                ## addition
+                                if (update){
+                                        if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                                        
+                                        R_permut[i, ] <- c(rptOutput$R_permut[[i]], unlist(R_permut[i, ])[-1])
+                                        # add new R permut without empirical point estimate to old R permut
+                                }
+                                
+                                P_permut[i] <- sum(R_permut[i, ] >= unlist(R[i]))/npermut
                         }
                 }
                 

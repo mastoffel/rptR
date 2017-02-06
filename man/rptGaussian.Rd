@@ -53,6 +53,13 @@ If TRUE (the default), the variances explained by fixed effects (if any) will no
 be part of the denominator, i.e. repeatabilities are calculated after controlling for 
 variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
 be added to the denominator.}
+
+\item{rptOutput}{The output of a rptR function. Can be specified in combination with update = TRUE
+to update bootstraps and permutations}
+
+\item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptOutput argument.
+The function just updates the permutations and bootstraps, so make sure to specify all other
+arguments excactly like for the rpt object specified in rptOutput.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -112,10 +119,9 @@ rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Popul
 # estimation of the fixed effect variance
 rptGaussian(BodyL ~ Sex + Treatment + Habitat + (1|Container) + (1|Population), 
                   grname=c("Container", "Population", "Fixed"), 
-                  data=BeetlesBody, nboot=100, npermut=3, adjusted=FALSE)
+                  data=BeetlesBody, nboot=3, npermut=3, adjusted=FALSE)
                   
                   
-               
 # two random effects, estimation of variance (instead repeatability)
 R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container), 
             grname= c("Population", "Container", "Residual"),
