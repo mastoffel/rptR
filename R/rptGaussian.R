@@ -98,6 +98,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # fit model
         mod <- lme4::lmer(formula, data = data)
+        
+        # check for random slopes
+        VarComps <- lme4::VarCorr(mod)
+        # check whether matrix occurs in VarComps
+        check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
+        randomslopes <- FALSE
+        if (check_rs > 0) randomslopes <- TRUE
+        
         # extract variance components
         # VarComps <- as.data.frame(lme4::VarCorr(mod))
         
@@ -159,14 +167,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 # group variances
                 group_vars <- function(grname, VarComps, mod){
-                        if (!is.matrix(as.numeric(VarComps[[grname]]))){
-                                var_grname <- as.numeric(VarComps[[grname]])
-                        } else {
-                                sigma <- VarComps[[grname]] ## random slopes, VarComps is a matrix
+                        # check whether component is a matrix (--> random slopes)
+                        if (sum(dim(VarComps[[grname]])) > 2 ){
+                                sigma <- VarComps[[grname]] 
                                 # design matrix subsetted for the elements of sigma
                                 Z <- stats::model.matrix(mod)[, colnames(sigma)]
                                 # average variance across covariate
-                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/nobs(mod)
+                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/lme4::nobs(mod)
+                        } else {
+                                var_grname <- as.numeric(VarComps[[grname]])
                         }
                         var_grname
                 }
@@ -310,7 +319,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # significance test by likelihood-ratio-test
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
+
+   
         # no permutation test
         if (npermut == 1) {
                 R_permut <- NA
@@ -352,7 +362,10 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 if (npermut > 1){
                         for (i in 1:length(grname)) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
+                                # from random terms
+                                randterm <-  randterms[grep(grname[i], randterms)]
+                                # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
                                 mod_red <- mod_fun(formula_red, data = data)
                                 if(parallel == TRUE) {
                                         if (is.null(ncores)) {
@@ -400,7 +413,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
         for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) # to change for random slopes
+                randterm <-  randterms[grep(grname[i], randterms)]
+                # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2) # instead of 1: LRT_df[i]
