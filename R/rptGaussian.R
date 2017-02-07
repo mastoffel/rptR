@@ -158,11 +158,34 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 names(var_f) <- "Fixed"
                 
                 # group variances
-                var_a <- as.numeric(VarComps[grname])
+                group_vars <- function(grname, VarComps, mod){
+                        if (!is.matrix(as.numeric(VarComps[[grname]]))){
+                                var_grname <- as.numeric(VarComps[[grname]])
+                        } else {
+                                sigma <- VarComps[[grname]] ## random slopes, VarComps is a matrix
+                                # design matrix subsetted for the elements of sigma
+                                Z <- stats::model.matrix(mod)[, colnames(sigma)]
+                                # average variance across covariate
+                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/nobs(mod)
+                        }
+                        var_grname
+                }
+                
+                var_a <- unlist(lapply(grname, group_vars, VarComps, mod))
                 names(var_a) <- grname
                 
+                # without random slopes
+                # group variances
+                # var_a <- as.numeric(VarComps[grname])
+                # names(var_a) <- grname
+                
+                
+                # without random slopes
                 # denominator variance
-                var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
+                # var_p <- sum(as.numeric(VarComps)) + attr(VarComps, "sc")^2
+                var_VarComps <- unlist(lapply(names(VarComps), group_vars, VarComps, mod))
+                var_p <- sum(as.numeric(var_VarComps)) + attr(VarComps, "sc")^2
+                
                 if (!adjusted) var_p <- var_p + var_f
                 
                 # return variance instead of repeatability
@@ -329,7 +352,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 if (npermut > 1){
                         for (i in 1:length(grname)) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
                                 mod_red <- mod_fun(formula_red, data = data)
                                 if(parallel == TRUE) {
                                         if (is.null(ncores)) {
@@ -368,7 +391,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- rep(1, length(grname))
+        LRT_df <- rep(1, length(grname)) # (2*2) dimension is 3 df, 3*3 is 6 df , if k is dimension of matrix:
+                                         # 3 free parameters random intercept, random slop and correlation
         
         # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
@@ -376,10 +400,10 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
         for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) # to change for random slopes
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2) # instead of 1: LRT_df[i]
         }
         LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
         row.names(LRT_table) <- grname
