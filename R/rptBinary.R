@@ -193,6 +193,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 # variance of all VarComps
                 var_VarComps <- unlist(lapply(names(VarComps), group_vars, VarComps, mod))
                 names(var_VarComps) <- names(VarComps)
+                
                 # Distribution-specific and Residual variance
                 if (link == "logit") {
                         # if(expect=="latent") Ep <- stats::plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)

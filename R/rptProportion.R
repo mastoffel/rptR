@@ -148,16 +148,34 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
                 mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                
                 # random effect variance data.frame
-                VarComps <- as.data.frame(lme4::VarCorr(mod))
-                rownames(VarComps) = VarComps$grp                
+                VarComps <- lme4::VarCorr(mod)
+                
+                group_vars <- function(grname, VarComps, mod){
+                        # check whether component is a matrix (--> random slopes)
+                        if (sum(dim(VarComps[[grname]])) > 2 ){
+                                sigma <- VarComps[[grname]] 
+                                # design matrix subsetted for the elements of sigma
+                                Z <- stats::model.matrix(mod)[, colnames(sigma)]
+                                # average variance across covariate
+                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/stats::nobs(mod)
+                        } else {
+                                var_grname <- as.numeric(VarComps[[grname]])
+                        }
+                        var_grname
+                }
                 
                 # groups random effect variances
-                var_a <- VarComps[grname, "vcov"]
+                var_a <- unlist(lapply(grname, group_vars, VarComps, mod))
                 names(var_a) <- grname
                 
+                # variance of all VarComps
+                var_VarComps <- unlist(lapply(names(VarComps), group_vars, VarComps, mod))
+                names(var_VarComps) <- names(VarComps)
+                
                 # olre variance
-                var_o <- VarComps["Overdispersion", "vcov"]
+                var_o <- var_VarComps["Overdispersion"]
                 # intercept on link scale
                 beta0 <- unname(lme4::fixef(mod)[1])
                 
@@ -166,21 +184,21 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 var_f <- stats::var(stats::predict(mod, re.form=NA))
                 
                 if (link == "logit") {
-                        if(expect=="latent") Ep <- stats::plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(VarComps[,"vcov"])+var_f))^-1)
+                        if(expect=="latent") Ep <- stats::plogis(beta0*sqrt(1+((16*sqrt(3))/(15*pi))^2*(sum(var_VarComps)+var_f))^-1)
                         if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                         if(expect=="liability") Ep <- exp(beta0) / (1 + exp(beta0))
                         if(expect=="latent") estdv_link <- 1 / (Ep*(1-Ep))
                         if(expect=="meanobs") estdv_link <- 1 / (Ep*(1-Ep))
                         if(expect=="liability") estdv_link <- pi^2/3
-                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
+                        var_r <-  var_VarComps["Overdispersion"] + estdv_link
                 }
                 if (link == "probit") {
-                        if(expect=="latent") Ep <- stats::pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
+                        if(expect=="latent") Ep <- stats::pnorm(beta0*sqrt(1+sum(var_VarComps)+var_f)^-1)
                         if(expect=="meanobs") Ep <- mean(mod@resp$y, na.rm=TRUE)
                         if(expect=="latent") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
                         if(expect=="meanobs") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
                         if(expect=="liability") estdv_link <- 1
-                        var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
+                        var_r <-  var_VarComps["Overdispersion"] + estdv_link
                 }
                 
                 if (ratio == FALSE) {
@@ -201,20 +219,20 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                 if (ratio == TRUE) {
                         if (link == "logit") {
                                 # link scale
-                                var_p_link <- sum(VarComps[,"vcov"]) + estdv_link
+                                var_p_link <- sum(var_VarComps) + estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a/ var_p_link
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                if(adjusted) var_p_org <- (sum(VarComps[,"vcov"]) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
-                                if(!adjusted) var_p_org <- ((sum(VarComps[,"vcov"])+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
                                 R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                         }
                         if (link == "probit") {
                                 # link scale
-                                var_p_link <- sum(VarComps[,"vcov"]) + estdv_link
+                                var_p_link <- sum(var_VarComps) + estdv_link
                                 if(!adjusted) var_p_link <- var_p_link + var_f
                                 R_link <- var_a / var_p_link
                                 R_r <- var_r / var_p_link
