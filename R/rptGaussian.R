@@ -173,7 +173,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                 # design matrix subsetted for the elements of sigma
                                 Z <- stats::model.matrix(mod)[, colnames(sigma)]
                                 # average variance across covariate
-                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/lme4::nobs(mod)
+                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/stats::nobs(mod)
                         } else {
                                 var_grname <- as.numeric(VarComps[[grname]])
                         }

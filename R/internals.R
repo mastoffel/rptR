@@ -174,7 +174,10 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                 
                 if (npermut > 1){
                         for (i in 1:length(grname)) {
-                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                                # from random terms
+                                randterm <-  randterms[grep(grname[i], randterms)]
+                                # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
+                                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
                                 mod_red <- mod_fun(formula_red, data = data, family = family_fun(link = link))
                                 
                                 if (!(grname[i] == "Overdispersion")){
@@ -284,7 +287,10 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
 
         for (i in 1:length(grname)) {
-                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")"))))
+                randterm <-  randterms[grep(grname[i], randterms)]
+                formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
+                
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data,
                         family = family_fun(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
