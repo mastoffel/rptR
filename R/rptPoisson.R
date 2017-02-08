@@ -151,21 +151,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 # groups random effect variances
                 VarComps <- lme4::VarCorr(mod)
                 
-                group_vars <- function(grname, VarComps, mod){
-                        # check whether component is a matrix (--> random slopes)
-                        if (sum(dim(VarComps[[grname]])) > 2 ){
-                                sigma <- VarComps[[grname]] 
-                                # design matrix subsetted for the elements of sigma
-                                Z <- stats::model.matrix(mod)[, colnames(sigma)]
-                                # average variance across covariate
-                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/stats::nobs(mod)
-                        } else {
-                                var_grname <- as.numeric(VarComps[[grname]])
-                        }
-                        var_grname
-                }
-                
-                # groups random effect variances
+                # group variances (group_vars is now an internal function in internal.R)
                 var_a <- unlist(lapply(grname, group_vars, VarComps, mod))
                 names(var_a) <- grname
                 

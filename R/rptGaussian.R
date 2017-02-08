@@ -165,21 +165,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 var_f <- stats::var(stats::predict(mod, re.form=NA))
                 names(var_f) <- "Fixed"
                 
-                # group variances
-                group_vars <- function(grname, VarComps, mod){
-                        # check whether component is a matrix (--> random slopes)
-                        if (sum(dim(VarComps[[grname]])) > 2 ){
-                                sigma <- VarComps[[grname]] 
-                                # design matrix subsetted for the elements of sigma
-                                Z <- stats::model.matrix(mod)[, colnames(sigma)]
-                                # average variance across covariate
-                                var_grname <- sum(rowSums((Z %*% sigma) * Z))/stats::nobs(mod)
-                        } else {
-                                var_grname <- as.numeric(VarComps[[grname]])
-                        }
-                        var_grname
-                }
-                
+                # group variances (group_vars is now an internal function in internal.R)
                 var_a <- unlist(lapply(grname, group_vars, VarComps, mod))
                 names(var_a) <- grname
                 
