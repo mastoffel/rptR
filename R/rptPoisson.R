@@ -94,7 +94,7 @@
 
 rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
-        rptOutput = NULL, update = FALSE) {
+        rptObj = NULL, update = FALSE) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -247,7 +247,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
         # run all bootstraps
         bootstraps <- bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname, 
-                grname_org, nboot, parallel, ncores, CI, rptOutput, update)
+                grname_org, nboot, parallel, ncores, CI, rptObj, update)
         
         # load everything (elegant solution)
         # list2env(bootstraps, envir = e1)
@@ -286,7 +286,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
         family <- "poisson"
         permutations <- permut_nongaussian(permut, R_pe, formula, data, dep_var, 
-                grname, npermut, parallel, ncores, link, family, R, rptOutput, update)
+                grname, npermut, parallel, ncores, link, family, R, rptObj, update)
         
         P_permut <- permutations$P_permut
         permut_org <- permutations$permut_org

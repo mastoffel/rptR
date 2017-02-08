@@ -84,7 +84,7 @@
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE,
-        rptOutput = NULL, update = FALSE) {
+        rptObj = NULL, update = FALSE) {
         
         # delete rows with missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -288,8 +288,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 
                 ## addition
                 if (update){
-                        if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
-                        boot <- rbind(boot, rptOutput$R_boot)
+                        if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
+                        boot <- rbind(boot, rptObj$R_boot)
                 }
                 
                 CI_emp <- as.data.frame(t(apply(boot, 2, calc_CI)))
@@ -333,9 +333,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         P_permut <- rep(NA, length(grname))
         
         if (update){
-                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
                 
-                old_perm_length <- length(rptOutput$R_permut[[1]])
+                old_perm_length <- length(rptObj$R_permut[[1]])
                 R_permut <- data.frame(matrix(rep(NA, length(grname) * (npermut + old_perm_length)), nrow = length(grname)))
                 # add new R permut without empirical point estimate to old R permut
                 if (npermut > 0) npermut <- npermut + 1 # account for deleting the point estimate in the update
@@ -372,9 +372,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                 
                                 ## addition
                                 if (update){
-                                        if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                                        if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
                                         
-                                        R_permut[i, ] <- c(rptOutput$R_permut[[i]], unlist(R_permut[i, ])[-1])
+                                        R_permut[i, ] <- c(rptObj$R_permut[[i]], unlist(R_permut[i, ])[-1])
                                         # add new R permut without empirical point estimate to old R permut
                                 }
                                 

@@ -6,7 +6,7 @@
 \usage{
 rptBinary(formula, grname, data, link = c("logit", "probit"), CI = 0.95,
   nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
-  ratio = TRUE, adjusted = TRUE, expect = "meanobs", rptOutput = NULL,
+  ratio = TRUE, adjusted = TRUE, expect = "meanobs", rptObj = NULL,
   update = FALSE)
 }
 \arguments{
@@ -68,12 +68,12 @@ appropriate results typically only when all covariances are centered to zero. Wi
 estimates follow formulae as presented in Nakagawa & Schielzeth (2010). Liability estimates tend 
 to be slightly higher.}
 
-\item{rptOutput}{The output of a rptR function. Can be specified in combination with update = TRUE
+\item{rptObj}{The output of a rptR function. Can be specified in combination with update = TRUE
 to update bootstraps and permutations}
 
-\item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptOutput argument.
+\item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptObj argument.
 The function just updates the permutations and bootstraps, so make sure to specify all other
-arguments excactly like for the rpt object specified in rptOutput.}
+arguments excactly like for the rpt object specified in rptObj.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 

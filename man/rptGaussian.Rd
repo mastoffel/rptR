@@ -6,7 +6,7 @@
 \usage{
 rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 0,
   parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE,
-  rptOutput = NULL, update = FALSE)
+  rptObj = NULL, update = FALSE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -54,12 +54,12 @@ be part of the denominator, i.e. repeatabilities are calculated after controllin
 variation due to covariates. If FALSE, the varianced explained by fixed effects (if any) will
 be added to the denominator.}
 
-\item{rptOutput}{The output of a rptR function. Can be specified in combination with update = TRUE
+\item{rptObj}{The output of a rptR function. Can be specified in combination with update = TRUE
 to update bootstraps and permutations}
 
-\item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptOutput argument.
+\item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptObj argument.
 The function just updates the permutations and bootstraps, so make sure to specify all other
-arguments excactly like for the rpt object specified in rptOutput.}
+arguments excactly like for the rpt object specified in rptObj.}
 }
 \value{
 Returns an object of class \code{rpt} that is a a list with the following elements: 

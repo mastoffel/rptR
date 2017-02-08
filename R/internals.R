@@ -60,7 +60,7 @@ group_vars <- function(grname, VarComps, mod){
 #' @param CI confidence interval, defaults to 0.95
 #' @keywords internal
 
-bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI, rptOutput, update) {
+bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grname, grname_org, nboot, parallel, ncores, CI, rptObj, update) {
         
         e_boot <- environment()
         
@@ -111,9 +111,9 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
                 for (i in 1:length(grname_org)) {
                         
                         if (update){
-                                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
-                                boot_org[[i]] <- c(rptOutput$R_boot_org[[i]], unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]])))
-                                boot_link[[i]] <- c(rptOutput$R_boot_link[[i]],unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]])))
+                                if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
+                                boot_org[[i]] <- c(rptObj$R_boot_org[[i]], unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]])))
+                                boot_link[[i]] <- c(rptObj$R_boot_link[[i]],unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]])))
                         } else {
                                 boot_org[[i]] <- unlist(lapply(R_boot, function(x) x["R_org", grname_org[i]]))
                                 boot_link[[i]] <- unlist(lapply(R_boot, function(x) x["R_link", grname_org[i]])) 
@@ -161,7 +161,7 @@ bootstrap_nongaussian <- function(bootstr, R_pe, formula, data, Ysim, mod, grnam
 #' @keywords internal
 
 permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npermut, parallel, 
-                               ncores, link, family, R, rptOutput, update){
+                               ncores, link, family, R, rptObj, update){
         
   
         # predefine if no permutation test
@@ -188,7 +188,7 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         e_permut <- environment()
         
         if (update){
-                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
+                if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
                 # one more permutation as we don't add the empirical point estimate again
                 if (npermut > 0)  npermut <- npermut + 1
         }
@@ -257,9 +257,9 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
                 for (i in 1:length(grname)) {
                         
                         if (update){
-                                if (is.null(rptOutput)) stop("provide rpt object for rptOutput argument")
-                                permut_org[[i]]<- c(rptOutput$R_permut_org[[i]], unlist(lapply(R_permut, function(x) x["R_org", grname[i]])))
-                                permut_link[[i]] <- c(rptOutput$R_permut_link[[i]], unlist(lapply(R_permut, function(x) x["R_link", grname[i]])))
+                                if (is.null(rptObj)) stop("provide rpt object for rptObj argument")
+                                permut_org[[i]]<- c(rptObj$R_permut_org[[i]], unlist(lapply(R_permut, function(x) x["R_org", grname[i]])))
+                                permut_link[[i]] <- c(rptObj$R_permut_link[[i]], unlist(lapply(R_permut, function(x) x["R_link", grname[i]])))
                         } else {
                                 permut_org[[i]] <- unlist(lapply(R_permut, function(x) x["R_org", grname[i]]))
                                 permut_link[[i]] <- unlist(lapply(R_permut, function(x) x["R_link", grname[i]]))
