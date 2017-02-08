@@ -178,6 +178,13 @@ permut_nongaussian <- function(permut, R_pe, formula, data, dep_var, grname, npe
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
+        # at the moment its not possible to fit the same grouping factor in more than one random effect
+        check_modelspecs <- sapply(grname, function(x) sum(grepl(x, randterms)))
+        if (any(check_modelspecs > 1)){
+                stop("Fitting the same grouping factor in more than one random 
+                        effect terms is not possible at the moment")  
+        } 
+        
         # function for the reduced model in permut and LRT tests
         mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
         

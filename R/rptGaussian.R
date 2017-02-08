@@ -101,6 +101,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         # check for random slopes
         VarComps <- lme4::VarCorr(mod)
+        
         # check whether matrix occurs in VarComps
         check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
         randomslopes <- FALSE
@@ -305,8 +306,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # significance test by likelihood-ratio-test
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-
-   
+        
+        # at the moment its not possible to fit the same grouping factor in more than one random effect
+        check_modelspecs <- sapply(grname, function(x) sum(grepl(x, randterms)))
+        if (any(check_modelspecs > 1)){
+                stop("Fitting the same grouping factor in more than one random 
+                        effect terms is not possible at the moment")  
+        } 
+        
         # no permutation test
         if (npermut == 1) {
                 R_permut <- NA
