@@ -100,12 +100,12 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         mod <- lme4::lmer(formula, data = data)
         
         # check for random slopes
-        VarComps <- lme4::VarCorr(mod)
+        # VarComps <- lme4::VarCorr(mod)
         
         # check whether matrix occurs in VarComps
-        check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
-        randomslopes <- FALSE
-        if (check_rs > 0) randomslopes <- TRUE
+        # check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
+        # randomslopes <- FALSE
+        # if (check_rs > 0) randomslopes <- TRUE
         
         # extract variance components
         # VarComps <- as.data.frame(lme4::VarCorr(mod))
@@ -397,22 +397,35 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         ## likelihood-ratio-test
         LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- rep(1, length(grname)) # (2*2) dimension is 3 df, 3*3 is 6 df , if k is dimension of matrix:
-                                         # 3 free parameters random intercept, random slop and correlation
+        # k*(k-1)/2+k
+        # check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
+        
+        # calculate df for random slopes
+        VarComps <- lme4::VarCorr(mod)
+        mat_dims <- unlist(lapply(VarComps[grname], ncol))
+        calc_df <- function(k){
+                if (k == 1) df <- 1
+                if (k > 1) df <- k*(k-1)/2+k
+                df
+        }
+        LRT_df <- sapply(mat_dims, calc_df) 
         
         # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
         # function
         # mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
-        
+
         for (i in 1:length(grname)) {
                 randterm <-  randterms[grep(grname[i], randterms)]
                 # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2) # instead of 1: LRT_df[i]
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) # instead of 1: LRT_df[i]
         }
+        # division by 2 if LRT_df = 1
+        LRT_P <- LRT_P/ifelse(LRT_df==1,2,1)
+        
         LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
         row.names(LRT_table) <- grname
         
