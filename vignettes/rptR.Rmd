@@ -70,6 +70,12 @@ Since this works fine and we see a sizable repeatability, we increase the number
 rep1 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 ```
 
+It is also possible to increase the number of bootstrap iterations (and also of permutations, see below) by calling the function again with the `update = TRUE` and `rptOutput` accepting the rpt object from the previous function call. Note that all other arguments (except for `nboot` and `npermut`) have to be identical to the original function call. 
+
+```{r gaussian-full-boot-update, tidy = TRUE, eval = FALSE}
+rep1 <- rpt(BodyL ~ (1|Population),  grname="Population", data=BeetlesBody, datatype="Gaussian", nboot=500, npermut=0, update=TRUE, rptOutput=rep1)
+```
+
 The `rptR` package offers three generic function for convenient display. The `print` function displays the essence of the repeatability estimation: the point estimate R, standard error SE, confidence interval CI and $P$ values. The `summary` function is more verbose, summarizing parts of the data structure, distributional summaries of the bootstrap and permutation samples and the full details on likelihood ratio tests. Finally, the `plot` function shows the distribution of the parametric bootstrap samples along with the point estimate and the limits of the confidence interval. The plot can be customized by specifying additional graphical parameters as with the `cex.main` argument below (see `?par` for additional arguments).
 
 ```{r gaussian-print, tidy = TRUE, fig.width=7, fig.height=4}
@@ -79,7 +85,7 @@ plot(rep1, cex.main=1.0)
 ```
 
 Parametric bootstrapping and permutations are inherently repetitive procedures that are computed on multiple cores in parallel. The `rptR` package has build-in options for using multiple cores by setting `parallel = TRUE`. The default `ncores = NULL` determines the number of cores on your machine and uses all but one core. It is also possible to specific the number of cores to be used via the `ncores` argument. 
-The statistical significance of the repeatability is tested by likelihood ratio tests (LRT), comparing the model fit of a model including the grouping factor of interest and one excluding it (i.e., constraining it group-level variance to zero). The difference in log-likelihoods is assumed to be $\chi^2$-distributed with 1 degree-of-freedom. $P$ values based on LRT are part of the standard `print` output and the full details can be see by a call to `summary` (see above). In this case, the variance among populations is highly significant and so is the repeatability at this level.
+The statistical significance of the repeatability is tested by likelihood ratio tests (LRT), comparing the model fit of a model including the grouping factor of interest and one excluding it (i.e., constraining it group-level variance to zero). Because the LRT are conducted at the boundary ot possible parameter space (against zero group-level variance), the difference in log-likelihoods is assumed to follow a mixture distribution of a $\chi^2$-distribution with 1 degree-of-freedom and point mass at zero. $P$ values based on LRT are part of the standard `print` output and the full details can be see by a call to `summary` (see above). In this case, the variance among populations is highly significant and so is the repeatability at this level. 
 
 Permutation can be used as a robust alternative or addition to LRT. In the simplest case this will work by randomizing the vector of group identities against the response vector followed by refitting the model to the randomized data and storage of the repeatability for each of many replications. However, in more complex models involving multiple random effects and/or fixed effects, this will also break the data structure between the grouping factor of interest and other aspects of the experimental design. We therefore construct randomized datasets by fitting a model without the grouping factor of interest and add the permutated or randomized residuals for the model to the fitted values of the model. This maintains the general data structure and any effects of other design aspects on the response while still breaking the link between grouping factor and the response.
 
@@ -373,13 +379,26 @@ print(rep15)
 ```
 It is possible to use both `Overdisperion` and `Residual` in combination with `ratio = FALSE` or with `ratio = TRUE`. The ratio of the residual variance to the total variance should then be interpreted as the 'non-repeatability'. We assume that the combination of these two terms with `ratio = FALSE` will be more commonly used.
 
+## Random-slope models
+
+It is possible to fit random-slope models following the approach introduced by Johnson (2014). The function call will return the average repeatability across the distribution of the covariate in the sample (see Johnson 2014 for details). Permuation tests and likelihood ratio test are conducted with random-intercepts and random-slopes being jointly removed from the model. Note that random-slope models can be specied in multiple ways and the function will likely handly only those models well that have been specified in the classical way `(foo | grname)`, implicitly fitting random-intercepts, random slopes for the covariate `foo` and their correlation. Multiple random-slopes are possible, but models with  covariances being constraint may not currently work.
+
+The following code gives and example for an repeatability estimation for body size where random slopes are fitted for `Sex` and `Treatment` at the level of populations. The resulting model allows for variance components to vary by sex and by treatment with the average across the level being returned as the model output.
+
+```{r gaussian-random-slopes, tidy = TRUE, eval = FALSE}
+rep16 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (Treatment + Sex|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0, adjusted=FALSE)
+print(rep16)
+```
+
 ## Concluding remarks
 
-The `rptR` package offers convenient extraction of (ratios of) variance components for multiple grouping levels for estimating repeatabilities, including the option to control for fixed effects in order to estimate adjusted repeatabilities. While this is easy-to-use, we want to remind users to make sure their data is appropriately modeled. We therefore provide the fitted mixed model as part of the `rpt` object and recommend that this is inspected for any indications of violated model assumptions or missing predictors. Repeatability estimates from Poisson, binary and proportion data might often appear disappointingly low. This is likely to be a simple reflection of the fact that for non-Gaussian data, the numerator contains the among-group variance in predispositions (e.g. probabilities of successes, long-range averages of counts) while the observed data is discretely scattered around these expectations. A lot of the phenotypic variance is hence inherently random in origin and each datapoint contains only very limited information about the underlying predispositions. The estimation of repeatabilities for count, binary and proportion data will thus require substantial sample sizes and (ideally) optimized sampling designs.
+The `rptR` package offers convenient extraction of (ratios of) variance components for multiple grouping levels for estimating repeatabilities, including the option to control for fixed effects in order to estimate adjusted repeatabilities. While this is easy-to-use we want to remind users to make sure their data is appropriately modeled. We therefore provide the fitted mixed model as part of the `rpt` object and recommend that this is inspected for any indications of violated model assumptions or missing predictors. Repeatability estimates from Poisson, binary and proportion data might often appear disappointingly low. This is likely to be a simple reflection of the fact that for non-Gaussian data, the numerator contains the among-group variance in predispositions (e.g. probabilities of successes, long-range averages of counts) while the observed data is discretely scattered around these expectations. A lot of the phenotypic variance is hence inherently random in origin and each datapoint contains only very limited information about the underlying predispositions. The estimation of repeatabilities for count, binary and proportion data will thus require substantial sample sizes and (ideally) optimized sampling designs.
 
 ## References
 
 Bates, D., M. Maechler, B. Bolker & S. Walker (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software 67: 1-48.
+
+Johnson, P.C.D. (2014). Extension of Nakagawa & Schielzeth's $R^2_{GLMM}$ to random slopes models. Methods in Ecology and Evolution 5: 944-946
 
 Nakagawa, S. & H. Schielzeth (2010). Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists. Biological Reviews 85: 935-956.
 
