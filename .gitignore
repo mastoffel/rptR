@@ -5,3 +5,4 @@ inst/doc
 *.csv
 .DS_Store
 *.Rproj
+^revdep$
