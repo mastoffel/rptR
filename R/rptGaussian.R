@@ -405,7 +405,15 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         mat_dims <- unlist(lapply(VarComps[grname], ncol))
         calc_df <- function(k){
                 if (k == 1) df <- 1
-                if (k > 1) df <- k*(k-1)/2+k
+                if (k > 1){
+                        terms <- attr(terms(formula), "term.labels")
+                        current_term <- terms[grep(names(k), terms)]
+                        if (grep("0", current_term)){
+                                df <- (k*(k-1)/2+k) - 1    
+                        } else {
+                                df <- k*(k-1)/2+k  
+                        }
+                } 
                 df
         }
         LRT_df <- sapply(mat_dims, calc_df) 
@@ -421,7 +429,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) # instead of 1: LRT_df[i]
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) 
         }
         # division by 2 if LRT_df = 1
         LRT_P <- LRT_P/ifelse(LRT_df==1,2,1)

@@ -312,7 +312,24 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
         mod_fun <- ifelse(length(randterms) == 1, stats::glm, lme4::glmer)
         
         LRT_mod <- as.numeric(stats::logLik(mod))
-        LRT_df <- 1
+        
+        # calculate df for random slopes
+        VarComps <- lme4::VarCorr(mod)
+        mat_dims <- unlist(lapply(VarComps[grname], ncol))
+        calc_df <- function(k){
+                if (k == 1) df <- 1
+                if (k > 1){
+                        terms <- attr(terms(formula), "term.labels")
+                        current_term <- terms[grep(names(k), terms)]
+                        if (grep("0", current_term)){
+                                df <- (k*(k-1)/2+k) - 1    
+                        } else {
+                                df <- k*(k-1)/2+k  
+                        }
+                } 
+                df
+        }
+        LRT_df <- sapply(mat_dims, calc_df) 
 
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
 
@@ -324,9 +341,12 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
                 LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data,
                         family = family_fun(link = link))))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
-                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], 1, lower.tail = FALSE)/2)
+                LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) 
         }
-
+        
+        # division by 2 if LRT_df = 1
+        LRT_P <- LRT_P/ifelse(LRT_df==1,2,1)
+        
         LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
         row.names(LRT_table) <- grname
         

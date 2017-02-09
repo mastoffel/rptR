@@ -84,7 +84,8 @@ test_that("rpt estimation works for two random effect, no boot, no permut, no pa
 
 test_that("LRTs works", {
         expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
-        expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001)
+        # expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001)
+        expect_equal(R_est_1$P[1, "LRT_P"], 0.5, tolerance = 0.001)
         expect_equal(R_est_1$P[2, "LRT_P"], 5.81e-09, tolerance = 0.001)
 })
 
