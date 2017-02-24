@@ -389,11 +389,11 @@ It is possible to fit random-slope models following the approach introduced by J
 
 The following code gives and example for an repeatability estimation for body size where random slopes are fitted for `Sex` and `Treatment` at the level of populations. The resulting model allows for variance components to vary by sex and by treatment with the average across the level being returned as the model output.
 
-```{r gaussian-random-slopes, tidy = TRUE, eval = FALSE}
+```{r gaussian-random-slopes, tidy = TRUE, eval = TRUE}
 rep16 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (Treatment + Sex|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0, adjusted=FALSE)
 ```
 ```{r gaussian-random-slopes-print, warning=1, tidy = TRUE, eval = FALSE}
-print(rep16)
+summary(rep16)
 ```
 
 ## Concluding remarks
