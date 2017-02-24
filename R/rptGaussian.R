@@ -403,20 +403,21 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # calculate df for random slopes
         VarComps <- lme4::VarCorr(mod)
         mat_dims <- unlist(lapply(VarComps[grname], ncol))
-        calc_df <- function(k){
+        calc_df <- function(k, k_names){
                 if (k == 1) df <- 1
                 if (k > 1){
                         terms <- attr(terms(formula), "term.labels")
-                        current_term <- terms[grep(names(k), terms)]
-                        if (grep("0", current_term)){
+                        current_term <- terms[grep(k_names, terms)]
+                        if (regexpr("0", current_term)>0){
                                 df <- (k*(k-1)/2+k) - 1    
                         } else {
-                                df <- k*(k-1)/2+k  
+                               df <- k*(k-1)/2+k  
                         }
                 } 
                 df
         }
-        LRT_df <- sapply(mat_dims, calc_df) 
+
+        LRT_df <- mapply(calc_df, mat_dims, names(mat_dims)) 
         
         # preassign
         for (i in c("LRT_P", "LRT_D", "LRT_red")) assign(i, rep(NA, length(grname)))
