@@ -12,14 +12,14 @@ vignette: >
 load("vignette_out.RData")
 ```
 
-The concept of 'repeatability' relates to the way of quantifying the reliability of measurements. In a wider context, however, the repeatability offers insights into the components contributing to variability in the data. The repeatability describes the relative partitioning of variance into within-group and between-group sources of variance and is more generally referred to as the intra-class correlation (ICC). The hierarchical decomposition of variances has become the focus of several disciplines. For example, in the context of behavioral research, repeatability measures the relative consistency of some behaviorial trait within individuals and the variability across individuals. The repeatability, therefore, becames a fundamental quantity of interest in the field of animal personality research.
+The concept of 'repeatability' relates to the way of quantifying the reliability of measurements. In a wider context, however, the repeatability offers insights into the components contributing to variability in the data. The repeatability describes the relative partitioning of variance into within-group and between-group sources of variance and is more generally referred to as the intra-class correlation (ICC). The hierarchical decomposition of variances has become the focus of several disciplines. For example, in the context of behavioral research, repeatability measures the relative consistency of some behaviorial trait within individuals and the variability across individuals. The repeatability, therefore, became a fundamental quantity of interest in the field of animal personality research.
 
 A very powerful tool for estimating repeatabilities is the mixed effects model framework. Random-effect predictors are used to estimate variances at different hierarchical levels. In the simplest case of a design where repeated measures (e.g. quantification of behavior) were taken from the same features (e.g. individuals), the repeatability $R$ is calculated as the variances among group means (group-level variance $V_G$) over the sum of group-level and data-level $V_R$ variance:
 $$
 R = {V_G}/{(V_G+V_R)}
 $$
 
-While it is relatively easy to extract point estimates for $V_G$ and $V_R$ from standard software packages, it is considerably more difficult to quantify the uncertainty in estimated $R$ values. The `rptR` package offers easy-to-use functions for estimating $R$ and its uncertainty. The package includes estimates of the repeatability (and also indeed of variance components and *marginal* $R^2$; *sensu* Nakagawa and Schielzeth 2013) for Gaussian traits, binomial and Poisson-distributed traits. The theory for for the quantification of the repeatability for non-Gaussian traits is reviewed in Nakagawa & Schielzeth (2010).
+While it is relatively easy to extract point estimates for $V_G$ and $V_R$ from standard software packages, it is considerably more difficult to quantify the uncertainty in estimated $R$ values. The `rptR` package offers easy-to-use functions for estimating $R$ and its uncertainty. The package includes estimates of the repeatability (and also raw variances and *marginal* $R^2$; *sensu* Nakagawa and Schielzeth 2013) for Gaussian traits, binomial and Poisson-distributed traits. The theory for for the quantification of the repeatability for non-Gaussian traits is reviewed in Nakagawa & Schielzeth (2010).
 
 The functions build heavily on functions for fitting mixed models, in particular on `lmer` from the `lme4` package (Bates et al. 2015). Mixed-effect models are fitted within the function call and fitted model objects are returned as part of the class `rpt` return object. Uncertainty is quantified via parametric bootstrapping. In a nutshell, parametric bootstrapping works by (i) fitting the model, (ii) simulating new data based on the estimators of the original model while adhering to the original sampling design, (iii) refitting the model to the simulated data and storage of the repeatability of the model fit. Repeating steps (ii) to (iii) a large number of times (e.g. 1000 times) yields the sampling variance give the data structure under the assumption that the model is valid.
 
@@ -38,7 +38,7 @@ install.packages("devtools")
 devtools::install_github("mastoffel/rptR", build_vignettes = TRUE)
 ```
 
-After this the package will be loaded by
+After one of those two steps, the package can be loaded by
 
 ```{r package-loading, tidy = TRUE, results='hide'}
 library(rptR)
@@ -142,7 +142,7 @@ One might argue that the full container variance should contain the population v
 ```{r gaussian-containeronly-randeff, tidy = TRUE, eval = FALSE}
 rep4 <- rpt(BodyL ~ (1|Container),  grname="Container", data=BeetlesBody, datatype="Gaussian", nboot=1000, npermut=0)
 ```
-```{r gaussian-containeronly-randeff-print, tidy = TRUE, eval = FALSE}
+```{r gaussian-containeronly-randeff-print, tidy = TRUE, eval = TRUE}
 print(rep4)
 ```
 ## Adjusted repeatabilities for Gaussian data
@@ -192,16 +192,14 @@ plot(rep7, grname="Fixed", type="boot")
 
 The variances explained by container and population are evidently unchanged, but it is now visible that the fixed effects alone explain almost 40% of the phenotypic variance in body length in our example. A big part of this is simply sexual dimorphism. This serves as an example, because in this particular case, we would probably be more interested in the adjusted repeatability controlling for `Treatment` and `Sex`.
 
-## Repeatabilities for Non-Gaussian data and the implicit fitting of an overdispersion term
-
-To account for and estimate additive overdisperison, the current implementation of `rptR` fits an **additional random effect term** (named `Overdispersion`) with as many levels as there are observations to the specified model. This variation is added to the distribution-specific variance in the denominator of the repeatability. A detailed explanation is given in the section **Multiplicative and additive overdispersion models** towards
-the end of the vignette.
-
 ## Repeatabilities for Poisson-distributed count data
 
 Count data represent a typical case of fitting generalized linear mixed-effects models (GLMM). Poisson error distributions with log-link are often appropriate for count data, although there is no guarantee that count data will be best modeled by Poisson error distributions (negative binomial distributions are an obvious alternative). Using the link function, the model parameters are fitted on the latent scale rather than on the original data scale and consequently the model output will represent results on the latent scale.   
 
-While in a Gaussian model, there are different parameters for the location and the spread of the distribution (mean and variance), this is not the case in non-Gaussian models. The Poisson distribution, for example, has an inherent variance that is equal to the mean. This inherent variance needs to be respected when quantifying repeatabilities for non-Gaussian data. We have reviewed the literature on non-Gaussian link-scale variances (Nakagawa & Schielzeth 2010) and `rptR` is based on the formula presented therein. It turns out that the distribution-specific variance for a Poisson model with log link approximates $ln(1/\lambda + 1)$ where $\lambda$ is the average count. The approximation however becomes increasingly inaccurate at low $\lambda$.
+While in a Gaussian model, there are different parameters for the location and the spread of the distribution (mean and variance), this is not the case in non-Gaussian models. The Poisson distribution, for example, has an inherent variance that is equal to the mean. This inherent variance needs to be respected when quantifying repeatabilities for non-Gaussian data. We have reviewed the literature on non-Gaussian link-scale variances (Nakagawa & Schielzeth 2010) and `rptR` is based on the formula presented therein. It turns out that the distribution-specific variance for a Poisson model with log link is approximated by $ln(1/\lambda + 1)$ where $\lambda$ is the average count. The approximation however becomes increasingly inaccurate at low $\lambda$.
+
+In order to account for additive overdisperison in Poisson and other non-Gaussian models, the current implementation of `rptR` internally adds an observation level random effect to the model specified in `formula`. An observation level random effect is an 
+additional random effect term (named `Overdispersion`) with as many levels as there are observations to the specified model. The additive overdispersion explained by the new `Overdispersion` term  is added to the distribution-specific variance in the denominator of the repeatability. See als section 'Multiplicative and additive overdispersion models' towards the end of the vignette.
 
 As an example, we will analyse the number of eggs laid by female beetles (`Eggs`) in our toy dataset. We will estimate the repeatability at the level of the population as well as at the level of the container simultaneously while controlling for excess variation introduced by the experimental nutritional treatment. There is no need to control for sex-differences in this sex-limited trait.
 
@@ -218,7 +216,8 @@ rep8 <- rpt(Egg ~ Treatment + (1|Container) + (1|Population),  grname=c("Contain
 
 In non-Gaussian models, it frequently happens that some of the bootstrap or permutation iterations do not to converge on a good model fit. Warnings are thrown by `glmer` and are collected in the `warnings` element of the `rpt` return object.
 
-As usual, the output can be viewed and displayed by `print`, `summary` and `plot`. The results show substantial repeatability at the level of the population (due to genetic differentiation or lasting environmental influence prior to sampling), but very little repeatability at the level of the container (indicating limited shared environmental effects). This is a toy example, of course, but this gives and illustration of how results would be interpreted.
+As usual, the output can be viewed and displayed by `print`, `summary` and `plot`. The results show substantial repeatability at the level of the population (due to genetic differentiation or lasting environmental influence prior to sampling), but very little repeatability at the level of the container (indicating limited shared environmental effects).
+
 ```{r poisson-model-print}
 print(rep8)
 ```
@@ -243,7 +242,7 @@ print(rep9)
 ```
 The quantification of the distribution-specific variance of Poisson models with log-link requires a parameter $\lambda$ that represents the expected value, i.e. the global mean on the data scale. We have previously given different advice for estimating $\lambda$, including the inverse-link of the intercept on the latent scale. While this gives a reasonable approximation in many cases, the estimate will be biased for small expected values (smaller than about 2). A preferred alternative is to use the mean of the observations in the sample as we have also suggested previously. The is now the default option in `rptR` that is determined by the `expect` argument with its default `expect = "meanobs"`. 
 
-There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $\beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including variance caused by fixed effects, on the latent scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only if all covariates are centered. Since centering is not enforced within `rptR`, we have made this option explicit by setting `expect = "latent"`. The repeatabilities estimated by the formulae presented in Nakagawa & Schielzeth (2010) can be requested by `expect = "liability"`. 
+There is also an analytical alternative that takes the intercept and variances as estimated on the latent scale. The expected value is $E[y] = exp(\beta_0 + var_{tot}/2)$, where $\beta_0$ represents the intercept on the latent scale and $var_{tot}$ represents the sum of the variances, including variance caused by fixed effects, on the latent scale. While this is generally a preferable solution, the estimates are susceptible to the distribution of covariates and, in most cases, it gives appropriate results only if all covariates are centered. Since centering is not enforced within `rptR`, we have made this an opt-in option that can be used by setting `expect = "latent"`. The repeatabilities estimated by the formulae presented in Nakagawa & Schielzeth (2010) can be requested by `expect = "liability"`. 
 
 ## Repeatabilities for Binary data
 
@@ -389,10 +388,10 @@ It is possible to fit random-slope models following the approach introduced by J
 
 The following code gives and example for an repeatability estimation for body size where random slopes are fitted for `Sex` and `Treatment` at the level of populations. The resulting model allows for variance components to vary by sex and by treatment with the average across the level being returned as the model output.
 
-```{r gaussian-random-slopes, tidy = TRUE, eval = TRUE}
-rep16 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (Treatment + Sex|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0, adjusted=FALSE)
+```{r gaussian-random-slopes, tidy = TRUE, eval = FALSE}
+rep16 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (Treatment + Sex|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=500, npermut=0, adjusted=FALSE)
 ```
-```{r gaussian-random-slopes-print, warning=1, tidy = TRUE, eval = FALSE}
+```{r gaussian-random-slopes-print, warning=1, tidy = TRUE, eval = TRUE}
 summary(rep16)
 ```
 
