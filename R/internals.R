@@ -316,7 +316,7 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
         # calculate df for random slopes
         VarComps <- lme4::VarCorr(mod)
         mat_dims <- unlist(lapply(VarComps[grname], ncol))
-        calc_df <- function(k){
+        calc_df <- function(k, k_names){
                 if (k == 1) df <- 1
                 if (k > 1){
                         terms <- attr(terms(formula), "term.labels")
