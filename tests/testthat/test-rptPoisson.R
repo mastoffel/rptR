@@ -224,8 +224,6 @@ test_that("LRTs are equal for different different sequence in grname argument", 
 })
 
 
-
-
 R_est_4 <-  rptPoisson(formula = Egg ~ Treatment + (1|Habitat) + (1|Container),
         grname=c("Container", "Habitat"), data = BeetlesFemale,
         nboot=0, npermut=0, ratio = TRUE)
@@ -239,4 +237,18 @@ test_that("LRTs are equal for different for different order in formula argument"
         expect_equal(R_est_2$P["Container", "LRT_P"], R_est_4$P["Container", "LRT_P"])
         expect_equal(R_est_2$P["Habitat", "LRT_P"], R_est_4$P["Habitat", "LRT_P"])
 })
-        
+
+# random slopes
+R_est_5 <- rptPoisson(formula = Egg ~ Treatment + (1 + Treatment|Container),
+        grname=c("Container"), data = BeetlesFemale,
+        nboot=0, npermut=0, ratio = TRUE)
+
+test_that("Random Slope repeatability point estimate is correct", {
+        expect_equal(R_est_5$R["R_org", "Container"], 0.5539859, tolerance = 0.001)
+})
+
+test_that("Random slopes fitted without correlation (i.e. with grname occuring in multiple random effect terms) throw an error", {
+        expect_error(rptPoisson(formula = Egg ~ (1|Treatment) + (0 + Treatment|Container),
+                grname=c("Container"), data = BeetlesFemale,
+                nboot=0, npermut=0, ratio = TRUE))
+})

@@ -170,6 +170,17 @@ test_that("LRTs are equal when random effects in formula have a different order"
         expect_equal(R_est_10$P["Population", "LRT_P"], R_est_12$P["Population", "LRT_P"])
 })
 
+# random slopes
+R_est_13 <- rptGaussian(BodyL ~ Treatment + Sex + (1 + Treatment|Population),  
+            grname=c("Population"), data=BeetlesBody, nboot=0, npermut=0)
 
+test_that("Random Slope repeatability point estimate is correct", {
+        expect_equal(R_est_13$R$Population, 0.5015875, tolerance = 0.001)
+})
+
+test_that("Random slopes fitted without correlation (i.e. with grname occuring in multiple random effect terms) throw an error", {
+        expect_error(rptGaussian(BodyL ~ Treatment + Sex + (1|Population) + (0 + Treatment|Population),  
+                grname=c("Population"), data=BeetlesBody, nboot=0, npermut=0))
+})
 
 

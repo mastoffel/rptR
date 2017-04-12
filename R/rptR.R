@@ -37,9 +37,14 @@
 #' fixed effects, respectively. All computation can be parallelized with the \code{parallel} 
 #' argument, which enhances computation speed for larger computations.
 #' 
-#' @author Holger Schielzeth (holger.schielzeth@@uni-jena.de), Shinichi Nakagawa
-#'   (s.nakagawa@unsw.edu.au) & Martin Stoffel (martin.adam.stoffel@@gmail.com)
-#'   
+#' When using \code{rptR} please cite:   
+#' 
+#' Stoffel, M., Nakagawa, S. & Schielzeth, H. (2017) \emph{rptR: Repeatability estimation and variance decomposition by generalized linear
+#' mixed-effects models.}. Methods in Ecology and Evolution (accepted)
+#' 
+#' @author Martin Stoffel (martin.adam.stoffel@@gmail.com), Shinichi Nakagawa
+#'   (s.nakagawa@unsw.edu.au) & Holger Schielzeth (holger.schielzeth@@uni-jena.de)
+#' 
 #' @references Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
 #'   non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #'   

@@ -4,9 +4,9 @@ Version: 0.9.1
 Depends: 
     R (>= 3.2.1)
 Date: 2017-02-09
-Author: Holger Schielzeth <holger.schielzeth@uni-jena.de>,
-        Martin Stoffel <martin.adam.stoffel@gmail.com>,
-        Shinichi Nakagawa <s.nakagawa@unsw.edu.au>
+Author:  Martin Stoffel <martin.adam.stoffel@gmail.com>,
+         Shinichi Nakagawa <s.nakagawa@unsw.edu.au>,
+         Holger Schielzeth <holger.schielzeth@uni-jena.de>
 Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: R functions for estimating repeatability (intra-class
     correlation) from gaussian, binary, proportion and count data.
