@@ -142,6 +142,19 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                 }
         }
         
+        # this is just a check: the following code changed position as we test 
+        # whether grname appears in more than one random effect.
+        terms <- attr(terms(formula), "term.labels")
+        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        
+        # at the moment its not possible to fit the same grouping factor in more than one random effect
+        check_modelspecs <- sapply(grname, function(x) sum(grepl(paste0("\\b", x, "\\b"), randterms)))
+        if (any(check_modelspecs > 1)){
+                stop("Fitting the same grouping factor in more than one random 
+                      effect term is not possible at the moment")  
+        }
+        
+
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 

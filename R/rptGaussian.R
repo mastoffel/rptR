@@ -140,7 +140,8 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         
-        # significance test by likelihood-ratio-test
+        # significance test by likelihood-ratio-test / the following code changed position as we test 
+        # whether grname appears in more than one random effect.
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
         
@@ -148,7 +149,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         check_modelspecs <- sapply(grname, function(x) sum(grepl(paste0("\\b", x, "\\b"), randterms)))
         if (any(check_modelspecs > 1)){
                 stop("Fitting the same grouping factor in more than one random 
-                        effect term is not possible at the moment")  
+                      effect term is not possible at the moment")  
         }
         
         
@@ -421,10 +422,12 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                         # no 0 will occur in the formula, as we are currently not allowing
                         # to seperate random intercepts and random slopes for a given grouping variable
                         
+                        # the 0 case is just necessary when we allow fitting random intercepts
+                        # and random slopes seperately without estimating correlations.
                        # if (regexpr("0", current_term)>0){
                         #        df <- (k*(k-1)/2+k) - 1    
                         #} else {
-                         df <- k*(k-1)/2+k  
+                                df <- k*(k-1)/2+k  
                         #}
                 } 
                 df

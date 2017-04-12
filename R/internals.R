@@ -321,11 +321,13 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
                 if (k > 1){
                         terms <- attr(terms(formula), "term.labels")
                         current_term <- terms[grep(k_names, terms)]
-                        if (regexpr("0", current_term)>0){
-                                df <- (k*(k-1)/2+k) - 1    
-                        } else {
+                        # the 0 case is just necessary when we allow fitting random intercepts
+                        # and random slopes seperately without estimating correlations.
+                        #if (regexpr("0", current_term)>0){
+                        #        df <- (k*(k-1)/2+k) - 1    
+                        #} else {
                                 df <- k*(k-1)/2+k  
-                        }
+                        #}
                 } 
                 df
         }
