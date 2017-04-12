@@ -407,7 +407,11 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         
         
         ## likelihood-ratio-test
-        LRT_mod <- as.numeric(stats::logLik(mod))
+        
+        ## If the reduced model does not have random effects anymore, the LRT for the full
+        ## model must be fitted with ML instead of REML
+        LRT_mod <- ifelse(length(randterms) == 1, as.numeric(stats::logLik(stats::update(mod, REML=FALSE))), as.numeric(stats::logLik(mod)))
+        
         # k*(k-1)/2+k
         # check_rs <- sum(unlist(lapply(VarComps[grname], function(x) sum(dim(x)) > 2)))
         
