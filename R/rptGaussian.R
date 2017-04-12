@@ -140,6 +140,16 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         
+        # significance test by likelihood-ratio-test
+        terms <- attr(terms(formula), "term.labels")
+        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        
+        # at the moment its not possible to fit the same grouping factor in more than one random effect
+        check_modelspecs <- sapply(grname, function(x) sum(grepl(paste0("\\b", x, "\\b"), randterms)))
+        if (any(check_modelspecs > 1)){
+                stop("Fitting the same grouping factor in more than one random 
+                        effect term is not possible at the moment")  
+        }
         
         
         # point estimates of R or var
@@ -303,16 +313,16 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # significance test by permutation of residuals
         P_permut <- rep(NA, length(grname))
         
-        # significance test by likelihood-ratio-test
-        terms <- attr(terms(formula), "term.labels")
-        randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
-        
-        # at the moment its not possible to fit the same grouping factor in more than one random effect
-        check_modelspecs <- sapply(grname, function(x) sum(grepl(x, randterms)))
-        if (any(check_modelspecs > 1)){
-                stop("Fitting the same grouping factor in more than one random 
-                        effect terms is not possible at the moment")  
-        } 
+        # # significance test by likelihood-ratio-test
+        # terms <- attr(terms(formula), "term.labels")
+        # randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]
+        # 
+        # # at the moment its not possible to fit the same grouping factor in more than one random effect
+        # check_modelspecs <- sapply(grname, function(x) sum(grepl(x, randterms)))
+        # if (any(check_modelspecs > 1)){
+        #         stop("Fitting the same grouping factor in more than one random 
+        #                 effect term is not possible at the moment")  
+        # } 
         
         # no permutation test
         if (npermut == 1) {
@@ -408,11 +418,14 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 if (k > 1){
                         terms <- attr(terms(formula), "term.labels")
                         current_term <- terms[grep(k_names, terms)]
-                        if (regexpr("0", current_term)>0){
-                                df <- (k*(k-1)/2+k) - 1    
-                        } else {
-                               df <- k*(k-1)/2+k  
-                        }
+                        # no 0 will occur in the formula, as we are currently not allowing
+                        # to seperate random intercepts and random slopes for a given grouping variable
+                        
+                       # if (regexpr("0", current_term)>0){
+                        #        df <- (k*(k-1)/2+k) - 1    
+                        #} else {
+                         df <- k*(k-1)/2+k  
+                        #}
                 } 
                 df
         }

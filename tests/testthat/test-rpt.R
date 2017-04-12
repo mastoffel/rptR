@@ -37,3 +37,13 @@ test_that("wrapper function rpt works for all distributions with perm and boot a
         expect_error(rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population"), data=md,
                 nboot=2, npermut=2, datatype = "Proportion"), NA)
 })
+
+
+# test random slopes
+
+#res1 <- rpt(BodyL ~ Treatment + Sex + (1|Population) + (0 + Treatment|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
+#res2 <- rpt(BodyL ~ Treatment + Sex + (1|Population) + (-1 + Treatment|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
+#res3 <- rpt(BodyL ~ Treatment + Sex + (1|Population) + (- 1 + Treatment|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
+#res4 <- rpt(BodyL ~ Treatment + Sex + (0 + Treatment|Population) + (1|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
+#res5 <- rpt(BodyL ~ Treatment + Sex + (-1 + Treatment|Population) + (1|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)
+#res6 <- rpt(BodyL ~ Treatment + Sex + (- 1 + Treatment|Population) + (1|Population) ,  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=0, npermut=0)

@@ -1,0 +1,51 @@
+2*2
+library(rptR)
+browseVignettes(rptR)
+browseVignettes("rptR")
+library(devtools)
+install_github("mastoffel/rptR", build_vignettes = TRUE)
+library(rptR)
+browseVignettes("rptR")
+setwd("/Users/martin/Dropbox/projects/Rpackages/rptR")
+md = read.table("ParalallusPolymorphData.txt", header=TRUE)#
+#md = subset(md, Altitude >800) ##########################
+require(lme4)#
+require(lmerTest)#
+require(rptR)#
+require(colorspace)#
+#
+Alt = with(md, tapply(Altitude2, SiteID, mean, na.rm=TRUE))#
+md$SiteSexID = paste(md$SiteID, md$Sex, sep="_")#
+nboot = 1000#
+#
+# Variance components#
+#
+md$Trait = md$Pronotum#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="F"), nboot=nboot))#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="M"), nboot=nboot))#
+md$Trait = md$Femur#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="F"), nboot=nboot))#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="M"), nboot=nboot))
+md = read.table("ParalallusPolymorphData.txt", header=TRUE)
+require(lme4)#
+require(lmerTest)#
+require(rptR)#
+require(colorspace)
+install.packages(c("lme4", "lmerTest", "rptR", "colorspace"))
+Alt = with(md, tapply(Altitude2, SiteID, mean, na.rm=TRUE))#
+md$SiteSexID = paste(md$SiteID, md$Sex, sep="_")#
+nboot = 1000#
+#
+# Variance components#
+#
+md$Trait = md$Pronotum#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="F"), nboot=nboot))#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="M"), nboot=nboot))#
+md$Trait = md$Femur#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="F"), nboot=nboot))#
+summary(rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="M"), nboot=nboot))
+Alt = with(md, tapply(Altitude2, SiteID, mean, na.rm=TRUE))#
+md$SiteSexID = paste(md$SiteID, md$Sex, sep="_")#
+nboot = 1000
+md$Trait = md$Pronotum
+rptGaussian(Trait ~ I(Altitude/100) + (1|SiteID), grname="SiteID", data=subset(md, Sex=="F"), nboot=nboot)
