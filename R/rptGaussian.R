@@ -140,7 +140,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         }
         
         
-        # significance test by likelihood-ratio-test / the following code changed position as we test 
+        # variables for likelihood-ratio-test / the following code changed position as we test 
         # whether grname appears in more than one random effect.
         terms <- attr(terms(formula), "term.labels")
         randterms <- terms[which(regexpr(" | ", terms, perl = TRUE) > 0)]

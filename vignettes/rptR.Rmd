@@ -176,7 +176,7 @@ rep6 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (1|Population),  grname=c(
 print(rep6)
 ```
 
-In our example, it turns out that the fixed effects explain a substantial amount of phenotypic variance and this reduces the relative contribution of `Population` and `Container`. We will see below that the change is entirely explained by the fraction explained by fixed effects. Note that the repeatability for `Population` is now the same as in our initial model (`rep1`), although a far more complex model was fitted. The estimation of enhanded agreement repeatabilities works equally for the non-Gaussian models introduced below.
+In our example, it turns out that the fixed effects explain a substantial amount of phenotypic variance and this reduces the relative contribution of `Population` and `Container`. We will see below that the change is entirely explained by the fraction explained by fixed effects. Note that the repeatability for `Population` is now the same as in our initial model (`rep1`), although a far more complex model was fitted. The estimation of enhanced agreement repeatabilities works equally for the non-Gaussian models introduced below.
 
 ## Estimating the coefficient determination $R^2$ for fixed effects
 
@@ -194,7 +194,7 @@ The variances explained by container and population are evidently unchanged, but
 
 ## Repeatabilities for Poisson-distributed count data
 
-Count data represent a typical situation in which we might want to cosider fitting generalized linear mixed-effects models (GLMM). Poisson error distributions with log-link are often appropriate for count data, although there is no guarantee that count data will be best modeled by Poisson error distributions (negative binomial distributions are an obvious alternative). Using the link function, the model parameters are fitted on the latent scale rather than on the original data scale and consequently the model output will represent results on the latent scale.   
+Count data represent a typical situation in which we might want to consider fitting generalized linear mixed-effects models (GLMM). Poisson error distributions with log-link are often appropriate for count data, although there is no guarantee that count data will be best modeled by Poisson error distributions (negative binomial distributions are an obvious alternative). Using the link function, the model parameters are fitted on the latent scale rather than on the original data scale and consequently the model output will represent results on the latent scale.   
 
 While in a Gaussian model, there are different parameters for the location and the spread of the distribution (mean and variance), this is not the case in non-Gaussian models. The Poisson distribution, for example, has an inherent variance that is equal to the mean. This inherent variance needs to be respected when quantifying repeatabilities for non-Gaussian data. We have reviewed the literature on non-Gaussian link-scale variances (Nakagawa & Schielzeth 2010) and `rptR` is based on the formula presented therein. It turns out that the distribution-specific variance for a Poisson model with log link is approximated by $ln(1/\lambda + 1)$ where $\lambda$ is the average count. This approximation however becomes increasingly inaccurate at low $\lambda$.
 
@@ -346,7 +346,7 @@ print(rep12a) # probit link
 
 ## Estimating variances instead of ratios
 
-We wrote `rptR` with the focus primarily on estimating repeatabilities, including a quantification of their uncertainty. However, we realize that it is often of interest to estimate variances and their uncertainty directly rather than as ratios of variances. `rptR` can be used for this purpose, too, by setting the `ratio` argument from `TRUE` (the default) to `FALSE`. 
+We wrote `rptR` with the focus primarily on estimating repeatabilities, including a quantification of their uncertainty. However, we realize that it is often of interest to estimate variances and their uncertainty directly rather than as ratios of variances. `rptR` can be used for this purpose too, by setting the `ratio` argument from `TRUE` (the default) to `FALSE`. 
 
 For example, if we are interested in the link scale variances of colour morph variation, we can estimate the variances as:
 
@@ -384,9 +384,9 @@ It is possible to use both `Overdisperion` and `Residual` in combination with `r
 
 ## Random-slope models
 
-It is possible to fit random-slope models following the approach introduced by Johnson (2014). The function call will return the average repeatability across the distribution of the covariate in the sample (see Johnson 2014 for details). Permutation tests and likelihood ratio test are conducted with random-intercepts and random-slopes being jointly removed from the model. Note that random-slope models can be specified in multiple ways and the function will likely handle only those models well that have been specified in the classical way `(foo | grname)`, implicitly fitting random-intercepts, random slopes for the covariate `foo` and their correlation. Multiple random-slopes are possible, but models with  covariances being constraint may not currently work.
+It is possible to fit random-slope models following the approach introduced by Johnson (2014). The function call will return the average repeatability across the distribution of the covariate in the sample (see Johnson 2014 for details). Permutation tests and likelihood ratio test are conducted with random-intercepts and random-slopes being jointly removed from the model. Note that random-slope models can be specified in multiple ways and the function will likely handle only those models well that have been specified in the classical way `(foo | grname)`, implicitly fitting random-intercepts, random slopes for the covariate `foo` and their correlation. Multiple random-slopes are possible, but models with covariances being constraint do currently not work.
 
-The following code gives and example for an repeatability estimation for body size where random slopes are fitted for `Sex` and `Treatment` at the level of populations. The resulting model allows for variance components to vary by sex and by treatment with the average across the sex/treatment levels being returned as the model output.
+The following code gives and example for a repeatability estimation for body size where random slopes are fitted for `Sex` and `Treatment` at the level of populations. The resulting model allows for variance components to vary by sex and by treatment with the average across the sex/treatment levels being returned as the model output.
 
 ```{r gaussian-random-slopes, tidy = TRUE, eval = FALSE}
 rep16 <- rpt(BodyL ~ Treatment + Sex + (1|Container) + (Treatment + Sex|Population),  grname=c("Population"), data=BeetlesBody, datatype="Gaussian", nboot=500, npermut=0, adjusted=FALSE)
