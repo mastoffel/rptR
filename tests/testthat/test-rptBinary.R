@@ -35,11 +35,11 @@ test_that("rpt estimation works for one random effect, boot, no permut, no paral
         expect_equal(R_est_2$R["R_link", "Population"], 0.1879296, tolerance = 0.001)
         
         # original scale
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "2.5%"]), 0.1797193, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "97.5%"]), 0.2007206, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "2.5%"]), 0.1448806, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "97.5%"]), 0.1660169, tolerance = 0.001)
         # link scale
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "2.5%"]), 0.1818618, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "97.5%"]), 0.2028332, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "2.5%"]), 0.1458783, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "97.5%"]), 0.1654149, tolerance = 0.001)
         
 })
 
@@ -115,11 +115,11 @@ test_that("rpt estimation works for two random effect, boot, no permut, no paral
         
         # original scale
         # Container random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Container", "2.5%"]), 0.000460106 , tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Container", "97.5%"]), 0.01794413, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Container", "2.5%"]), 1.527434e-10 , tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Container", "97.5%"]), 4.373448e-09, tolerance = 0.001)
         # Population random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "2.5%"]), 0.08705837, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "97.5%"]), 0.226984, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "2.5%"]),  9.297816e-02, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Population", "97.5%"]), 1.955244e-01, tolerance = 0.001)
         # Residual random effect
         #expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Residual", "2.5%"]), NA, tolerance = 0.001)
         #expect_equal(as.numeric(R_est_2$CI_emp$CI_org["Residual", "97.5%"]), NA, tolerance = 0.001)
@@ -127,37 +127,29 @@ test_that("rpt estimation works for two random effect, boot, no permut, no paral
         
         # link scale
         # Container random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Container", "2.5%"]),  0.0004719506, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Container", "97.5%"]), 0.01840607, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Container", "2.5%"]),  1.540502e-10, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Container", "97.5%"]), 4.420091e-09, tolerance = 0.001)
         # Population random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "2.5%"]), 0.08733554, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "97.5%"]), 0.232777, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "2.5%"]),  9.327113e-02, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Population", "97.5%"]), 1.975921e-01, tolerance = 0.001)
         # Residual random effect
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Residual", "2.5%"]), 0.748817, tolerance = 0.001)
-        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Residual", "97.5%"]), 0.9121925, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Residual", "2.5%"]), 8.024079e-01, tolerance = 0.001)
+        expect_equal(as.numeric(R_est_2$CI_emp$CI_link["Residual", "97.5%"]), 9.067289e-01, tolerance = 0.001)
         
 })
 
 
 
 # run with two random effects (no residual), no boot, permut
-R_est_3 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Overdispersion", "Population"), data=BeetlesMale, nboot=0, npermut=2)
+R_est_3 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population"), data=BeetlesMale, nboot=0, npermut=2)
 
-test_that("rpt estimation is independent of the presence of Overdispersion/Residual in grname", {
+test_that("rpt estimation is independent of the presence of Residual in grname", {
         # Container random effect
         expect_equal(R_est_1$R["R_org", "Container"], R_est_3$R["R_org", "Container"], tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Container"], R_est_3$R["R_link", "Container"], tolerance = 0.001)
         # Population random effect
         expect_equal(R_est_1$R["R_org", "Population"], R_est_3$R["R_org", "Population"], tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Population"], R_est_3$R["R_link", "Population"], tolerance = 0.001)
-})
-
-test_that("rpt estimation works for overdispersion, boot, no permut, no parallelisation, logit link", {
-        # original scale
-        # Overdispersion random effect
-        expect_equal(R_est_3$R["R_org", "Overdispersion"], 0, tolerance = 0.001)
-        expect_equal(R_est_3$R["R_link", "Overdispersion"], 0, tolerance = 0.001)
-
 })
 
 
@@ -173,28 +165,26 @@ test_that("rpt estimation works for two random effect, no boot, permut, no paral
 
 
 # variance estimation with boot and permut and residual/overdispersion and Fixed effect
-R_est_1 <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Fixed", "Container", "Population", "Residual", "Overdispersion"), 
+R_est_1 <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population),  grname=c("Fixed", "Container", "Population", "Residual"), 
         data=BeetlesMale, nboot=2, npermut=2, ratio = FALSE)
 
 test_that("Variance estimation works for two random effects, boot, permut, Residual, Overdispersion and Fixed", {
         expect_equal(R_est_1$R["R_link", "Container"], 7.902152e-10, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Population"],  1.054672 , tolerance = 0.001)
-        expect_equal(R_est_1$R["R_link", "Overdispersion"], 0 , tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Residual"], 4.086918, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Fixed"], 0.2438065, tolerance = 0.001)
 })
 
 
-# test whether repeatabilities are equal for overdispersion independent of other grouping factors
+# test whether repeatabilities are equal independent of other grouping factors
 
-R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Overdispersion", "Fixed"), 
+R_est_1 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Container", "Population", "Residual", "Fixed"), 
         data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE, adjusted=FALSE)
-R_est_2 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Overdispersion", "Fixed"), 
+R_est_2 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Fixed", "Container"), 
         data=BeetlesMale, nboot=0, npermut=0, ratio = TRUE, adjusted=FALSE)
 
 
-test_that("Repeatabilities are equal for grouping factors independent of residual and overdispersion specification", {
-        expect_false(any(R_est_1$R[,"Overdispersion"] == R_est_2$R[,"Overdispersion"]) == FALSE)
+test_that("Repeatabilities are equal for grouping factors independent of residual specification", {
         expect_false(any(R_est_1$R[,"Fixed"] == R_est_2$R[,"Fixed"]) == FALSE)
 })
 
@@ -226,3 +216,4 @@ test_that("LRTs are equal for different order in formula argument", {
         expect_equal(R_est_3$P["Container", "LRT_P"], R_est_4$P["Container", "LRT_P"])
         expect_equal(R_est_3$P["Population", "LRT_P"], R_est_4$P["Population", "LRT_P"])
 })
+

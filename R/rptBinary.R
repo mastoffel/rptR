@@ -80,7 +80,7 @@
 #' \dontrun{
 #' # variance estimation of random effects, residual and overdispersion 
 #' R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population), 
-#'                    grname=c("Container","Population","Residual", "Overdispersion"), 
+#'                    grname=c("Container","Population","Residual"), 
 #'                    data = BeetlesMale, nboot=0, npermut=0, ratio = FALSE)
 #' }    
 #' 
@@ -99,8 +99,12 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 data <- data[no_NA_vals, ]
         } 
         
-        # check whether grnames just contain "Residual" or "Overdispersion"
-        if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
+        # check whether grnames just contain "Residual" or "Fixed" and check if "Overdispersion" is specified
+        if (any(grname == "Overdispersion")) {
+                grname <- grname[grname!="Overdispersion"]
+                warning('No observation-level random effect ist fitted for Binary data. grname="Overdispersion" is thus ignored.')
+        }
+        if (!any((grname != "Residual") & (grname != "Fixed") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
         
         # check whether expect is either "meanobs" or "latent" or "liability"
         if (expect != "meanobs" & expect != "latent" & expect != "liability") stop("The argument expect has to be either 'meanobs' (the default), 'latent' or 'liability'")
@@ -108,10 +112,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # link
         if (length(link) > 1) link <- "logit"
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
-        # observational level random effect
-        Overdispersion <- factor(1:nrow(data))
-        data <- cbind(data, Overdispersion)
-        formula <- stats::update(formula,  ~ . + (1|Overdispersion))
+        
+        # note: no Overdispersion for binary data. 
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
         
         # check for random slopes
@@ -139,7 +141,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # https://stat.ethz.ch/pipermail/r-help/2006-June/108153.html
         inverf <- function(x) stats::qnorm((x + 1)/2)/sqrt(2)
         
-        # check whether Residual, Overdispersion or Fixed is selected and if so, remove it
+        # check whether Residualor Fixed is selected and if so, remove it
         # from grname vector
         for (component in c("Residual", "Fixed")) {
                 if (any(grname == component)){
@@ -201,7 +203,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if(expect=="latent") estdv_link <- 1 / (Ep*(1-Ep))
                         if(expect=="meanobs") estdv_link <- 1 / (Ep*(1-Ep))
                         if(expect=="liability") estdv_link <- pi^2/3
-                        var_r <-  var_VarComps["Overdispersion"] + estdv_link
+                        # var_r <-  var_VarComps["Overdispersion"] + estdv_link # old version with overdisp
+                        var_r <-  estdv_link
                 }
                 if (link == "probit") {
                         if(expect=="latent") Ep <- stats::pnorm(beta0*sqrt(1+sum(VarComps[,"vcov"])+var_f)^-1)
@@ -210,7 +213,8 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                         if(expect=="meanobs") estdv_link <- 2*pi*Ep*(1-Ep) * (exp(inverf(2*Ep-1)^2))^2
                         if(expect=="liability") estdv_link <- 1
                         # var_r <- VarComps["Overdispersion", "vcov"] + estdv_link
-                        var_r <-  var_VarComps["Overdispersion"] + estdv_link
+                        # var_r <-  var_VarComps["Overdispersion"] + estdv_link
+                        var_r <- estdv_link
                 }
                 
                 if (ratio == FALSE) {
@@ -357,7 +361,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         
         # delete overdispersion from ngroups
         ngroups <-  unlist(lapply(data[grname], function(x) length(unique(x))))
-        ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
+        #ngroups <- ngroups[!names(ngroups) == "Overdispersion"]
         
         res <- list(call = match.call(), 
                 datatype = "Binary", 
