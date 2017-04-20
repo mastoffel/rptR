@@ -19,8 +19,9 @@ repeatabilities.}
 name(s) of the grouping factor(s), for which the repeatability should
 be estimated. Spelling needs to match the random effect names as given in \code{formula} 
 and terms have to be set in quotation marks. The reseved terms "Residual", 
-"Overdispersion" and "Fixed" allow the estimation of oversipersion variance, residual 
-variance and variance explained by fixed effects, respectively.}
+"Fixed" allow the estimation of residual 
+variance and variance explained by fixed effects, respectively. "Overdispersion" is 
+not available for rptBinary.}
 
 \item{data}{A dataframe that contains the variables included in the \code{formula}
 and \code{grname} arguments.}

@@ -2,6 +2,13 @@
 #' 
 #' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @inheritParams rpt
+#' @param grname A character string or vector of character strings giving the
+#'        name(s) of the grouping factor(s), for which the repeatability should
+#'        be estimated. Spelling needs to match the random effect names as given in \code{formula} 
+#'        and terms have to be set in quotation marks. The reseved terms "Residual", 
+#'        "Fixed" allow the estimation of residual 
+#'        variance and variance explained by fixed effects, respectively. "Overdispersion" is 
+#'        not available for rptBinary.
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
 #' 
 #' @return 
