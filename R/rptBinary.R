@@ -104,7 +104,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                 grname <- grname[grname!="Overdispersion"]
                 warning('No observation-level random effect ist fitted for Binary data. grname="Overdispersion" is thus ignored.')
         }
-        if (!any((grname != "Residual") & (grname != "Fixed") & (grname != "Overdispersion"))) stop("Specify at least one grouping factor in grname")
+        if (!any((grname != "Residual") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # check whether expect is either "meanobs" or "latent" or "liability"
         if (expect != "meanobs" & expect != "latent" & expect != "liability") stop("The argument expect has to be either 'meanobs' (the default), 'latent' or 'liability'")

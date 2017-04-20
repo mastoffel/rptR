@@ -179,8 +179,8 @@ test_that("Random Slope repeatability point estimate is correct", {
 })
 
 test_that("Random slopes fitted without correlation (i.e. with grname occuring in multiple random effect terms) throw an error", {
-        expect_error(rptGaussian(BodyL ~ Treatment + Sex + (1|Population) + (0 + Treatment|Population),  
-                grname=c("Population"), data=BeetlesBody, nboot=0, npermut=0))
+        expect_error(suppressWarnings(rptGaussian(BodyL ~ Treatment + Sex + (1|Population) + (0 + Treatment|Population),  
+                grname=c("Population"), data=BeetlesBody, nboot=0, npermut=0)))
 })
 
 
