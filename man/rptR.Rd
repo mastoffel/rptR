@@ -44,7 +44,7 @@ argument, which enhances computation speed for larger computations.
 When using \code{rptR} please cite:   
 
 Stoffel, M., Nakagawa, S. & Schielzeth, H. (2017) \emph{rptR: Repeatability estimation and variance decomposition by generalized linear
-mixed-effects models.}. Methods in Ecology and Evolution (accepted)
+mixed-effects models.}. Methods Ecol Evol. Accepted Author Manuscript. doi:10.1111/2041-210X.12797
 }
 \author{
 Martin Stoffel (martin.adam.stoffel@gmail.com), Shinichi Nakagawa

@@ -44,6 +44,7 @@ After one of those two steps, the package can be loaded by
 library(rptR)
 ```
 
+
 The central wrapper function for estimating the repeatability is `rpt`. The argument `datatype` decides whether the call is forwarded to the specialized functions `rptGaussian` for Gaussian traits, `rptBinary` for truly binary (0/1) outcomes, `rptProportion` for proportion data represented as joint vectors (or matrix) of successes and failures and `rptPoisson` for Poisson-distributed count data. The functions return S3 class `rpt` objects that can be viewed via the `str` function. The generic functions `summary`, `print` and `plot` are available for a more convenient display of the results. In the following we walk through the features of `rptR` starting with Gaussian models for introducing the basic plots and outputs, before addressing the specifics of count and binary trait analyses. 
 
 
@@ -198,7 +199,7 @@ Count data represent a typical situation in which we might want to consider fitt
 
 While in a Gaussian model, there are different parameters for the location and the spread of the distribution (mean and variance), this is not the case in non-Gaussian models. The Poisson distribution, for example, has an inherent variance that is equal to the mean. This inherent variance needs to be respected when quantifying repeatabilities for non-Gaussian data. We have reviewed the literature on non-Gaussian link-scale variances (Nakagawa & Schielzeth 2010) and `rptR` is based on the formula presented therein. It turns out that the distribution-specific variance for a Poisson model with log link is approximated by $ln(1/\lambda + 1)$ where $\lambda$ is the average count. This approximation however becomes increasingly inaccurate at low $\lambda$.
 
-In order to account for additive overdisperison in Poisson and other non-Gaussian models, the current implementation of `rptR` internally adds an observation level random effect to the model specified in `formula`. An observation level random effect is an 
+In order to account for additive overdisperison in Poisson and other non-Gaussian models (except for models with binary response), the current implementation of `rptR` internally adds an observation level random effect to the model specified in `formula`. An observation level random effect is an 
 additional random effect term (named `Overdispersion`) with as many levels as there are observations to the specified model. The additive overdispersion explained by the new `Overdispersion` term  is added to the distribution-specific variance in the denominator of the repeatability. See als section 'Multiplicative and additive overdispersion models' towards the end of the vignette.
 
 As an example, we will analyse the number of eggs laid by female beetles (`Eggs`) in our toy dataset. We will estimate the repeatability at the level of the population as well as at the level of the container simultaneously while controlling for excess variation introduced by the experimental nutritional treatment. There is no need to control for sex-differences in this sex-limited trait.
