@@ -44,6 +44,12 @@ After one of those two steps, the package can be loaded by
 library(rptR)
 ```
 
+The citation can be found with
+
+```{r citation, tidy = TRUE, results='hide'}
+citation("rptR")
+```
+
 The central wrapper function for estimating the repeatability is `rpt`. The argument `datatype` decides whether the call is forwarded to the specialized functions `rptGaussian` for Gaussian traits, `rptBinary` for  binary (0/1) outcomes, `rptProportion` for proportion data represented as joint vectors (or matrix) of successes and failures and `rptPoisson` for Poisson-distributed count data. The functions return S3 class `rpt` objects that can be viewed via the `str` function. The generic functions `summary`, `print` and `plot` are available for a more convenient display of the results. In the following we walk through the features of `rptR` starting with Gaussian models for introducing the basic plots and outputs, before addressing the specifics of count and binary trait analyses. 
 
 ## A toy dataset

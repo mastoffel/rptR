@@ -9,3 +9,14 @@
 * Progress bars for all non-parallel functions  
 
 * several new sections in documentation and vignette
+
+
+# rptR 0.9.2
+
+* stability improvements for random-slope models
+
+* binary (0/1) data is now fitted without overdispersion
+
+* citation("rptR") now shows the accepted paper citation
+
+* slight improvements to the Likelihood-ratio tests
