@@ -56,7 +56,7 @@ rpt_gaussian <- rpt(BodyL ~ (1|Population), grname=c("Population", "Residual", "
         nboot=0, npermut=0, datatype = "Gaussian")
 rpt_poisson <- rpt(Egg ~ Treatment + (1|Container), grname=c("Container", "Residual", "Overdispersion", "Fixed"), data = BeetlesFemale,
         nboot=0, npermut=0, datatype = "Poisson")
-rpt_binary <- rpt(Colour ~ (1|Population), grname=c("Population", "Residual", "Overdispersion", "Fixed"), 
+rpt_binary <- rpt(Colour ~ (1|Population), grname=c("Population", "Residual", "Fixed"), # no overdisp in binary
         data=BeetlesMale, nboot=0, npermut=0, datatype = "Binary")
 rpt_proportion <- rpt(cbind(Dark, Reddish) ~ (1|Population), grname=c("Population", "Residual", "Overdispersion", "Fixed"), data=md,
         nboot=0, npermut=0, datatype = "Proportion")
