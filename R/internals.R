@@ -353,9 +353,9 @@ LRT_nongaussian <- function(formula, data, grname, mod, link, family){
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) 
         }
         
-        # division by 2 if LRT_df = 1
-        LRT_P <- LRT_P/ifelse(LRT_df==1,2,1)
-        
+        # division by 2 if LRT_df = 1 and LRT_D > 0
+        LRT_P <- LRT_P/ifelse(LRT_df==1 & LRT_D > 0,2,1)
+
         LRT_table <- data.frame(logL_red = LRT_red, LR_D = LRT_D, LRT_P = LRT_P, LRT_df =  LRT_df, stringsAsFactors = FALSE)
         row.names(LRT_table) <- grname
         
