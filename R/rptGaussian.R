@@ -61,7 +61,7 @@
 #' 
 #' # one random effect
 #' rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population", 
-#'                    data=BeetlesBody, nboot=3, npermut=3)
+#'                    data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 #' 
 #' # two random effects
 #' rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
