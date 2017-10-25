@@ -226,7 +226,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
                                 R_f_link <- var_f / var_p_link
                                 # origial scale
                                 if( adjusted) var_p_org <- EY * (exp(sum(var_VarComps)) - 1) + 1
-                                if(!adjusted) var_p_org <- EY * (exp(sum(var_VarComps + var_f)) - 1) + 1
+                                if(!adjusted) var_p_org <- EY * (exp(sum(var_VarComps) + var_f) - 1) + 1
                                 R_org <- EY * (exp(var_a) - 1)/ var_p_org
                                 R_f_org <- EY * (exp(var_f) - 1)/ var_p_org
                         }
