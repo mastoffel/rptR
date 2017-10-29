@@ -145,11 +145,6 @@ R_est <- rptBinary(Colour ~ Treatment + (1|Container) + (1|Population),
 
      
 }
-\author{
-Holger Schielzeth  (holger.schielzeth@uni-jena.de),
-        Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
-        Martin Stoffel (martin.adam.stoffel@gmail.com)
-}
 \references{
 Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
 concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
@@ -162,4 +157,8 @@ non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935
 \seealso{
 \link{rpt}
 }
-
+\author{
+Holger Schielzeth  (holger.schielzeth@uni-jena.de),
+        Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
+}

@@ -20,3 +20,8 @@
 * citation("rptR") now shows the accepted paper citation
 
 * slight improvements to the Likelihood-ratio tests
+
+
+# rptR 0.9.25
+
+* bug fix in variance addition in rptPoisson

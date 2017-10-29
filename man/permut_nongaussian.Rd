@@ -36,4 +36,3 @@ permut_nongaussian(permut, R_pe, formula, data, dep_var, grname, npermut,
 Permutation function for non-gaussian functions (internal use)
 }
 \keyword{internal}
-

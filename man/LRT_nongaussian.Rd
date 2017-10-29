@@ -21,4 +21,3 @@ LRT_nongaussian(formula, data, grname, mod, link, family)
 Likelihood ratio test for non-gaussian functions (internal use)
 }
 \keyword{internal}
-

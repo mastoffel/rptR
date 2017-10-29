@@ -36,4 +36,3 @@ bootstrap_nongaussian(bootstr, R_pe, formula, data, Ysim, mod, grname,
 Bootstrapping for non-gaussian functions (internal use)
 }
 \keyword{internal}
-

@@ -164,11 +164,6 @@ rpt(cbind(Dark, Reddish) ~ Treatment + (1|Population),
 }
 
 }
-\author{
-Holger Schielzeth  (holger.schielzeth@uni-jena.de), 
-        Shinichi Nakagawa (s.nakagawa@unsw.edu.au),
-        Martin Stoffel (martin.adam.stoffel@gmail.com)
-}
 \references{
 Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for 
      Gaussian and non-Gaussian data: a practical guide for biologists}. 
@@ -177,5 +172,9 @@ Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for
 \seealso{
 \link{rptR}
 }
+\author{
+Holger Schielzeth  (holger.schielzeth@uni-jena.de), 
+        Shinichi Nakagawa (s.nakagawa@unsw.edu.au),
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
+}
 \keyword{models}
-

@@ -19,4 +19,3 @@ This function uses the method from Paul Johnson to compute the average group
 variance across the levels of a covariate.
 }
 \keyword{internal}
-

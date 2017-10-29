@@ -109,7 +109,7 @@ data(BeetlesBody)
 
 # one random effect
 rpt_est <- rptGaussian(BodyL ~ (1|Population), grname="Population", 
-                   data=BeetlesBody, nboot=3, npermut=3)
+                   data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 
 # two random effects
 rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Container", "Population"), 
@@ -128,11 +128,6 @@ R_est <- rptGaussian(formula = BodyL ~ (1|Population) + (1|Container),
             data=BeetlesBody, nboot=3, npermut=3, ratio = FALSE)
 
 }
-\author{
-Holger Schielzeth  (holger.schielzeth@uni-jena.de),
-        Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
-        Martin Stoffel (martin.adam.stoffel@gmail.com)
-}
 \references{
 Carrasco, J. L. & Jover, L.  (2003) \emph{Estimating the generalized 
 concordance correlation coefficient through variance components}. Biometrics 59: 849-858.
@@ -143,4 +138,8 @@ non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935
 \seealso{
 \link{rpt}
 }
-
+\author{
+Holger Schielzeth  (holger.schielzeth@uni-jena.de),
+        Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
+        Martin Stoffel (martin.adam.stoffel@gmail.com)
+}

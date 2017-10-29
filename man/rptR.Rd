@@ -46,12 +46,11 @@ When using \code{rptR} please cite:
 Stoffel, M., Nakagawa, S. & Schielzeth, H. (2017) \emph{rptR: Repeatability estimation and variance decomposition by generalized linear
 mixed-effects models.}. Methods Ecol Evol. Accepted Author Manuscript. doi:10.1111/2041-210X.12797
 }
-\author{
-Martin Stoffel (martin.adam.stoffel@gmail.com), Shinichi Nakagawa
-  (s.nakagawa@unsw.edu.au) & Holger Schielzeth (holger.schielzeth@uni-jena.de)
-}
 \references{
 Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
   non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
-
+\author{
+Martin Stoffel (martin.adam.stoffel@gmail.com), Shinichi Nakagawa
+  (s.nakagawa@unsw.edu.au) & Holger Schielzeth (holger.schielzeth@uni-jena.de)
+}
