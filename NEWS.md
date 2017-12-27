@@ -22,6 +22,8 @@
 * slight improvements to the Likelihood-ratio tests
 
 
-# rptR 0.9.25
+# rptR 0.9.21
 
 * bug fix in variance addition in rptPoisson
+
+* full citation added
