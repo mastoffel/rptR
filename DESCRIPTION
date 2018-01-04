@@ -3,7 +3,7 @@ Title: Repeatability Estimation for Gaussian and Non-Gaussian Data
 Version: 0.9.21
 Depends: 
     R (>= 3.2.1)
-Date: 2017-12-27
+Date: 2018-01-04
 Author: Martin Stoffel <martin.adam.stoffel@gmail.com>,
          Shinichi Nakagawa <s.nakagawa@unsw.edu.au>,
          Holger Schielzeth <holger.schielzeth@uni-jena.de>
