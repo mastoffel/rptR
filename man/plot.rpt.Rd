@@ -5,8 +5,8 @@
 \title{Plot a rpt object}
 \usage{
 \method{plot}{rpt}(x, grname = names(x$ngroups), scale = c("link",
-  "original"), type = c("boot", "permut"), main = NULL, breaks = "FD",
-  xlab = NULL, ...)
+  "original"), type = c("boot", "permut"), main = NULL,
+  breaks = "FD", xlab = NULL, ...)
 }
 \arguments{
 \item{x}{An rpt object returned from one of the rpt functions.}

@@ -4,11 +4,11 @@
 \alias{rpt}
 \title{Repeatability Estimation for Gaussian and Non-Gaussian Data}
 \usage{
-rpt(formula, grname, data, datatype = c("Gaussian", "Binary", "Proportion",
-  "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95,
-  nboot = 1000, npermut = 0, parallel = FALSE, ncores = NULL,
-  ratio = TRUE, adjusted = TRUE, expect = "meanobs", rptObj = NULL,
-  update = FALSE)
+rpt(formula, grname, data, datatype = c("Gaussian", "Binary",
+  "Proportion", "count"), link = c("logit", "probit", "log", "sqrt"),
+  CI = 0.95, nboot = 1000, npermut = 0, parallel = FALSE,
+  ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs",
+  rptObj = NULL, update = FALSE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of

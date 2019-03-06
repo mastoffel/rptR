@@ -4,9 +4,9 @@
 \alias{rptGaussian}
 \title{LMM-based Repeatability Estimation for Gaussian Data}
 \usage{
-rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000, npermut = 0,
-  parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE,
-  rptObj = NULL, update = FALSE)
+rptGaussian(formula, grname, data, CI = 0.95, nboot = 1000,
+  npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE,
+  adjusted = TRUE, rptObj = NULL, update = FALSE)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of

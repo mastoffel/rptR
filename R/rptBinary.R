@@ -248,11 +248,23 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
                                 R_link <- var_a/ var_p_link
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
-                                # origial scale
-                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                # original scale
+                                
+                                # old computation leading to large CIs
+                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2) + Ep*(1-Ep)
                                 if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
                                 R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
+                             
+                                # new computation, still to be discussed with Holger but probably ok
+                                # if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(stats::qlogis(Ep)))^2) + Ep*(1-Ep)
+                                # if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(stats::qlogis(Ep)))^2)+Ep*(1-Ep)
+                                # R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
+                                # R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
+
+                                #R_org <- ( var_a * Ep^2 / ((1 + exp(beta0))^2)) / var_p_org
+                                #R_f_org <- ( var_f * Ep^2/ ((1 + exp(beta0))^2)) / var_p_org
+                                
                         }
                         if (link == "probit") {
                                 # link scale
