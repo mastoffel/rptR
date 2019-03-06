@@ -27,3 +27,8 @@
 * bug fix in variance addition in rptPoisson
 
 * full citation added
+
+
+# rptR 0.9.22
+
+* 

@@ -1,7 +1,7 @@
 
 ## Test environments
 * win-builder 
-* local macOS Sierra
+* local macOS Mojave
 * Travis-CI
 
 ## R CMD check results

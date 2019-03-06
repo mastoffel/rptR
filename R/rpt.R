@@ -152,7 +152,7 @@
 #' @export
 #' 
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binary", "Proportion", 
-    "count"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
+    "Poisson"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
     parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs",
     rptObj = NULL, update = FALSE) {
         

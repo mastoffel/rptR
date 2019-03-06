@@ -5,6 +5,7 @@ context("rptBinary")
 data(BeetlesMale)
 
 # Set a seed for reproducibility of the randomization 
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(23)
 
 ########## checks for one random effect

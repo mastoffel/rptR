@@ -1,6 +1,7 @@
 context("summary.rpt")
 
 # Set a seed for reproducibility of the randomization 
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(23)
 
 # load data

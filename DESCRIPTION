@@ -1,15 +1,15 @@
 Package: rptR
 Title: Repeatability Estimation for Gaussian and Non-Gaussian Data
-Version: 0.9.21
+Version: 0.9.22
 Depends: 
     R (>= 3.2.1)
-Date: 2018-01-04
+Date: 2019-06-03
 Author: Martin Stoffel <martin.adam.stoffel@gmail.com>,
          Shinichi Nakagawa <s.nakagawa@unsw.edu.au>,
          Holger Schielzeth <holger.schielzeth@uni-jena.de>
 Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: Estimating repeatability (intra-class
-    correlation) from Gaussian, binary, proportion and count data.
+    correlation) from Gaussian, binary, proportion and Poisson data.
 License: GPL (>= 2)
 Imports: 
     methods,
