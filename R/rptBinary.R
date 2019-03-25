@@ -63,7 +63,7 @@
 #' non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 #' 
 #' @author Holger Schielzeth  (holger.schielzeth@@uni-jena.de),
-#'         Shinichi Nakagawa (s.nakagawa@unsw.edu.au) &
+#'         Shinichi Nakagawa (s.nakagawa@@unsw.edu.au) &
 #'         Martin Stoffel (martin.adam.stoffel@@gmail.com)
 #'      
 #' @seealso \link{rpt}

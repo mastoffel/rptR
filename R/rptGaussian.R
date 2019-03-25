@@ -362,6 +362,11 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         # function for the reduced model in permut and LRT tests
         mod_fun <- ifelse(length(randterms) == 1, stats::lm, lme4::lmer)
         
+        # no permutation or LRT for Fixed, Overdispersion or Residuals
+        output_resid <- FALSE
+        output_overdisp <- FALSE
+        output_fixed <- FALSE
+        
         warnings_permut <- with_warnings({
                 
                 if (npermut > 1){
