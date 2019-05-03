@@ -132,7 +132,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                                     CI.u = unname(x$CI_emp$CI_link[grname, 2]), 
                                     main. = main, ...)   
                     } else if (scale == "original") {
-                            boot_hist(R = x$R[2, grname], R.boot = unname(unlist(x$R_boot_org[grname])), 
+                            boot_hist(R = x$R[1, grname], R.boot = unname(unlist(x$R_boot_org[grname])), 
                                     CI.l = unname(x$CI_emp$CI_org[grname, 1]), 
                                     CI.u = unname(x$CI_emp$CI_org[grname, 2]), 
                                     main. = main, ...)   
@@ -143,7 +143,7 @@ plot.rpt <- function(x, grname = names(x$ngroups), scale = c("link", "original")
                                     main. = main, ...)  
                     }
                     if (scale == "org") {
-                            permut_hist(R = x$R[2, grname], R.permut = unname(unlist(x$R_permut_org[grname])), 
+                            permut_hist(R = x$R[1, grname], R.permut = unname(unlist(x$R_permut_org[grname])), 
                                     main. = main, ...)  
                     }
             }
