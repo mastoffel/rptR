@@ -97,7 +97,7 @@
 
 rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
-        rptObj = NULL, update = FALSE) {
+        rptObj = NULL, update = FALSE, ...) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -121,7 +121,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         
         # note: no Overdispersion for binary data. 
-        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
+        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link), ...)
         
         # check for random slopes
         VarComps <- lme4::VarCorr(mod)
@@ -173,7 +173,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         # point estimates of R
         R_pe <- function(formula, data, grname) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link), ...)
                 
                 # mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
                 # random effect variance data.frame

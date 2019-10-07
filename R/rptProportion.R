@@ -94,7 +94,7 @@
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
-        rptObj = NULL, update = FALSE) {
+        rptObj = NULL, update = FALSE, ...) {
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -117,7 +117,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         data <- cbind(data, Overdispersion)
         
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
-        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link))
+        mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link), ...)
         
         if (nboot < 0) nboot <- 0
         if (npermut < 1) npermut <- 1
@@ -158,7 +158,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         # point estimates of R
         R_pe <- function(formula, data, grname, peYN = FALSE) {
                 
-                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link))
+                mod <- lme4::glmer(formula = formula, data = data, family = stats::binomial(link = link), ...)
                 
                 # random effect variance data.frame
                 VarComps <- lme4::VarCorr(mod)

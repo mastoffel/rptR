@@ -8,7 +8,7 @@ rpt(formula, grname, data, datatype = c("Gaussian", "Binary",
   "Proportion", "Poisson"), link = c("logit", "probit", "log", "sqrt"),
   CI = 0.95, nboot = 1000, npermut = 0, parallel = FALSE,
   ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs",
-  rptObj = NULL, update = FALSE)
+  rptObj = NULL, update = FALSE, ...)
 }
 \arguments{
 \item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
@@ -79,6 +79,8 @@ to update bootstraps and permutations}
 \item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptObj argument.
 The function just updates the permutations and bootstraps, so make sure to specify all other
 arguments excactly like for the rpt object specified in rptObj.}
+
+\item{...}{Other parameters for the lmer or glmer call, such as optimizers.}
 }
 \value{
 Returns an object of class \code{rpt}. See specific functions for details.

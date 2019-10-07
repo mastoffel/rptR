@@ -84,7 +84,7 @@
 
 rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE,
-        rptObj = NULL, update = FALSE) {
+        rptObj = NULL, update = FALSE, ...) {
         
         # delete rows with missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -97,7 +97,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         if (!any((grname != "Residual") & (grname != "Overdispersion") & (grname != "Fixed"))) stop("Specify at least one grouping factor in grname")
         
         # fit model
-        mod <- lme4::lmer(formula, data = data)
+        mod <- lme4::lmer(formula, data = data, ...)
         
         # check for random slopes
         # VarComps <- lme4::VarCorr(mod)
@@ -157,10 +157,10 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
         R_pe <- function(formula, data, grname, mod = NULL, resp = NULL) {
                 
                 if (!is.null(mod)) {
-                        mod <- lme4::refit(mod, newresp = resp)
+                        mod <- lme4::refit(mod, newresp = resp, ...)
                 } else {
                         # model
-                        mod <- lme4::lmer(formula, data)   
+                        mod <- lme4::lmer(formula, data, ...)   
                 }
                 
                 VarComps <- lme4::VarCorr(mod)
@@ -375,7 +375,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                                 randterm <-  randterms[grep(grname[i], randterms)]
                                 # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
                                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
-                                mod_red <- mod_fun(formula_red, data = data)
+                                mod_red <- mod_fun(formula_red, data = data, ...)
                                 if(parallel == TRUE) {
                                         if (is.null(ncores)) {
                                                 ncores <- parallel::detectCores()
@@ -453,7 +453,7 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 randterm <-  randterms[grep(grname[i], randterms)]
                 # formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (1 | ", grname[i], ")")))) ## check that random slopes work
                 formula_red <- stats::update(formula, eval(paste(". ~ . ", paste("- (", randterm, ")")))) ## check that random slopes work
-                LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data)))
+                LRT_red[i] <- as.numeric(stats::logLik(mod_fun(formula = formula_red, data = data, ...)))
                 LRT_D[i] <- as.numeric(-2 * (LRT_red[i] - LRT_mod))
                 LRT_P[i] <- ifelse(LRT_D[i] <= 0, 1, stats::pchisq(LRT_D[i], LRT_df[i], lower.tail = FALSE)) 
         }
