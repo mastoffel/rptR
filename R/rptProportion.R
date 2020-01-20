@@ -291,7 +291,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         ### permutation of residuals ###
         
         # response matrix for permutation test
-        dep_var_expr <- as.character(formula)[2]
+        dep_var_expr <- as.character(unclass(formula))[2]
         dep_var <- as.data.frame(with(data, eval(parse(text=dep_var_expr))))
         
         # defining main permutation function

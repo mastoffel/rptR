@@ -327,7 +327,7 @@ rptBinary <- function(formula, grname, data, link = c("logit", "probit"), CI = 0
         ### significance test by permutation of residuals ###
         
         # response variable
-        dep_var <- as.character(formula)[2]
+        dep_var <- as.character(unclass(formula))[2]
         
         # significance test by permutation of residuals
         

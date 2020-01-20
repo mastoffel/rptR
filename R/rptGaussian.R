@@ -343,7 +343,9 @@ rptGaussian <- function(formula, grname, data, CI = 0.95, nboot = 1000,
                 out
         }
         
-        dep_var <- as.character(formula)[2]
+        # unclass formula here to not clash with formula.tools package
+        dep_var <- as.character(unclass(formula))[2]
+      
         # one random effect, uses stats::lm()
         # multiple random effects, uses lmer()
         

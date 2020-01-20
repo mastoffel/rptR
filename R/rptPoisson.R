@@ -279,7 +279,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         ### significance test by permutation of residuals ###
         
         # response variable
-        dep_var <- as.character(formula)[2]
+        dep_var <- as.character(unclass(formula))[2]
         
         #  main permutation function
         permut <- function(nperm, formula, mod_red, dep_var, grname, data) {
