@@ -25,8 +25,6 @@ library("badger")
 [![CRAN total downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR) 
 [![Codecov test coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://codecov.io/gh/mastoffel/rptR?branch=master)
 
-* get the latest development version from github with
-
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -49,9 +47,7 @@ The goal of `rptR` is to provide point estimates, confidence intervals and signi
 
 When using `rptR``, please cite our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12797):
 
-Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models. Methods in Ecology and Evolution, 8(11), 1639-1644.
-
-`r badge_doi("https://doi.org/10.1111/2041-210X.12797", "green")`
+Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models. Methods in Ecology and Evolution, 8(11), 1639-1644. `r badge_doi("https://doi.org/10.1111/2041-210X.12797", "green")`
 
 ### Installation
 
@@ -66,7 +62,7 @@ Or the development version from GitHub with:
 ```{r gh-installation, eval = FALSE}
 # install.packages("remotes")
 remotes::install_github("mastoffel/rptR", build_vignettes = TRUE, dependencies = TRUE) 
-# check vignette
+# manual
 browseVignettes("rptR")
 ```
 
@@ -79,15 +75,17 @@ data(BeetlesBody)
 rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population), 
             grname = c("Container", "Population"), data = BeetlesBody, 
             datatype = "Gaussian", nboot = 100, npermut = 100)
+```
 
-rpts
+```{r, results = TRUE, warning=FALSE, message=FALSE}
+summary(rpts)
 ```
 
 #### Plotting
 
-```{r gaussian, tidy = TRUE, fig.show='hold', fig.width=3.2}
-plot(rpts, grname="Container", type="boot", cex.main=0.8)
-plot(rpts, grname="Population", type="boot", cex.main=0.8)
+```{r gaussian, tidy = TRUE, fig.show='hold', fig.width=4.2}
+plot(rpts, grname="Container", type="boot", cex.main=0.8, color = "#5E81AC")
+plot(rpts, grname="Population", type="boot", cex.main=0.8, color = "#5E81AC")
 ```
     
 
