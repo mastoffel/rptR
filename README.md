@@ -49,6 +49,9 @@ browseVignettes("rptR")
 
 ### Example
 
+Calculating the repeatability of beetle body length (`BodyL`) for both
+`Container` and `Population` while adjusting for `Treatment` and `Sex`:
+
 ``` r
 library(rptR)
 data(BeetlesBody)
@@ -57,6 +60,8 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             grname = c("Container", "Population"), data = BeetlesBody, 
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
+
+An extended summry of the results can be viewed with `summary()`.
 
 ``` r
 summary(rpts)
@@ -72,12 +77,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0246 0.0523  0.141     0.01      0
+#>  0.0834 0.0227 0.0473   0.13     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08815 8.62e-02 0.0523  0.141
-#> permut    100 0.00383 2.11e-10 0.0000  0.021
+#>             N    Mean Median   2.5%  97.5%
+#> boot      100 0.08891 0.0883 0.0473 0.1297
+#> permut    100 0.00521 0.0011 0.0000 0.0242
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -91,12 +96,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.104  0.245  0.628     0.04      0
+#>   0.491 0.0956  0.277  0.637     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.454  0.481  0.245  0.628
-#> permut    100  0.457  0.457  0.419  0.492
+#> boot      100  0.465  0.471  0.277  0.637
+#> permut    100  0.456  0.456  0.422  0.487
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -107,6 +112,10 @@ summary(rpts)
 ```
 
 #### Plotting
+
+`rptR` estimates uncertainties around repeatability estimates with
+parametric bootstrapping. The distribution of bootstrap estimates can
+easily be plotted.
 
 ``` r
 plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")

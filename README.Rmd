@@ -69,6 +69,9 @@ browseVignettes("rptR")
 
 ### Example
 
+Calculating the repeatability of beetle body length (`BodyL`) for both `Container` and 
+`Population` while adjusting for `Treatment` and `Sex`:
+
 ```{r example, results = 'hide', warning=FALSE, message=FALSE}
 library(rptR)
 data(BeetlesBody)
@@ -78,11 +81,15 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
 
+An extended summry of the results can be viewed with `summary()`.
+
 ```{r, results = TRUE, warning=FALSE, message=FALSE}
 summary(rpts)
 ```
 
 #### Plotting
+
+`rptR` estimates uncertainties around repeatability estimates with parametric bootstrapping. The distribution of bootstrap estimates can easily be plotted.
 
 ```{r gaussian, fig.show="hold", fig.width=4.2}
 plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
