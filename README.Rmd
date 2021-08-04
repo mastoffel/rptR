@@ -84,7 +84,7 @@ summary(rpts)
 
 #### Plotting
 
-```{r gaussian, tidy = TRUE, fig.show="hold", fig.width=4.2, fig.height=2}
+```{r gaussian, tidy = TRUE, fig.show="hold", fig.width=4.2}
 plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
 plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#ECEFF4")
 ```
