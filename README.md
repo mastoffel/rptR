@@ -19,7 +19,7 @@ permutation test estimates.
 
 ### Citation
 
-When using \`rptR\`\`, please cite our
+When using `rptR`, please cite our
 [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12797):
 
 Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR:
@@ -54,9 +54,6 @@ data(BeetlesBody)
 rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population), 
             grname = c("Container", "Population"), data = BeetlesBody, 
             datatype = "Gaussian", nboot = 100, npermut = 100)
-#> Bootstrap Progress:
-#> Permutation Progress for Container :
-#> Permutation Progress for Population :
 ```
 
 ``` r
@@ -73,12 +70,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834  0.025 0.0452  0.132     0.01      0
+#>  0.0834 0.0259 0.0422  0.144     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08772 0.084018 0.0452 0.1321
-#> permut    100 0.00463 0.000405 0.0000 0.0238
+#> boot      100 0.08221 0.077582 0.0422 0.1441
+#> permut    100 0.00464 0.000422 0.0000 0.0246
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -92,12 +89,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491 0.0978  0.294  0.652     0.04      0
+#>   0.491  0.113  0.275   0.66     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.477  0.472  0.294  0.652
-#> permut    100  0.452  0.455  0.419  0.492
+#> boot      100  0.484  0.484  0.275  0.660
+#> permut    100  0.454  0.454  0.415  0.485
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -110,20 +107,8 @@ summary(rpts)
 #### Plotting
 
 ``` r
-plot(rpts, grname="Container", type="boot", cex.main=0.8, color = "#5E81AC")
-#> Warning in plot.window(xlim, ylim, "", ...): "color" is not a graphical
-#> parameter
-#> Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "color"
-#> is not a graphical parameter
-#> Warning in axis(1, ...): "color" is not a graphical parameter
-#> Warning in axis(2, ...): "color" is not a graphical parameter
-plot(rpts, grname="Population", type="boot", cex.main=0.8, color = "#5E81AC")
-#> Warning in plot.window(xlim, ylim, "", ...): "color" is not a graphical
-#> parameter
-#> Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "color"
-#> is not a graphical parameter
-#> Warning in axis(1, ...): "color" is not a graphical parameter
-#> Warning in axis(2, ...): "color" is not a graphical parameter
+plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#5E81AC")
+plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#5E81AC")
 ```
 
 ![](README-gaussian-1.png)![](README-gaussian-2.png)

@@ -45,7 +45,7 @@ The goal of `rptR` is to provide point estimates, confidence intervals and signi
 
 ### Citation
 
-When using `rptR``, please cite our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12797):
+When using `rptR`, please cite our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12797):
 
 Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models. Methods in Ecology and Evolution, 8(11), 1639-1644. `r badge_doi("https://doi.org/10.1111/2041-210X.12797", "green")`
 
@@ -68,7 +68,7 @@ browseVignettes("rptR")
 
 ### Example
 
-```{r example, results = TRUE, warning=FALSE, message=FALSE}
+```{r example, results = 'hide', warning=FALSE, message=FALSE}
 library(rptR)
 data(BeetlesBody)
 
@@ -84,8 +84,8 @@ summary(rpts)
 #### Plotting
 
 ```{r gaussian, tidy = TRUE, fig.show='hold', fig.width=4.2}
-plot(rpts, grname="Container", type="boot", cex.main=0.8, color = "#5E81AC")
-plot(rpts, grname="Population", type="boot", cex.main=0.8, color = "#5E81AC")
+plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#5E81AC")
+plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#5E81AC")
 ```
     
 
