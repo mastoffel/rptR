@@ -81,7 +81,7 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
 
-An extended summry of the results can be viewed with `summary()`.
+An extended summary of the results is shown with `summary()`.
 
 ```{r, results = TRUE, warning=FALSE, message=FALSE}
 summary(rpts)

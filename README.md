@@ -61,7 +61,7 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
 
-An extended summry of the results can be viewed with `summary()`.
+An extended summary of the results is shown with `summary()`.
 
 ``` r
 summary(rpts)
@@ -77,12 +77,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0234 0.0479  0.136     0.01      0
+#>  0.0834 0.0268 0.0462  0.142     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.09214 0.093979 0.0479 0.1355
-#> permut    100 0.00491 0.000494 0.0000 0.0222
+#>             N   Mean   Median   2.5%  97.5%
+#> boot      100 0.0888 8.89e-02 0.0462 0.1419
+#> permut    100 0.0043 1.09e-11 0.0000 0.0188
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -96,12 +96,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.093  0.272  0.625     0.04      0
+#>   0.491  0.111   0.26  0.645     0.03      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.453  0.464  0.272  0.625
-#> permut    100  0.455  0.455  0.415  0.492
+#> boot      100  0.461  0.464  0.260  0.645
+#> permut    100  0.455  0.455  0.424  0.489
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
