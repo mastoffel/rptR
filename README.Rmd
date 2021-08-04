@@ -23,6 +23,7 @@ library("badger")
 
 ![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
 [![CRAN total downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR) 
+[![Monthly downloads badge](https://cranlogs.r-pkg.org/badges/last-month/rptR?color=blue)](https://CRAN.R-project.org/package=rptR)
 [![Codecov test coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://codecov.io/gh/mastoffel/rptR?branch=master)
 
 ```{r, echo = FALSE}
@@ -47,7 +48,7 @@ The goal of `rptR` is to provide point estimates, confidence intervals and signi
 
 When using `rptR`, please cite our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12797):
 
-Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models. Methods in Ecology and Evolution, 8(11), 1639-1644. `r badge_doi("https://doi.org/10.1111/2041-210X.12797", "green")`
+Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models. *Methods in Ecology and Evolution*, **8(11)**, 1639-1644. `r badge_doi("https://doi.org/10.1111/2041-210X.12797", "green")`
 
 ### Installation
 
@@ -83,9 +84,9 @@ summary(rpts)
 
 #### Plotting
 
-```{r gaussian, tidy = TRUE, fig.show='hold', fig.width=4.2}
-plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#5E81AC")
-plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#5E81AC")
+```{r gaussian, tidy = TRUE, fig.show='hold', fig.width=4.2, fig.height=2}
+plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
+plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#ECEFF4")
 ```
     
 

@@ -5,6 +5,8 @@
 ![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
 [![CRAN total
 downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR)
+[![Monthly downloads
+badge](https://cranlogs.r-pkg.org/badges/last-month/rptR?color=blue)](https://CRAN.R-project.org/package=rptR)
 [![Codecov test
 coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://codecov.io/gh/mastoffel/rptR?branch=master)
 
@@ -24,8 +26,8 @@ When using `rptR`, please cite our
 
 Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR:
 Repeatability estimation and variance decomposition by generalized
-linear mixed-effects models. Methods in Ecology and Evolution, 8(11),
-1639-1644.
+linear mixed-effects models. *Methods in Ecology and Evolution*,
+**8(11)**, 1639-1644.
 [![](https://img.shields.io/badge/doi-https://doi.org/10.1111/2041--210X.12797-green.svg)](https://doi.org/https://doi.org/10.1111/2041-210X.12797)
 
 ### Installation
@@ -70,12 +72,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0259 0.0422  0.144     0.01      0
+#>  0.0834 0.0229  0.052  0.141     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08221 0.077582 0.0422 0.1441
-#> permut    100 0.00464 0.000422 0.0000 0.0246
+#> boot      100 0.08838 8.55e-02  0.052 0.1407
+#> permut    100 0.00444 7.53e-11  0.000 0.0183
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -89,12 +91,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.113  0.275   0.66     0.01      0
+#>   0.491 0.0971  0.283  0.627     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.484  0.484  0.275  0.660
-#> permut    100  0.454  0.454  0.415  0.485
+#> boot      100  0.461  0.458  0.283  0.627
+#> permut    100  0.452  0.451  0.422  0.487
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -107,8 +109,8 @@ summary(rpts)
 #### Plotting
 
 ``` r
-plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#5E81AC")
-plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#5E81AC")
+plot(rpts, grname = "Container", type = "boot", cex.main = 0.8, col = "#ECEFF4")
+plot(rpts, grname = "Population", type = "boot", cex.main = 0.8, col = "#ECEFF4")
 ```
 
 ![](README-gaussian-1.png)![](README-gaussian-2.png)
