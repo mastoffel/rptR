@@ -13,11 +13,11 @@ coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](h
 ### Goal
 
 The goal of `rptR` is to provide point estimates, confidence intervals
-and significance tests of the **repeatability** (intra-class correlation
-coefficient) of measurements based on generalised linear mixed models
-(GLMMs). The function `?summary.rpt` produces summaries in a detailed
-format, whereby `?plot.rpt` plots the distributions of bootstrap or
-permutation test estimates.
+and significance tests for the **repeatability** (intra-class
+correlation coefficient) of measurements based on generalised linear
+mixed models (GLMMs). The function `?summary.rpt` produces summaries in
+a detailed format, whereby `?plot.rpt` plots the distributions of
+bootstrap or permutation test estimates.
 
 ### Citation
 
@@ -77,12 +77,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0227 0.0473   0.13     0.01      0
+#>  0.0834 0.0234 0.0479  0.136     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean Median   2.5%  97.5%
-#> boot      100 0.08891 0.0883 0.0473 0.1297
-#> permut    100 0.00521 0.0011 0.0000 0.0242
+#>             N    Mean   Median   2.5%  97.5%
+#> boot      100 0.09214 0.093979 0.0479 0.1355
+#> permut    100 0.00491 0.000494 0.0000 0.0222
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -96,12 +96,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491 0.0956  0.277  0.637     0.01      0
+#>   0.491  0.093  0.272  0.625     0.04      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.465  0.471  0.277  0.637
-#> permut    100  0.456  0.456  0.422  0.487
+#> boot      100  0.453  0.464  0.272  0.625
+#> permut    100  0.455  0.455  0.415  0.492
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553

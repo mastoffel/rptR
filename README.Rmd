@@ -42,7 +42,7 @@ library("badger")
 
 ### Goal 
 
-The goal of `rptR` is to provide point estimates, confidence intervals and significance tests of the **repeatability** (intra-class correlation coefficient) of measurements based on generalised linear mixed models (GLMMs). The function `?summary.rpt` produces summaries in a detailed format, whereby `?plot.rpt` plots the distributions of bootstrap or permutation test estimates.
+The goal of `rptR` is to provide point estimates, confidence intervals and significance tests for the **repeatability** (intra-class correlation coefficient) of measurements based on generalised linear mixed models (GLMMs). The function `?summary.rpt` produces summaries in a detailed format, whereby `?plot.rpt` plots the distributions of bootstrap or permutation test estimates.
 
 ### Citation
 
