@@ -72,12 +72,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0256 0.0457  0.138     0.01      0
+#>  0.0834 0.0265 0.0468  0.146     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08512 0.080915 0.0457 0.1384
-#> permut    100 0.00484 0.000409 0.0000 0.0247
+#> boot      100 0.08730 0.084304 0.0468 0.1465
+#> permut    100 0.00525 0.000662 0.0000 0.0188
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -91,12 +91,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.116  0.235  0.656     0.04      0
+#>   0.491  0.119  0.214  0.649     0.02      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.483  0.486  0.235  0.656
-#> permut    100  0.458  0.456  0.425  0.495
+#> boot      100  0.463  0.469  0.214  0.649
+#> permut    100  0.456  0.455  0.424  0.487
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
