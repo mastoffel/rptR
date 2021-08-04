@@ -72,12 +72,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0265 0.0468  0.146     0.01      0
+#>  0.0834 0.0246 0.0523  0.141     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08730 0.084304 0.0468 0.1465
-#> permut    100 0.00525 0.000662 0.0000 0.0188
+#> boot      100 0.08815 8.62e-02 0.0523  0.141
+#> permut    100 0.00383 2.11e-10 0.0000  0.021
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -91,12 +91,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.119  0.214  0.649     0.02      0
+#>   0.491  0.104  0.245  0.628     0.04      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.463  0.469  0.214  0.649
-#> permut    100  0.456  0.455  0.424  0.487
+#> boot      100  0.454  0.481  0.245  0.628
+#> permut    100  0.457  0.457  0.419  0.492
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -109,8 +109,8 @@ summary(rpts)
 #### Plotting
 
 ``` r
-plot(rpts, grname = "Container", type = "boot", cex.main = 0.8, col = "#ECEFF4")
-plot(rpts, grname = "Population", type = "boot", cex.main = 0.8, col = "#ECEFF4")
+plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
+plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#ECEFF4")
 ```
 
 ![](README-gaussian-1.png)![](README-gaussian-2.png)
