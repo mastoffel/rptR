@@ -32,7 +32,7 @@ linear mixed-effects models. *Methods in Ecology and Evolution*,
 
 ### Installation
 
-You can install the stable version of \`rptR\`\` from CRAN with:
+You can install the stable version of `rptR` from CRAN with:
 
 ``` r
 install.packages("rptR")
@@ -78,12 +78,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0232 0.0497  0.132     0.01      0
+#>  0.0834 0.0241 0.0486  0.139     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08820 8.65e-02 0.0497 0.1315
-#> permut    100 0.00493 1.35e-11 0.0000 0.0224
+#>             N    Mean  Median   2.5%  97.5%
+#> boot      100 0.08886 0.08768 0.0486 0.1391
+#> permut    100 0.00466 0.00138 0.0000 0.0184
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -97,12 +97,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.105  0.264  0.642     0.03      0
+#>   0.491  0.103  0.232  0.652     0.04      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.461  0.471  0.264  0.642
-#> permut    100  0.453  0.454  0.417  0.490
+#> boot      100  0.451  0.452  0.232  0.652
+#> permut    100  0.452  0.452  0.416  0.491
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553

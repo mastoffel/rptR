@@ -54,7 +54,7 @@ Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR: Repeatability estim
 
 ### Installation
 
-You can install the stable version of `rptR`` from CRAN with:
+You can install the stable version of `rptR` from CRAN with:
 
 ```{r, eval = FALSE}
 install.packages("rptR")
