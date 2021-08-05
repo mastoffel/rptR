@@ -78,12 +78,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0265 0.0449  0.148     0.01      0
+#>  0.0834 0.0232 0.0497  0.132     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean  Median   2.5%  97.5%
-#> boot      100 0.08730 0.08147 0.0449 0.1484
-#> permut    100 0.00478 0.00135 0.0000 0.0176
+#>             N    Mean   Median   2.5%  97.5%
+#> boot      100 0.08820 8.65e-02 0.0497 0.1315
+#> permut    100 0.00493 1.35e-11 0.0000 0.0224
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -97,12 +97,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.107  0.255  0.649     0.02      0
+#>   0.491  0.105  0.264  0.642     0.03      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.474  0.482  0.255  0.649
-#> permut    100  0.454  0.453  0.420  0.487
+#> boot      100  0.461  0.471  0.264  0.642
+#> permut    100  0.453  0.454  0.417  0.490
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -123,4 +123,4 @@ plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
 plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#ECEFF4")
 ```
 
-<img src="README-gaussian-1.png" width="100%" /><img src="README-gaussian-2.png" width="100%" />
+![](README-gaussian-1.png)![](README-gaussian-2.png)

@@ -12,8 +12,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "README-",
   message = FALSE,
-  warning = FALSE,
-  out.width = "100%"
+  warning = FALSE
 )
 ```
 
