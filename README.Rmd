@@ -10,7 +10,10 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "README-",
+  message = FALSE,
+  warning = FALSE,
+  out.width = "100%"
 )
 ```
 
@@ -67,9 +70,11 @@ remotes::install_github("mastoffel/rptR", build_vignettes = TRUE, dependencies =
 browseVignettes("rptR")
 ```
 
+If you find a bug, please report a minimal reproducible example in the [issues](https://github.com/mastoffel/rptR/issues).
+
 ### Example
 
-Calculating the repeatability of beetle body length (`BodyL`) for both `Container` and 
+Repeatability of beetle body length (`BodyL`) for both `Container` and 
 `Population` while adjusting for `Treatment` and `Sex`:
 
 ```{r example, results = 'hide', warning=FALSE, message=FALSE}
@@ -80,8 +85,6 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             grname = c("Container", "Population"), data = BeetlesBody, 
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
-
-An extended summary of the results is shown with `summary()`.
 
 ```{r, results = TRUE, warning=FALSE, message=FALSE}
 summary(rpts)

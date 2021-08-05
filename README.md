@@ -47,10 +47,13 @@ remotes::install_github("mastoffel/rptR", build_vignettes = TRUE, dependencies =
 browseVignettes("rptR")
 ```
 
+If you find a bug, please report a minimal reproducible example in the
+[issues](https://github.com/mastoffel/rptR/issues).
+
 ### Example
 
-Calculating the repeatability of beetle body length (`BodyL`) for both
-`Container` and `Population` while adjusting for `Treatment` and `Sex`:
+Repeatability of beetle body length (`BodyL`) for both `Container` and
+`Population` while adjusting for `Treatment` and `Sex`:
 
 ``` r
 library(rptR)
@@ -60,8 +63,6 @@ rpts <- rpt(BodyL ~ Treatment + Sex + (1 | Container) + (1 | Population),
             grname = c("Container", "Population"), data = BeetlesBody, 
             datatype = "Gaussian", nboot = 100, npermut = 100)
 ```
-
-An extended summary of the results is shown with `summary()`.
 
 ``` r
 summary(rpts)
@@ -77,12 +78,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0268 0.0462  0.142     0.01      0
+#>  0.0834 0.0265 0.0449  0.148     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N   Mean   Median   2.5%  97.5%
-#> boot      100 0.0888 8.89e-02 0.0462 0.1419
-#> permut    100 0.0043 1.09e-11 0.0000 0.0188
+#>             N    Mean  Median   2.5%  97.5%
+#> boot      100 0.08730 0.08147 0.0449 0.1484
+#> permut    100 0.00478 0.00135 0.0000 0.0176
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -96,12 +97,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.111   0.26  0.645     0.03      0
+#>   0.491  0.107  0.255  0.649     0.02      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.461  0.464  0.260  0.645
-#> permut    100  0.455  0.455  0.424  0.489
+#> boot      100  0.474  0.482  0.255  0.649
+#> permut    100  0.454  0.453  0.420  0.487
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -122,4 +123,4 @@ plot(rpts, grname="Container", type="boot", cex.main=0.8, col = "#ECEFF4")
 plot(rpts, grname="Population", type="boot", cex.main=0.8, col = "#ECEFF4")
 ```
 
-![](README-gaussian-1.png)![](README-gaussian-2.png)
+<img src="README-gaussian-1.png" width="100%" /><img src="README-gaussian-2.png" width="100%" />
