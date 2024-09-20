@@ -23,8 +23,8 @@ library("badger")
 
 # rptR
 
-![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
-[![CRAN total downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR) 
+[![CRAN status](https://www.r-pkg.org/badges/version/rptR)](https://CRAN.R-project.org/package=rptR)
+[![CRAN total downloads](https://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR)
 [![Monthly downloads badge](https://cranlogs.r-pkg.org/badges/last-month/rptR?color=blue)](https://CRAN.R-project.org/package=rptR)
 [![Codecov test coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://codecov.io/gh/mastoffel/rptR?branch=master)
 

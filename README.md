@@ -2,9 +2,10 @@
 
 # rptR
 
-![Build Status](https://travis-ci.org/mastoffel/rptR.svg?branch=master)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/rptR)](https://CRAN.R-project.org/package=rptR)
 [![CRAN total
-downloads](http://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR)
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https://cran.r-project.org/package=rptR)
 [![Monthly downloads
 badge](https://cranlogs.r-pkg.org/badges/last-month/rptR?color=blue)](https://CRAN.R-project.org/package=rptR)
 [![Codecov test
@@ -78,12 +79,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0241 0.0486  0.139     0.01      0
+#>  0.0834 0.0247  0.043  0.142     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
-#>             N    Mean  Median   2.5%  97.5%
-#> boot      100 0.08886 0.08768 0.0486 0.1391
-#> permut    100 0.00466 0.00138 0.0000 0.0184
+#>             N    Mean   Median   2.5%  97.5%
+#> boot      100 0.08820 8.39e-02  0.043 0.1423
+#> permut    100 0.00391 5.74e-11  0.000 0.0191
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -97,12 +98,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.103  0.232  0.652     0.04      0
+#>   0.491  0.106  0.229  0.635     0.03      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.451  0.452  0.232  0.652
-#> permut    100  0.452  0.452  0.416  0.491
+#> boot      100  0.459  0.464  0.229  0.635
+#> permut    100  0.453  0.453  0.420  0.489
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
