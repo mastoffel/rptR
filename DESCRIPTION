@@ -25,3 +25,5 @@ Suggests:
     tibble
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
+URL: https://github.com/mastoffel/rptR
+BugReports: https://github.com/mastoffel/rptR/issues
