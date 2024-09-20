@@ -115,7 +115,7 @@ rptPoisson <- function(formula, grname, data, link = c("log", "sqrt"), CI = 0.95
         
         # observational level random effect
         Overdispersion <- factor(1:nrow(data))
-        data <- cbind(data, Overdispersion)
+        data$Overdispersion <- Overdispersion
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::poisson(link = link), ...)
         

@@ -1,6 +1,6 @@
 
 context("rptPoisson")
-
+library(tibble)
 # Set a seed for reproducibility of the randomization 
 suppressWarnings(RNGversion("3.5.0"))
 set.seed(23)
@@ -252,4 +252,12 @@ test_that("Random slopes fitted without correlation (i.e. with grname occuring i
         expect_error(rptPoisson(formula = Egg ~ (1|Treatment) + (0 + Treatment|Container),
                 grname=c("Container"), data = BeetlesFemale,
                 nboot=0, npermut=0, ratio = TRUE))
+})
+
+# run with one random effect, no boot, no permut
+R_est_6 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), data = tibble(BeetlesFemale),
+                      nboot=0, npermut=0)
+
+test_that("rptPoisson runs with a tibble as data", {
+        expect_true(is.numeric(unlist(R_est_1$R))) 
 })
