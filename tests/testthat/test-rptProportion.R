@@ -1,5 +1,6 @@
 
 context("rptProportion")
+library(tibble)
 
 # Set a seed for reproducibility of the randomization 
 suppressWarnings(RNGversion("3.5.0"))
@@ -19,13 +20,13 @@ R_est_1 <- rptProportion(cbind(Dark, Reddish) ~ (1|Population), grname=c("Popula
                          nboot=0, npermut=0)
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$R["R_org", ],0.1853997, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", ], 0.1879315, tolerance = 0.001)
 })
 
 test_that("LRT works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P$LRT_P, 5.81e-09, tolerance = 0.001)
 })
 
@@ -74,7 +75,7 @@ R_est_1 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) +
         nboot=0, npermut=0))
 
 test_that("rpt estimation works for two random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         # 1st random effect
         expect_equal(R_est_1$R["R_org", 1], 3.030087e-11, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", 1], 4.686765e-11 , tolerance = 0.001)
@@ -84,7 +85,7 @@ test_that("rpt estimation works for two random effect, no boot, no permut, no pa
 })
 
 test_that("LRTs works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         # expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001)
         expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001) #prev 0.5
         expect_equal(R_est_1$P[2, "LRT_P"], 5.81e-09, tolerance = 0.001)
@@ -179,3 +180,15 @@ test_that("LRTs are equal for different order in formula argument", {
         expect_equal(R_est_3$P["Container", "LRT_P"], R_est_6$P["Container", "LRT_P"])
         expect_equal(R_est_3$P["Population", "LRT_P"], R_est_6$P["Population", "LRT_P"])
 })
+
+
+R_est_7 <- suppressWarnings(rptProportion(cbind(Dark, Reddish) ~ (1|Container) + (1|Population), 
+                                          grname=c("Container", "Population", "Residual"), data = tibble(md),
+                                          nboot=0, npermut=0))
+
+test_that("rptProportion runs with a tibble as data", {
+        expect_true(is.numeric(unlist(R_est_1$R))) 
+})
+
+
+

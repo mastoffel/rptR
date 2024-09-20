@@ -114,7 +114,7 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
         if (!(link %in% c("logit", "probit"))) stop("Link function has to be 'logit' or 'probit'")
         # observational level random effect
         Overdispersion <- factor(1:nrow(data))
-        data <- cbind(data, Overdispersion)
+        data$Overdispersion <- Overdispersion
         
         formula <- stats::update(formula,  ~ . + (1|Overdispersion))
         mod <- lme4::glmer(formula, data = data, family = stats::binomial(link = link), ...)
