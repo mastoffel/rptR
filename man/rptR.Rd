@@ -2,8 +2,8 @@
 % Please edit documentation in R/rptR.R
 \docType{package}
 \name{rptR}
-\alias{rptR}
 \alias{rptR-package}
+\alias{rptR}
 \title{rptR: Repeatability Estimation for Gaussian and Non-Gaussian data}
 \description{
 A collection of functions for calculating point estimates, interval estimates and 

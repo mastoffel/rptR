@@ -15,13 +15,13 @@ R_est_1 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), da
                       nboot=0, npermut=0)
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$R["R_org", ], 0.5449128, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", ], 0.5550295, tolerance = 0.001)
 })
 
 test_that("LRT works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P$LRT_P, 1.98e-46, tolerance = 0.001)
 })
 
@@ -32,7 +32,7 @@ R_est_2 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), da
 
 test_that("rpt estimation works for one random effect, boot, no permut, no parallelisation, logit link", {
         
-        expect_that(is.numeric(unlist(R_est_2$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_2$R))) 
         expect_equal(R_est_2$R["R_org", ], 0.5449128, tolerance = 0.001)
         expect_equal(R_est_2$R["R_link", ], 0.5550295, tolerance = 0.001)
         
@@ -54,7 +54,7 @@ R_est_3 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), da
 
 test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
         
-        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_3$R))) 
         expect_equal(R_est_3$R["R_org", ], 0.5449128, tolerance = 0.001)
         expect_equal(R_est_3$R["R_link", ], 0.5550295, tolerance = 0.001)
         
@@ -77,7 +77,7 @@ R_est_1 <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c
         nboot=0, npermut=0)
 
 test_that("rpt estimation works for two random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         # 1st random effect
         expect_equal(R_est_1$R["R_org", 1], 0.03190105, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", 1],0.03799297, tolerance = 0.001)
@@ -87,7 +87,7 @@ test_that("rpt estimation works for two random effect, no boot, no permut, no pa
 })
 
 test_that("LRTs works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P[1, "LRT_P"], 8.744869e-03, tolerance = 0.001)
         expect_equal(R_est_1$P[2, "LRT_P"], 1.187500e-16, tolerance = 0.001)
 })
@@ -154,13 +154,13 @@ R_est_1 <- rptPoisson(Egg ~ Treatment + (1|Container), grname=c("Container"), da
         nboot=5, npermut=5, ratio = FALSE)
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_true(is.na(R_est_1$R["R_org", ]))
         expect_equal(R_est_1$R["R_link", ], 0.3229846, tolerance = 0.001)
 })
 
 test_that("LRT works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P$LRT_P, 1.98e-46, tolerance = 0.001)
 })
 
@@ -169,7 +169,7 @@ R_est_2 <- rptPoisson(Egg ~ Treatment + (1|Container) + (1|Population), grname=c
         nboot=0, npermut=0, ratio = FALSE)
 
 test_that("rpt estimation works for two random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         # 1st random effect
         expect_true(is.na(R_est_2$R["R_org", 1]))
         expect_equal(R_est_2$R["R_link", 1],  0.02224455, tolerance = 0.001)

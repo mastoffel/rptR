@@ -14,13 +14,13 @@ R_est_1 <- rptGaussian(BodyL ~ (1|Population), grname="Population", data=Beetles
                        npermut=0)
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(as.numeric(R_est_1$R), 0.2985548, tolerance = 0.001)
  
 })
 
 test_that("LRT works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P$LRT_P,  9.59e-62, tolerance = 0.001)
 })
 
@@ -53,7 +53,7 @@ R_est_4 <- rptGaussian(BodyL ~ (1|Container) + (1|Population), grname=c("Contain
                        npermut=0)
 
 test_that("rpt estimation works for two random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_4$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_4$R))) 
         # 1st random effect
         expect_equal(R_est_4$R[[1]], 0.478317, tolerance = 0.001)
         # 2nd random effect
@@ -61,7 +61,7 @@ test_that("rpt estimation works for two random effect, no boot, no permut, no pa
 })
 
 test_that("LRTs works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_4$P[1, "LRT_P"], 2.292582e-138, tolerance = 0.001)
         expect_equal(R_est_4$P[2, "LRT_P"], 2.156259e-07, tolerance = 0.001)
 
@@ -109,7 +109,7 @@ R_est_8 <- rptGaussian(BodyL ~ (1|Container) + (1|Population),
         npermut=3, ratio = FALSE)
 
 test_that("Variance estimation works for two random effects with residual and overdispersion and boot and permut", {
-        expect_that(is.numeric(unlist(R_est_8$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_8$R))) 
         # 1st random effect
         expect_equal(R_est_8$R[[1]], 2.205629, tolerance = 0.001)
         # 2nd random effect

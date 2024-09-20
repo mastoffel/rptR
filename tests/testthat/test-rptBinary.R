@@ -14,13 +14,13 @@ set.seed(23)
 R_est_1 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=BeetlesMale, nboot=0, npermut=0)
 
 test_that("rpt estimation works for one random effect, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$R["R_org", "Population"], 0.1853978, tolerance = 0.001)
         expect_equal(R_est_1$R["R_link", "Population"], 0.1879297, tolerance = 0.001)
 })
 
 test_that("LRT works", {
-        expect_that(is.numeric(unlist(R_est_1$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_1$R))) 
         expect_equal(R_est_1$P$LRT_P, 8.656602e-15, tolerance = 0.001)
 })
 
@@ -31,7 +31,7 @@ R_est_2 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=Beet
 
 test_that("rpt estimation works for one random effect, boot, no permut, no parallelisation, logit link", {
         
-        expect_that(is.numeric(unlist(R_est_2$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_2$R))) 
         expect_equal(R_est_2$R["R_org", "Population"], 0.1853978, tolerance = 0.001)
         expect_equal(R_est_2$R["R_link", "Population"], 0.1879296, tolerance = 0.001)
         
@@ -51,7 +51,7 @@ R_est_3 <- rptBinary(Colour ~ (1|Population),  grname=c("Population"), data=Beet
 
 test_that("rpt estimation works for one random effect, no boot, permut, no parallelisation, logit link", {
         
-        expect_that(is.numeric(unlist(R_est_3$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_3$R))) 
         expect_equal(R_est_3$R["R_org", "Population"], 0.1853978, tolerance = 0.001)
         expect_equal(R_est_3$R["R_link", "Population"], 0.1879296, tolerance = 0.001)
         
@@ -73,7 +73,7 @@ R_est_4 <- rptBinary(Colour ~ (1|Container) + (1|Population),  grname=c("Contain
                      data=BeetlesMale, nboot=0, npermut=0)
 
 test_that("rpt estimation works for two random effects plus residual, no boot, no permut, no parallelisation, logit link", {
-        expect_that(is.numeric(unlist(R_est_4$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_4$R))) 
         # Container random effect
         expect_equal(R_est_4$R["R_org", "Container"], 0, tolerance = 0.001)
         expect_equal(R_est_4$R["R_link", "Container"], 0, tolerance = 0.001)
@@ -86,7 +86,7 @@ test_that("rpt estimation works for two random effects plus residual, no boot, n
 })
 
 test_that("LRTs works", {
-        expect_that(is.numeric(unlist(R_est_4$R)), is_true()) 
+        expect_true(is.numeric(unlist(R_est_4$R))) 
         # expect_equal(R_est_1$P[1, "LRT_P"], 1, tolerance = 0.001)
         expect_equal(R_est_4$P[1, "LRT_P"], 1, tolerance = 0.001) # previously 0.5
         expect_equal(R_est_4$P[2, "LRT_P"], 5.80928e-09, tolerance = 0.001)
