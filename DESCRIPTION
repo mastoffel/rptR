@@ -10,7 +10,7 @@ Author: Martin Stoffel <martin.adam.stoffel@gmail.com>,
 Maintainer: Martin Stoffel <martin.adam.stoffel@gmail.com>
 Description: Estimating repeatability (intra-class
     correlation) from Gaussian, binary, proportion and Poisson data.
-License: GPL (>= 2)
+License: MIT + file LICENSE
 Imports: 
     methods,
     stats,
