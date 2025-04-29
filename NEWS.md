@@ -31,4 +31,8 @@
 
 # rptR 0.9.22
 
-* 
+* fixed small typos
+
+# rptR 0.9.23
+
+* small fixes and updates

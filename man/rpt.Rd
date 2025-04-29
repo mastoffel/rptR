@@ -24,7 +24,7 @@ rpt(
 )
 }
 \arguments{
-\item{formula}{Formula as used e.g. by \link{lmer}. The grouping factor(s) of
+\item{formula}{Formula as used e.g. by \link[lme4]{lmer}. The grouping factor(s) of
 interest needs to be included as a random effect, e.g. '(1|groups)'.
 Covariates and additional random effects can be included to estimate adjusted 
 repeatabilities.}

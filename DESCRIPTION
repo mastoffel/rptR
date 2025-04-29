@@ -12,7 +12,6 @@ Description: Estimating repeatability (intra-class
     correlation) from Gaussian, binary, proportion and Poisson data.
 License: MIT + file LICENSE
 Imports: 
-    methods,
     stats,
     lme4,
     parallel (>= 3.1.2),
