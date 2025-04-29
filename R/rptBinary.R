@@ -21,7 +21,7 @@
 #'      (in this order).}
 #' \item{se}{\code{data.frame} with approximate standard errors (\emph{se}) for repeatabilities. Columns
 #'      are groups of interest. Rows are original and link scale (in this order).
-#'      Note that the distribution might not be symmetrical, in which case the emph{se} is less informative.}
+#'      Note that the distribution might not be symmetrical, in which case the \emph{se} is less informative.}
 #' \item{CI_emp}{\code{list} of two elements containing the confidence intervals for repeatabilities 
 #'      on the link and original scale, respectively. Within each list element, lower and upper CI
 #'      are columns and each row for each grouping factor of interest.}

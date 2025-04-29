@@ -50,6 +50,14 @@ mixed-effects models.}. Methods Ecol Evol. Accepted Author Manuscript. doi:10.11
 Nakagawa, S. & Schielzeth, H. (2010) \emph{Repeatability for Gaussian and
   non-Gaussian data: a practical guide for biologists}. Biological Reviews 85: 935-956
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mastoffel/rptR}
+  \item Report bugs at \url{https://github.com/mastoffel/rptR/issues}
+}
+
+}
 \author{
 Martin Stoffel (martin.adam.stoffel@gmail.com), Shinichi Nakagawa
   (s.nakagawa@unsw.edu.au) & Holger Schielzeth (holger.schielzeth@uni-jena.de)
