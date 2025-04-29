@@ -9,7 +9,7 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/rptR?color=blue)](https
 [![Monthly downloads
 badge](https://cranlogs.r-pkg.org/badges/last-month/rptR?color=blue)](https://CRAN.R-project.org/package=rptR)
 [![Codecov test
-coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://codecov.io/gh/mastoffel/rptR?branch=master)
+coverage](https://codecov.io/gh/mastoffel/rptR/branch/master/graph/badge.svg)](https://app.codecov.io/gh/mastoffel/rptR?branch=master)
 
 ### Goal
 
@@ -29,7 +29,7 @@ Stoffel, M. A., Nakagawa, S., & Schielzeth, H. (2017). rptR:
 Repeatability estimation and variance decomposition by generalized
 linear mixed-effects models. *Methods in Ecology and Evolution*,
 **8(11)**, 1639-1644.
-[![](https://img.shields.io/badge/doi-https://doi.org/10.1111/2041--210X.12797-green.svg)](https://doi.org/https://doi.org/10.1111/2041-210X.12797)
+[![](https://img.shields.io/badge/doi-10.1111/2041--210X.12797-green.svg)](https://doi.org/10.1111/2041-210X.12797)
 
 ### Installation
 
@@ -79,12 +79,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>  0.0834 0.0247  0.043  0.142     0.01      0
+#>  0.0834 0.0247 0.0449  0.135     0.01      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N    Mean   Median   2.5%  97.5%
-#> boot      100 0.08820 8.39e-02  0.043 0.1423
-#> permut    100 0.00391 5.74e-11  0.000 0.0191
+#> boot      100 0.08428 0.077960 0.0449 0.1352
+#> permut    100 0.00428 0.000315 0.0000 0.0232
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553
@@ -98,12 +98,12 @@ summary(rpts)
 #> 
 #> Repeatability estimation overview: 
 #>       R     SE   2.5%  97.5% P_permut  LRT_P
-#>   0.491  0.106  0.229  0.635     0.03      0
+#>   0.491  0.107  0.233  0.644     0.02      0
 #> 
 #> Bootstrapping and Permutation test: 
 #>             N   Mean Median   2.5%  97.5%
-#> boot      100  0.459  0.464  0.229  0.635
-#> permut    100  0.453  0.453  0.420  0.489
+#> boot      100  0.477  0.491  0.233  0.644
+#> permut    100  0.454  0.453  0.422  0.483
 #> 
 #> Likelihood ratio test: 
 #> logLik full model = -1528.553

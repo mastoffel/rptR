@@ -1,10 +1,6 @@
-citHeader("To cite rptR in publications please refer to our article:")
-
-citEntry(entry = "Article",
+bibentry("Article",
         title        = "rptR: Repeatability estimation and variance decomposition by generalized linear mixed-effects models",
-        author       = personList(as.person("Martin A. Stoffel"),
-                                  as.person("Shinichi Nakagawa"),
-                                  as.person("Holger Schielzeth")),
+        author       = c(person("Martin A.", "Stoffel"), person("Shinichi", "Nakagawa"), person("Holger", "Schielzeth")),
         journal      = "Methods in Ecology and Evolution",
         year         = "2017",
         volume  = "8",
