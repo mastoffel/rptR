@@ -1,9 +1,9 @@
 Package: rptR
 Title: Repeatability Estimation for Gaussian and Non-Gaussian Data
-Version: 0.9.23
+Version: 0.9.24
 Depends: 
     R (>= 3.2.1)
-Date: 2025-04-29
+Date: 2026-11-16
 Authors@R: c(
         person("Martin", "Stoffel", email = "martin.adam.stoffel@gmail.com", role = c("aut", "cre")),
         person("Shinichi", "Nakagawa", role = "aut"),
