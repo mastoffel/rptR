@@ -1,3 +1,7 @@
+# rptR 0.9.24
+
+* Relaxed tolerances of bootstrap CI tests for compatibility with lme4 >= 2.0 (GLMM covariance fix; see lme4 issue #1003).
+
 # rptR 0.9.1
 
 ## Improvements
