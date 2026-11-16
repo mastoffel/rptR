@@ -3,6 +3,20 @@
 #' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @inheritParams rpt
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
+#' @param scale_obs Character string defining the observation unit for the
+#'        original-scale repeatability (\code{R_org}) with the logit link.
+#'        \code{"trial"} (the default, unchanged behaviour) uses the binomial
+#'        residual variance of a single trial, \eqn{E(p)(1-E(p))}, so that
+#'        \code{R_org} is the repeatability of single binary decisions.
+#'        \code{"series"} divides this residual variance by \eqn{n_h}, the
+#'        harmonic mean of the number of trials per observation, so that
+#'        \code{R_org} is the repeatability of the observed proportions
+#'        (successes / trials). Without overdispersion this approximately
+#'        equals the Spearman-Brown step-up of the trial-level \code{R_org}.
+#'        The overdispersion (observation-level) variance and the link-scale
+#'        repeatability are not affected. The use of the harmonic mean for
+#'        unequal numbers of trials is provisional. Ignored for the probit link
+#'        (no original-scale estimate) and when \code{ratio = FALSE}.
 #'         
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -94,7 +108,10 @@
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
-        rptObj = NULL, update = FALSE, ...) {
+        rptObj = NULL, update = FALSE, scale_obs = c("trial", "series"), ...) {
+        
+        # observation unit for the original-scale repeatability
+        scale_obs <- match.arg(scale_obs)
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -222,8 +239,17 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
-                                if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                # binomial residual variance on the proportion scale:
+                                # single trial (default) or series of n_h trials, where
+                                # n_h is the harmonic mean of the trials per observation
+                                # (provisional choice for unequal numbers of trials)
+                                var_e_org <- Ep*(1-Ep)
+                                if (scale_obs == "series") {
+                                        n_h <- 1 / mean(1 / mod@resp$weights)
+                                        var_e_org <- var_e_org / n_h
+                                }
+                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+var_e_org
+                                if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+var_e_org
                                 R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                         }

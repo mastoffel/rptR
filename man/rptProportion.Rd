@@ -19,6 +19,7 @@ rptProportion(
   expect = "meanobs",
   rptObj = NULL,
   update = FALSE,
+  scale_obs = c("trial", "series"),
   ...
 )
 }
@@ -87,6 +88,21 @@ to update bootstraps and permutations}
 \item{update}{If TRUE, the rpt object to be updated has to be inputted with the rptObj argument.
 The function just updates the permutations and bootstraps, so make sure to specify all other
 arguments excactly like for the rpt object specified in rptObj.}
+
+\item{scale_obs}{Character string defining the observation unit for the
+original-scale repeatability (\code{R_org}) with the logit link.
+\code{"trial"} (the default, unchanged behaviour) uses the binomial
+residual variance of a single trial, \eqn{E(p)(1-E(p))}, so that
+\code{R_org} is the repeatability of single binary decisions.
+\code{"series"} divides this residual variance by \eqn{n_h}, the
+harmonic mean of the number of trials per observation, so that
+\code{R_org} is the repeatability of the observed proportions
+(successes / trials). Without overdispersion this approximately
+equals the Spearman-Brown step-up of the trial-level \code{R_org}.
+The overdispersion (observation-level) variance and the link-scale
+repeatability are not affected. The use of the harmonic mean for
+unequal numbers of trials is provisional. Ignored for the probit link
+(no original-scale estimate) and when \code{ratio = FALSE}.}
 
 \item{...}{Other parameters for the lmer or glmer call, such as optimizers.}
 }
