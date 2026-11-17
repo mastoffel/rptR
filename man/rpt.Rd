@@ -20,7 +20,8 @@ rpt(
   expect = "meanobs",
   rptObj = NULL,
   update = FALSE,
-  scale_obs = c("trial", "series"),
+  scale_obs = c("trial", "series", "series_obs"),
+  n_ref = NULL,
   ...
 )
 }
@@ -95,8 +96,12 @@ The function just updates the permutations and bootstraps, so make sure to speci
 arguments excactly like for the rpt object specified in rptObj.}
 
 \item{scale_obs}{Only used for \code{datatype = 'Proportion'}: observation unit
-of the original-scale repeatability, \code{"trial"} (default) or
-\code{"series"}. See \link{rptProportion}.}
+of the original-scale repeatability, \code{"trial"} (default),
+\code{"series"} or \code{"series_obs"}. See \link{rptProportion}.}
+
+\item{n_ref}{Only used for \code{datatype = 'Proportion'} with
+\code{scale_obs = "series"}: optional reference number of trials.
+See \link{rptProportion}.}
 
 \item{...}{Other parameters for the lmer or glmer call, such as optimizers.}
 }

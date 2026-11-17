@@ -19,7 +19,8 @@ rptProportion(
   expect = "meanobs",
   rptObj = NULL,
   update = FALSE,
-  scale_obs = c("trial", "series"),
+  scale_obs = c("trial", "series", "series_obs"),
+  n_ref = NULL,
   ...
 )
 }
@@ -100,9 +101,31 @@ harmonic mean of the number of trials per observation, so that
 (successes / trials). Without overdispersion this approximately
 equals the Spearman-Brown step-up of the trial-level \code{R_org}.
 The overdispersion (observation-level) variance and the link-scale
-repeatability are not affected. The use of the harmonic mean for
-unequal numbers of trials is provisional. Ignored for the probit link
-(no original-scale estimate) and when \code{ratio = FALSE}.}
+repeatability are not affected.
+\code{"series_obs"} uses the per-observation binomial residual variance
+instead, averaged over observations:
+\eqn{mean_i[p_i(1-p_i)/n_i]}, where \eqn{n_i} is the number of trials
+of observation \eqn{i} and \eqn{p_i} its fitted proportion from the
+fixed effects only (random effects set to zero), put on the same footing
+as \eqn{E(p)} by \code{expect}: for \code{"liability"},
+\eqn{p_i = plogis(\eta_i)}; for \code{"latent"}, the same
+approximation as for \eqn{E(p)} is applied to each \eqn{\eta_i}; for
+\code{"meanobs"}, the latent-type \eqn{p_i} are shifted on the logit
+scale so that their mean equals \eqn{E(p)} (the observed mean). Without
+fixed effects all \eqn{p_i} equal \eqn{E(p)}, so \code{"series_obs"}
+gives exactly the same result as \code{"series"}. The two differ when
+the fitted proportions vary across observations (fixed effects), most
+strongly when they are related to the number of trials.
+Ignored for the probit link (no original-scale estimate) and when
+\code{ratio = FALSE}.}
+
+\item{n_ref}{Optional reference number of trials for \code{scale_obs = "series"}.
+\code{NULL} (the default) uses \eqn{n_h}, the harmonic mean of the
+number of trials per observation (which for equal numbers of trials is
+simply that number). A single finite number > 0 replaces \eqn{n_h}, so
+that \code{R_org} is the repeatability of proportions based on a series
+of \code{n_ref} trials (e.g. to compare studies with different numbers
+of trials). Only allowed with \code{scale_obs = "series"}.}
 
 \item{...}{Other parameters for the lmer or glmer call, such as optimizers.}
 }
