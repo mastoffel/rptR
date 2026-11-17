@@ -3,6 +3,41 @@
 #' Estimates repeatability from a generalized linear mixed-effects models fitted by restricted maximum likelihood (REML).
 #' @inheritParams rpt
 #' @param link Link function. \code{logit} and \code{probit} are allowed, defaults to \code{logit}.
+#' @param scale_obs Character string defining the observation unit for the
+#'        original-scale repeatability (\code{R_org}) with the logit link.
+#'        \code{"trial"} (the default, unchanged behaviour) uses the binomial
+#'        residual variance of a single trial, \eqn{E(p)(1-E(p))}, so that
+#'        \code{R_org} is the repeatability of single binary decisions.
+#'        \code{"series"} divides this residual variance by \eqn{n_h}, the
+#'        harmonic mean of the number of trials per observation, so that
+#'        \code{R_org} is the repeatability of the observed proportions
+#'        (successes / trials). Without overdispersion this approximately
+#'        equals the Spearman-Brown step-up of the trial-level \code{R_org}.
+#'        The overdispersion (observation-level) variance and the link-scale
+#'        repeatability are not affected.
+#'        \code{"series_obs"} uses the per-observation binomial residual variance
+#'        instead, averaged over observations:
+#'        \eqn{mean_i[p_i(1-p_i)/n_i]}, where \eqn{n_i} is the number of trials
+#'        of observation \eqn{i} and \eqn{p_i} its fitted proportion from the
+#'        fixed effects only (random effects set to zero), put on the same footing
+#'        as \eqn{E(p)} by \code{expect}: for \code{"liability"},
+#'        \eqn{p_i = plogis(\eta_i)}; for \code{"latent"}, the same
+#'        approximation as for \eqn{E(p)} is applied to each \eqn{\eta_i}; for
+#'        \code{"meanobs"}, the latent-type \eqn{p_i} are shifted on the logit
+#'        scale so that their mean equals \eqn{E(p)} (the observed mean). Without
+#'        fixed effects all \eqn{p_i} equal \eqn{E(p)}, so \code{"series_obs"}
+#'        gives exactly the same result as \code{"series"}. The two differ when
+#'        the fitted proportions vary across observations (fixed effects), most
+#'        strongly when they are related to the number of trials.
+#'        Ignored for the probit link (no original-scale estimate) and when
+#'        \code{ratio = FALSE}.
+#' @param n_ref Optional reference number of trials for \code{scale_obs = "series"}.
+#'        \code{NULL} (the default) uses \eqn{n_h}, the harmonic mean of the
+#'        number of trials per observation (which for equal numbers of trials is
+#'        simply that number). A single finite number > 0 replaces \eqn{n_h}, so
+#'        that \code{R_org} is the repeatability of proportions based on a series
+#'        of \code{n_ref} trials (e.g. to compare studies with different numbers
+#'        of trials). Only allowed with \code{scale_obs = "series"}.
 #'         
 #' @return 
 #' Returns an object of class \code{rpt} that is a a list with the following elements: 
@@ -94,7 +129,17 @@
 
 rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI = 0.95, nboot = 1000, 
         npermut = 0, parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect="meanobs",
-        rptObj = NULL, update = FALSE, ...) {
+        rptObj = NULL, update = FALSE, scale_obs = c("trial", "series", "series_obs"),
+        n_ref = NULL, ...) {
+        
+        # observation unit for the original-scale repeatability
+        scale_obs <- match.arg(scale_obs)
+        if (!is.null(n_ref)) {
+                if (!is.numeric(n_ref) || length(n_ref) != 1 || !is.finite(n_ref) || n_ref <= 0) {
+                        stop("n_ref has to be NULL or a single finite number > 0")
+                }
+                if (scale_obs != "series") stop("n_ref can only be used with scale_obs = 'series'")
+        }
         
         # missing values
         no_NA_vals <- stats::complete.cases(data[all.vars(formula)])
@@ -222,8 +267,39 @@ rptProportion <- function(formula, grname, data, link = c("logit", "probit"), CI
                                 R_r <- var_r / var_p_link
                                 R_f_link <- var_f / var_p_link                                
                                 # origial scale
-                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
-                                if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+Ep*(1-Ep)
+                                # binomial residual variance on the proportion scale:
+                                # "trial" (default): single trial, Ep*(1-Ep)
+                                # "series": series of n_h trials (harmonic mean of the
+                                #           trials per observation) or of n_ref trials
+                                # "series_obs": mean over observations of p_i*(1-p_i)/n_i
+                                var_e_org <- Ep*(1-Ep)
+                                if (scale_obs == "series") {
+                                        n_s <- if (is.null(n_ref)) 1 / mean(1 / mod@resp$weights) else n_ref
+                                        var_e_org <- var_e_org / n_s
+                                }
+                                if (scale_obs == "series_obs") {
+                                        # fitted proportions from the fixed effects only,
+                                        # on the same footing as Ep (see expect)
+                                        eta <- stats::predict(mod, re.form = NA, type = "link")
+                                        if (expect == "liability") p_i <- stats::plogis(eta)
+                                        if (expect %in% c("latent", "meanobs")) {
+                                                eta <- eta * sqrt(1 + ((16*sqrt(3))/(15*pi))^2 * sum(var_VarComps))^-1
+                                                p_i <- stats::plogis(eta)
+                                        }
+                                        if (expect == "meanobs") {
+                                                # shift on the logit scale so that mean(p_i) = Ep
+                                                if (stats::var(eta) == 0) {
+                                                        p_i <- rep(Ep, length(eta))
+                                                } else {
+                                                        shift <- stats::uniroot(function(d) mean(stats::plogis(eta + d)) - Ep,
+                                                                interval = c(-1, 1), extendInt = "yes", tol = 1e-10)$root
+                                                        p_i <- stats::plogis(eta + shift)
+                                                }
+                                        }
+                                        var_e_org <- mean(p_i * (1 - p_i) / mod@resp$weights)
+                                }
+                                if(adjusted) var_p_org <- (sum(var_VarComps) * Ep^2) / ((1 + exp(beta0))^2)+var_e_org
+                                if(!adjusted) var_p_org <- ((sum(var_VarComps)+var_f) * Ep^2) / ((1 + exp(beta0))^2)+var_e_org
                                 R_org <- ( var_a * Ep^2 / ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                                 R_f_org <- ( var_f * Ep^2/ ((1 + exp(stats::qlogis(Ep)))^2)) / var_p_org
                         }

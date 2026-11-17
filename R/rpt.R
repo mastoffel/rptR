@@ -58,6 +58,12 @@
 #' @param update If TRUE, the rpt object to be updated has to be inputted with the rptObj argument.
 #'        The function just updates the permutations and bootstraps, so make sure to specify all other
 #'        arguments excactly like for the rpt object specified in rptObj. 
+#' @param scale_obs Only used for \code{datatype = 'Proportion'}: observation unit
+#'        of the original-scale repeatability, \code{"trial"} (default),
+#'        \code{"series"} or \code{"series_obs"}. See \link{rptProportion}.
+#' @param n_ref Only used for \code{datatype = 'Proportion'} with
+#'        \code{scale_obs = "series"}: optional reference number of trials.
+#'        See \link{rptProportion}.
 #' @param ... Other parameters for the lmer or glmer call, such as optimizers.
 #'   
 #' @details 
@@ -155,7 +161,8 @@
 rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binary", "Proportion", 
     "Poisson"), link = c("logit", "probit", "log", "sqrt"), CI = 0.95, nboot = 1000, npermut = 0,
     parallel = FALSE, ncores = NULL, ratio = TRUE, adjusted = TRUE, expect = "meanobs",
-    rptObj = NULL, update = FALSE, ...) {
+    rptObj = NULL, update = FALSE, scale_obs = c("trial", "series", "series_obs"),
+    n_ref = NULL, ...) {
         
     if (datatype == "Gaussian") {
             out_gaussian <- rptGaussian(formula, grname, data, CI, nboot, npermut, parallel, ncores, ratio, adjusted, rptObj, update, ...)
@@ -168,7 +175,7 @@ rpt <- function(formula, grname, data, datatype = c("Gaussian", "Binary", "Propo
             return(out_binary)
     }
     if (datatype == "Proportion") {
-            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect, rptObj, update, ...)
+            out_proportion <- rptProportion(formula, grname, data, link, CI, nboot, npermut, parallel, ncores, ratio, adjusted, expect, rptObj, update, scale_obs = scale_obs, n_ref = n_ref, ...)
             out_proportion$call <- match.call()
             return(out_proportion)
     }
